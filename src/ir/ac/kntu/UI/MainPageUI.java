@@ -1,9 +1,11 @@
 package ir.ac.kntu.UI;
 
+import ir.ac.kntu.Customer;
 import javafx.application.Application;
 import javafx.geometry.Bounds;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
@@ -16,7 +18,11 @@ public class MainPageUI extends Application {
     private boolean isPopupPinned = false;
     private VBox accountPopupContent;
     private boolean isAccountPopupVisible = false;
+    private Customer currentCustomer;
 
+    public MainPageUI(Customer currentCustomer) {
+        this.currentCustomer = currentCustomer;
+    }
     @Override
     public void start(Stage primaryStage) {
 
@@ -43,7 +49,7 @@ public class MainPageUI extends Application {
         Label categoryButton = new Label("Product Category ▾");
         categoryButton.setStyle("-fx-font-size: 20px; -fx-text-fill: #b63227; -fx-font-weight: bold;");
 
-        Label account = new Label("My Account");
+        Label account = new Label("");
         account.setStyle("-fx-font-size:12px; -fx-text-fill: #b63227; -fx-font-weight: bold;");
         account.setGraphic(userView);
         account.setContentDisplay(ContentDisplay.LEFT);
@@ -69,10 +75,20 @@ public class MainPageUI extends Application {
         accountPopupContent.setPrefSize(200, 150);
         accountPopupContent.setVisible(false);
 
-        for (int i = 0; i < 3; i++) {
-            Label field = new Label("Field " + (i + 1));
-            accountPopupContent.getChildren().add(field);
-        }
+        Button accountButton = new Button(currentCustomer.getName() + " " + currentCustomer.getSurname());
+        accountButton.setStyle("-fx-font-size: 12; -fx-background-color: #d89566; -fx-padding: 8;");
+
+        Button editInfoButton = new Button("Edit Information");
+        editInfoButton.setStyle("-fx-font-size: 12; -fx-background-color: #d89566; -fx-padding: 8;");
+
+        Button odredButton = new Button("Orders Details");
+        odredButton.setStyle("-fx-font-size: 12; -fx-background-color: #d89566; -fx-padding: 8;");
+
+        Button logOutButton = new Button("Log Out");
+        logOutButton.setStyle("-fx-font-size: 12; -fx-background-color: #d89566; -fx-padding: 8;");
+
+        accountPopupContent.getChildren().addAll(accountButton, editInfoButton, odredButton, logOutButton);
+
 
         root.getChildren().addAll(header, popupContent, accountPopupContent);
         AnchorPane.setTopAnchor(header, 0.0);

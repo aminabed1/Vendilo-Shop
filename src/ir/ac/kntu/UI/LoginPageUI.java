@@ -1,5 +1,7 @@
 package ir.ac.kntu.UI;
 
+import ir.ac.kntu.Customer;
+import ir.ac.kntu.DataBase;
 import ir.ac.kntu.LoginPage;
 import javafx.animation.PauseTransition;
 import javafx.application.Application;
@@ -18,8 +20,9 @@ import javafx.stage.Popup;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
-public class LoginPageUI extends Application {
+import java.util.List;
 
+public class LoginPageUI extends Application {
     private String selectedRole = "Customer";
 
     @Override
@@ -29,14 +32,14 @@ public class LoginPageUI extends Application {
         title.setFont(Font.font("Cinzel", FontWeight.BOLD, 28));
         title.setTextFill(Color.web("#b63227"));
 
-        // Role selector tabs
+
         ToggleGroup roleGroup = new ToggleGroup();
 
         ToggleButton customerTab = createRoleTab("Customer", roleGroup);
         ToggleButton sellerTab = createRoleTab("Seller", roleGroup);
         ToggleButton supportTab = createRoleTab("Support", roleGroup);
 
-        customerTab.setSelected(true); // default
+        customerTab.setSelected(true);
 
         HBox tabs = new HBox(sellerTab, customerTab, supportTab);
         tabs.setAlignment(Pos.CENTER);
@@ -102,9 +105,10 @@ public class LoginPageUI extends Application {
             /////TODO complete here ;
             if (LoginPage.receiveLoginInfo(usernameText, passwordText, selectedRole)) {
                 showFloatingMessage("Logged in successfully,\nWelcome dear " + selectedRole, false, primaryStage, () -> {
+                    Customer customer = findCustomer(usernameText, passwordText);
+                    new MainPageUI(customer).start(new Stage());
                     ((Stage)((Node)e.getSource()).getScene().getWindow()).close();
                 });
-
 
             } else {
                 showFloatingMessage("Invalid username or password\ndon't have account? create one", true, primaryStage, null);
@@ -164,6 +168,16 @@ public class LoginPageUI extends Application {
             }
         });
         delay.play();
+    }
+
+    public Customer findCustomer(String username, String password) {
+        List<Customer> customerList = DataBase.getCustomerList();
+        for (Customer customer : customerList) {
+            if (customer.getUsername().equals(username) && customer.getPassword().equals(password)) {
+                return customer;
+            }
+        }
+        return null;
     }
 
     public static void main(String[] args) {

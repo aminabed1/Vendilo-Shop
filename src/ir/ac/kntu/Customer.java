@@ -13,7 +13,7 @@ public class Customer extends Person{
                     String password, String province, String address) {
 
         errorList = new ArrayList<>();
-        PersonValidator cv = new PersonValidator();
+        PersonInfoValidator cv = new PersonInfoValidator();
 
         boolean isUnique = cv.emailUniquementCheck(email, errorList) &&
             cv.phoneNumberUniquementCheck(phoneNumber, errorList) &&
@@ -41,7 +41,45 @@ public class Customer extends Person{
         }
     }
 
+    public Customer() {
+
+    }
+
+    public Customer(String username, String password, String name, String surename) {
+        setUsername(username);
+        setPassword(password);
+        setName(name);
+        setSurname(surename);
+    }
+
     public List<String> getErrorList() {
         return errorList;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) {
+            return true;
+        }
+        if (object == null || this.getClass() != object.getClass()) {
+            return false;
+        }
+
+        Customer customer = (Customer) object;
+
+        return this.getName().equals(customer.getName()) &&
+                this.getSurname().equals(customer.getSurname() )&&
+                this.getPhoneNumber().equals(customer.getPhoneNumber()) &&
+                this.getEmail().equals(customer.getEmail()) &&
+                this.getUsername().equals(customer.getUsername()) &&
+                this.getPassword().equals(customer.getPassword()) &&
+                this.province.equals(customer.province) &&
+                this.address.equals(customer.address);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getName(), getSurname(), getPhoneNumber(), getEmail(),
+                            getUsername(), getPassword(), province, address);
     }
 }

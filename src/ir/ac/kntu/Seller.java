@@ -14,7 +14,7 @@ public class Seller extends Person{
                   String password, String agencyCode, String shopName, String province, String address) {
 
         errorList = new ArrayList<>();
-        PersonValidator cv = new PersonValidator();
+        PersonInfoValidator cv = new PersonInfoValidator();
 
         boolean isUnique = cv.emailUniquementCheck(email, errorList) &&
                 cv.phoneNumberUniquementCheck(phoneNumber, errorList) &&

@@ -8,7 +8,7 @@ public class Person {
     private String username;
     private String password;
     private int age;
-    //    private String gender;
+    private String gender;
 
     public String getName() {
         return name;
@@ -26,13 +26,13 @@ public class Person {
         this.surname = surname;
     }
 
-//    public String getGender() {
-//        return gender;
-//    }
-//
-//    public void setGender(String gender) {
-//        this.gender = gender;
-//    }
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
 
     public String getPhoneNumber() {
         return phoneNumber;
