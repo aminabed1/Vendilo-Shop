@@ -1,6 +1,7 @@
 package ir.ac.kntu.UI;
 
 import ir.ac.kntu.Customer;
+import ir.ac.kntu.Person;
 import javafx.application.Application;
 import javafx.geometry.Bounds;
 import javafx.geometry.Pos;
@@ -20,9 +21,10 @@ public class MainPageUI extends Application {
     private boolean isAccountPopupVisible = false;
     private Customer currentCustomer;
 
-    public MainPageUI(Customer currentCustomer) {
-        this.currentCustomer = currentCustomer;
+    public MainPageUI(Person currentCustomer) {
+        this.currentCustomer = (Customer) currentCustomer;
     }
+
     @Override
     public void start(Stage primaryStage) {
 

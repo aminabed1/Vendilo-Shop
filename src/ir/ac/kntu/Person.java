@@ -1,5 +1,8 @@
 package ir.ac.kntu;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public abstract class Person {
     private String name;
     private String surname;
@@ -9,6 +12,40 @@ public abstract class Person {
     private String password;
     private int age;
     private String gender;
+    private List<String> errorList;
+
+    public Person(String name, String surname, String phoneNumber, String email, String username, String password) {
+        this.name = name;
+        this.surname = surname;
+        this.phoneNumber = phoneNumber;
+        this.email = email;
+        this.username = username;
+        this.password = password;
+
+        errorList = new ArrayList<>();
+        PersonInfoValidator cv = new PersonInfoValidator();
+
+        boolean isUnique = cv.emailUniquementCheck(email, errorList) &&
+                cv.phoneNumberUniquementCheck(phoneNumber, errorList) &&
+                cv.usernameUniquementCheck(username, errorList);
+
+        boolean isValid = cv.checkNameAndSurnameValidation(name, errorList) &&
+                cv.checkNameAndSurnameValidation(surname, errorList) &&
+                cv.phoneNumberValidation(phoneNumber, errorList) &&
+                cv.emailValidation(email, errorList) &&
+                cv.usernameValidation(username, errorList) &&
+                cv.passwordValidation(password, errorList);
+
+        if (isValid && isUnique) {
+            setName(name);
+            setSurname(surname);
+            setPhoneNumber(phoneNumber);
+            setEmail(email);
+            setUsername(username);
+            setPassword(password);
+            DataBase.setPersonList(this);
+        }
+    }
 
     public String getName() {
         return name;
@@ -72,6 +109,10 @@ public abstract class Person {
 
     public void setAge(int age) {
         this.age = age;
+    }
+
+    public List<String> getErrorList() {
+        return errorList;
     }
 
     public abstract boolean equals(Object object);

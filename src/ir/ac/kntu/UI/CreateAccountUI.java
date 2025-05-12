@@ -18,10 +18,10 @@ import javafx.stage.Stage;
 import javafx.scene.Node;
 import javafx.util.Duration;
 
-import java.util.List;
+import java.util.*;
 
 public class CreateAccountUI extends Application {
-    private List<String> errorList;
+    private List<String> errorList = new ArrayList<>();
     private String selectedRole = "Customer";
     private VBox form;
 
@@ -35,6 +35,7 @@ public class CreateAccountUI extends Application {
         ToggleButton customerTab = createRoleTab("Customer", roleGroup);
         ToggleButton sellerTab = createRoleTab("Seller", roleGroup);
         customerTab.setSelected(true);
+        updateTabStyle(roleGroup);
 
         HBox tabs = new HBox(customerTab, sellerTab);
         tabs.setAlignment(Pos.CENTER);
@@ -46,7 +47,7 @@ public class CreateAccountUI extends Application {
         TextField phoneNumber = new TextField(); phoneNumber.setPromptText("Phone Number");
         TextField email = new TextField(); email.setPromptText("Email");
         TextField username = new TextField(); username.setPromptText("Username");
-        PasswordField password = new PasswordField(); password.setPromptText("Password");
+        TextField password = new PasswordField(); password.setPromptText("Password");
         TextField agencyCode = new TextField(); agencyCode.setPromptText("Agency Code"); agencyCode.setVisible(false);
         TextField shopName = new TextField(); shopName.setPromptText("Shop Name"); shopName.setVisible(false);
 
@@ -76,11 +77,11 @@ public class CreateAccountUI extends Application {
             }
 
             if (selectedRole.equals("Customer")) {
-                Customer person = new Customer(nameText, surnameText, phoneNumberText, emailText, usernameText,
+                Person person = new Customer(nameText, surnameText, phoneNumberText, emailText, usernameText,
                         passwordText);
                 errorList = person.getErrorList();
             } else {
-                Seller person = new Seller(nameText, surnameText, phoneNumberText, emailText, usernameText,
+                Person person = new Seller(nameText, surnameText, phoneNumberText, emailText, usernameText,
                         passwordText, agencyCodeText, shopNameText);
                 errorList = person.getErrorList();
             }

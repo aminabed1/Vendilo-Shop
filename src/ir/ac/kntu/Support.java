@@ -1,4 +1,5 @@
-package ir.ac.kntu;
-
-public class Support {
-}
+//package ir.ac.kntu;
+//
+//public class Support extends Person {
+//
+//}

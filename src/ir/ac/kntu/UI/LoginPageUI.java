@@ -1,8 +1,6 @@
 package ir.ac.kntu.UI;
 
-import ir.ac.kntu.Customer;
-import ir.ac.kntu.DataBase;
-import ir.ac.kntu.LoginPage;
+import ir.ac.kntu.*;
 import javafx.animation.PauseTransition;
 import javafx.application.Application;
 import javafx.geometry.Insets;
@@ -40,6 +38,7 @@ public class LoginPageUI extends Application {
         ToggleButton supportTab = createRoleTab("Support", roleGroup);
 
         customerTab.setSelected(true);
+        updateTabStyle(roleGroup);
 
         HBox tabs = new HBox(sellerTab, customerTab, supportTab);
         tabs.setAlignment(Pos.CENTER);
@@ -99,24 +98,22 @@ public class LoginPageUI extends Application {
         primaryStage.show();
 
         loginBtn.setOnAction(e -> {
-            String AuthenticationText = authentication.getText();
+            String authenticationText = authentication.getText();
             String passwordText = password.getText();
 
-            /////TODO complete here ;
-            if (LoginPage.receiveLoginInfo(AuthenticationText, passwordText, selectedRole)) {
-                showFloatingMessage("Logged in successfully,\nWelcome dear " + selectedRole, false, primaryStage, () -> {
-                    Customer customer = findCustomer(AuthenticationText, passwordText);
-                    new MainPageUI(customer).start(new Stage());
-                    ((Stage)((Node)e.getSource()).getScene().getWindow()).close();
-                });
-
-            } else {
-                showFloatingMessage("Invalid username or password\ndon't have account? create one", true, primaryStage, null);
+            if (authenticationText.isEmpty() || passwordText.isEmpty()) {
+                showFloatingMessage("Please fill in all fields.", true, primaryStage, null);
+                return;
             }
+
+            if (LoginPage.receiveLoginInfo(authenticationText, passwordText, selectedRole)) {
+                Person person = findPerson(authenticationText, passwordText, selectedRole);
+                handleLoginForRole(person, selectedRole, primaryStage, e);
+                }
         });
     }
 
-    private ToggleButton createRoleTab(String role, ToggleGroup group) {
+    public ToggleButton createRoleTab(String role, ToggleGroup group) {
         ToggleButton tab = new ToggleButton(role);
         tab.setToggleGroup(group);
         tab.setPrefWidth(120);
@@ -130,7 +127,7 @@ public class LoginPageUI extends Application {
         return tab;
     }
 
-    private void updateTabStyle(ToggleGroup group) {
+    public void updateTabStyle(ToggleGroup group) {
         for (Toggle toggle : group.getToggles()) {
             ToggleButton btn = (ToggleButton) toggle;
             if (btn.isSelected()) {
@@ -141,7 +138,7 @@ public class LoginPageUI extends Application {
         }
     }
 
-    private void showFloatingMessage(String message, boolean isError, Stage ownerStage, Runnable afterMessage) {
+    public  void showFloatingMessage(String message, boolean isError, Stage ownerStage, Runnable afterMessage) {
         Popup popup = new Popup();
 
         Label messageLabel = new Label(message);
@@ -170,19 +167,42 @@ public class LoginPageUI extends Application {
         delay.play();
     }
 
-    public Customer findCustomer(String authenticationText, String password) {
-        List<Customer> customerList = DataBase.getCustomerList();
-        for (Customer customer : customerList) {
-            if ((customer.getUsername().equals(authenticationText)
-                    || customer.getPhoneNumber().equals(authenticationText) 
-                    || customer.getEmail().equals(authenticationText))
-                    && customer.getPassword().equals(password)) {
-                return customer;
+    public Person findPerson(String authenticationText, String password, String selectedRole) {
+        List<Person> personList = DataBase.getPersonList();
+
+        for (Person person : personList) {
+            if (authenticate(person, authenticationText, password)) {
+                return person;
             }
         }
         return null;
     }
 
+    public boolean authenticate(Person person, String authenticationText, String password) {
+        return (person.getUsername().equals(authenticationText)
+                || person.getPhoneNumber().equals(authenticationText)
+                || person.getEmail().equals(authenticationText))
+                && person.getPassword().equals(password);
+    }
+
+    public void handleLoginForRole(Person person, String role, Stage primaryStage, javafx.event.ActionEvent e) {
+        boolean success = switch (role) {
+            case "Customer" -> person instanceof Customer;
+            case "Seller" -> person instanceof Seller;
+//            case "Support" -> person instanceof Support;
+            default -> false;
+        };
+
+        if (!success) {
+            showFloatingMessage("Entered data is not for a " + selectedRole, true, primaryStage, null);
+        } else {
+            //TODO : complete here for Seller and Support Page
+            showFloatingMessage("Logged in successfully,\nWelcome dear " + selectedRole, false, primaryStage, () -> {
+                new MainPageUI(person).start(new Stage());
+                ((Stage)((Node)e.getSource()).getScene().getWindow()).close();
+            });
+        }
+    }
     public static void main(String[] args) {
         launch(args);
     }

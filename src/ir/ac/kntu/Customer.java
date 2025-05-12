@@ -8,34 +8,7 @@ public class Customer extends Person{
 
     public Customer(String name, String surname, String phoneNumber, String email, String username,
                     String password) {
-
-        errorList = new ArrayList<>();
-        PersonInfoValidator cv = new PersonInfoValidator();
-
-        boolean isUnique = cv.emailUniquementCheck(email, errorList) &&
-            cv.phoneNumberUniquementCheck(phoneNumber, errorList) &&
-            cv.usernameUniquementCheck(username, errorList);
-
-        boolean isValid = cv.checkNameAndSurnameValidation(name, errorList) &&
-            cv.checkNameAndSurnameValidation(surname, errorList) &&
-            cv.phoneNumberValidation(phoneNumber, errorList) &&
-            cv.emailValidation(email, errorList) &&
-            cv.usernameValidation(username, errorList) &&
-            cv.passwordValidation(password, errorList);
-
-        if (isValid && isUnique) {
-            setName(name);
-            setSurname(surname);
-            setPhoneNumber(phoneNumber);
-            setEmail(email);
-            setUsername(username);
-            setPassword(password);
-            DataBase.setCustomerList(this);
-        }
-    }
-
-    public List<String> getErrorList() {
-        return errorList;
+        super(name, surname, phoneNumber, email, username, password);
     }
 
     public List<Address> getAddressList() {

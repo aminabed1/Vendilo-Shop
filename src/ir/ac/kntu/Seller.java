@@ -9,40 +9,13 @@ public class Seller extends Person{
     private String agencyCode;
     private String shopName;
     private Address address;
+    private boolean isValidSeller = false;
 
     public Seller(String name, String surname, String phoneNumber, String email, String username,
                   String password, String agencyCode, String shopName) {
-
-        errorList = new ArrayList<>();
-        PersonInfoValidator cv = new PersonInfoValidator();
-
-        boolean isUnique = cv.emailUniquementCheck(email, errorList) &&
-                cv.phoneNumberUniquementCheck(phoneNumber, errorList) &&
-                cv.usernameUniquementCheck(username, errorList);
-
-        boolean isValid = cv.checkNameAndSurnameValidation(name, errorList) &&
-                cv.checkNameAndSurnameValidation(surname, errorList) &&
-                cv.phoneNumberValidation(phoneNumber, errorList) &&
-                cv.emailValidation(email, errorList) &&
-                cv.usernameValidation(username, errorList) &&
-                cv.passwordValidation(password, errorList);
-//            cv.checkAgeValidation(String.valueOf(age), errorList);
-
-        if (isValid && isUnique) {
-            this.agencyCode = agencyCode;
-            this.shopName = shopName;
-            setName(name);
-            setSurname(surname);
-            setPhoneNumber(phoneNumber);
-            setEmail(email);
-            setUsername(username);
-            setPassword(password);
-            DataBase.setSellerList(this);
-        }
-    }
-
-    public List<String> getErrorList() {
-        return errorList;
+        super(name, surname, phoneNumber, email, username, password);
+        this.agencyCode = agencyCode;
+        this.shopName = shopName;
     }
 
     public Address getAddress() {
