@@ -4,13 +4,10 @@ import java.util.*;
 
 public class Customer extends Person{
     private List<String> errorList;
-//    private Province province;
-//    private Address address;
-    private String province;
-    private String address;
+    private List<Address> addressList;
 
     public Customer(String name, String surname, String phoneNumber, String email, String username,
-                    String password, String province, String address) {
+                    String password) {
 
         errorList = new ArrayList<>();
         PersonInfoValidator cv = new PersonInfoValidator();
@@ -25,14 +22,10 @@ public class Customer extends Person{
             cv.emailValidation(email, errorList) &&
             cv.usernameValidation(username, errorList) &&
             cv.passwordValidation(password, errorList);
-//            cv.checkAgeValidation(String.valueOf(age), errorList);
 
         if (isValid && isUnique) {
-            this.province = province;
-            this.address = address;
             setName(name);
             setSurname(surname);
-//            setAge(age);
             setPhoneNumber(phoneNumber);
             setEmail(email);
             setUsername(username);
@@ -41,19 +34,12 @@ public class Customer extends Person{
         }
     }
 
-    public Customer() {
-
-    }
-
-    public Customer(String username, String password, String name, String surename) {
-        setUsername(username);
-        setPassword(password);
-        setName(name);
-        setSurname(surename);
-    }
-
     public List<String> getErrorList() {
         return errorList;
+    }
+
+    public List<Address> getAddressList() {
+        return addressList;
     }
 
     @Override
@@ -72,14 +58,13 @@ public class Customer extends Person{
                 this.getPhoneNumber().equals(customer.getPhoneNumber()) &&
                 this.getEmail().equals(customer.getEmail()) &&
                 this.getUsername().equals(customer.getUsername()) &&
-                this.getPassword().equals(customer.getPassword()) &&
-                this.province.equals(customer.province) &&
-                this.address.equals(customer.address);
+                this.getPassword().equals(customer.getPassword());
+
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(getName(), getSurname(), getPhoneNumber(), getEmail(),
-                            getUsername(), getPassword(), province, address);
+                            getUsername(), getPassword());
     }
 }

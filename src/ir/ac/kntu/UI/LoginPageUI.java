@@ -46,13 +46,13 @@ public class LoginPageUI extends Application {
         tabs.setSpacing(10);
         tabs.setPadding(new Insets(10));
 
-        TextField username = new TextField();
-        username.setPromptText("username");
+        TextField authentication = new TextField();
+        authentication.setPromptText("username/email/phone number");
 
         PasswordField password = new PasswordField();
         password.setPromptText("password");
 
-        username.setStyle("-fx-background-radius: 10; -fx-border-radius: 10; -fx-border-color: #cd0909;");
+        authentication.setStyle("-fx-background-radius: 10; -fx-border-radius: 10; -fx-border-color: #cd0909;");
         password.setStyle("-fx-background-radius: 10; -fx-border-radius: 10; -fx-border-color: #cd0909;");
 
         Button loginBtn = new Button("login");
@@ -73,7 +73,7 @@ public class LoginPageUI extends Application {
         errorMessage.setTextFill(Color.RED);
         errorMessage.setFont(Font.font("Arial", 12));
 
-        VBox form = new VBox(15, title, tabs, username, password, loginBtn, createAcc, forgotPass, errorMessage);
+        VBox form = new VBox(15, title, tabs, authentication, password, loginBtn, createAcc, forgotPass, errorMessage);
         form.setAlignment(Pos.CENTER_LEFT);
         form.setPadding(new Insets(60, 40, 60, 60));
         form.setMaxWidth(400);
@@ -99,13 +99,13 @@ public class LoginPageUI extends Application {
         primaryStage.show();
 
         loginBtn.setOnAction(e -> {
-            String usernameText = username.getText();
+            String AuthenticationText = authentication.getText();
             String passwordText = password.getText();
 
             /////TODO complete here ;
-            if (LoginPage.receiveLoginInfo(usernameText, passwordText, selectedRole)) {
+            if (LoginPage.receiveLoginInfo(AuthenticationText, passwordText, selectedRole)) {
                 showFloatingMessage("Logged in successfully,\nWelcome dear " + selectedRole, false, primaryStage, () -> {
-                    Customer customer = findCustomer(usernameText, passwordText);
+                    Customer customer = findCustomer(AuthenticationText, passwordText);
                     new MainPageUI(customer).start(new Stage());
                     ((Stage)((Node)e.getSource()).getScene().getWindow()).close();
                 });
@@ -170,10 +170,13 @@ public class LoginPageUI extends Application {
         delay.play();
     }
 
-    public Customer findCustomer(String username, String password) {
+    public Customer findCustomer(String authenticationText, String password) {
         List<Customer> customerList = DataBase.getCustomerList();
         for (Customer customer : customerList) {
-            if (customer.getUsername().equals(username) && customer.getPassword().equals(password)) {
+            if ((customer.getUsername().equals(authenticationText)
+                    || customer.getPhoneNumber().equals(authenticationText) 
+                    || customer.getEmail().equals(authenticationText))
+                    && customer.getPassword().equals(password)) {
                 return customer;
             }
         }

@@ -47,9 +47,6 @@ public class CreateAccountUI extends Application {
         TextField email = new TextField(); email.setPromptText("Email");
         TextField username = new TextField(); username.setPromptText("Username");
         PasswordField password = new PasswordField(); password.setPromptText("Password");
-        TextField province = new TextField(); province.setPromptText("Province");
-        TextField address = new TextField(); address.setPromptText("Address");
-
         TextField agencyCode = new TextField(); agencyCode.setPromptText("Agency Code"); agencyCode.setVisible(false);
         TextField shopName = new TextField(); shopName.setPromptText("Shop Name"); shopName.setVisible(false);
 
@@ -63,14 +60,11 @@ public class CreateAccountUI extends Application {
             String emailText = email.getText();
             String usernameText = username.getText();
             String passwordText = password.getText();
-            String provinceText = province.getText();
-            String addressText = address.getText();
             String agencyCodeText = agencyCode.getText();
             String shopNameText = shopName.getText();
 
             if (nameText.isEmpty() || surnameText.isEmpty() || phoneNumberText.isEmpty() || emailText.isEmpty() ||
                     usernameText.isEmpty() || passwordText.isEmpty() ||
-                    provinceText.isEmpty() || addressText.isEmpty() ||
                     (selectedRole.equals("Seller") && (agencyCodeText.isEmpty() || shopNameText.isEmpty()))) {
                 showFloatingMessage("Please fill in all fields.", true, primaryStage, null);
                 return;
@@ -83,11 +77,11 @@ public class CreateAccountUI extends Application {
 
             if (selectedRole.equals("Customer")) {
                 Customer person = new Customer(nameText, surnameText, phoneNumberText, emailText, usernameText,
-                        passwordText, provinceText, addressText);
+                        passwordText);
                 errorList = person.getErrorList();
             } else {
                 Seller person = new Seller(nameText, surnameText, phoneNumberText, emailText, usernameText,
-                        passwordText, agencyCodeText, shopNameText, provinceText, addressText);
+                        passwordText, agencyCodeText, shopNameText);
                 errorList = person.getErrorList();
             }
 
@@ -103,7 +97,7 @@ public class CreateAccountUI extends Application {
         });
 
         form = new VBox(15, title, tabs, name, surname, phoneNumber, email, username, password,
-                province, address, agencyCode, shopName, createAccountBtn);
+                        agencyCode, shopName, createAccountBtn);
         form.setAlignment(Pos.CENTER_LEFT);
         form.setPadding(new Insets(60, 40, 60, 60));
         form.setMaxWidth(400);

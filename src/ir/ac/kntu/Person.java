@@ -1,6 +1,6 @@
 package ir.ac.kntu;
 
-public class Person {
+public abstract class Person {
     private String name;
     private String surname;
     private String phoneNumber;
@@ -73,4 +73,8 @@ public class Person {
     public void setAge(int age) {
         this.age = age;
     }
+
+    public abstract boolean equals(Object object);
+
+    public abstract int hashCode();
 }
