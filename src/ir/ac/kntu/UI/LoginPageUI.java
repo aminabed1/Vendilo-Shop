@@ -25,40 +25,88 @@ public class LoginPageUI extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        // Title
-        Label title = new Label("VENDILO");
-        title.setFont(Font.font("Cinzel", FontWeight.BOLD, 28));
-        title.setTextFill(Color.web("#b63227"));
+        HBox root = new HBox();
+        root.setStyle("-fx-background-color: linear-gradient(to right, #f8f9fa, #e9ecef);");
 
+        VBox formContainer = new VBox();
+        formContainer.setAlignment(Pos.CENTER);
+        formContainer.setPadding(new Insets(40));
+        formContainer.setStyle("-fx-background-color: white; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 0);");
+
+        Label title = new Label("VENDILO");
+        title.setFont(Font.font("Arial Rounded MT Bold", FontWeight.EXTRA_BOLD, 36));
+        title.setTextFill(Color.web("#2c3e50"));
+        title.setPadding(new Insets(0, 0, 30, 0));
 
         ToggleGroup roleGroup = new ToggleGroup();
-
         ToggleButton customerTab = createRoleTab("Customer", roleGroup);
         ToggleButton sellerTab = createRoleTab("Seller", roleGroup);
         ToggleButton supportTab = createRoleTab("Support", roleGroup);
-
         customerTab.setSelected(true);
-        updateTabStyle(roleGroup);
 
-        HBox tabs = new HBox(sellerTab, customerTab, supportTab);
+        HBox tabs = new HBox(10, sellerTab, customerTab, supportTab);
         tabs.setAlignment(Pos.CENTER);
-        tabs.setSpacing(10);
-        tabs.setPadding(new Insets(10));
+        tabs.setPadding(new Insets(0, 0, 20, 0));
 
         TextField authentication = new TextField();
-        authentication.setPromptText("username/email/phone number");
+        authentication.setPromptText("Username, email or phone");
+        authentication.setStyle("-fx-background-color: #f8f9fa; -fx-background-radius: 8; -fx-padding: 12; -fx-font-size: 14px;");
+        authentication.setMaxWidth(350);
 
         PasswordField password = new PasswordField();
-        password.setPromptText("password");
+        password.setPromptText("Password");
+        password.setStyle("-fx-background-color: #f8f9fa; -fx-background-radius: 8; -fx-padding: 12; -fx-font-size: 14px;");
+        password.setMaxWidth(350);
 
-        authentication.setStyle("-fx-background-radius: 10; -fx-border-radius: 10; -fx-border-color: #cd0909;");
-        password.setStyle("-fx-background-radius: 10; -fx-border-radius: 10; -fx-border-color: #cd0909;");
+        Button loginBtn = new Button("LOGIN");
+        loginBtn.setStyle("-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold; " +
+                "-fx-background-radius: 8; -fx-padding: 12 30; -fx-font-size: 16px;");
+        loginBtn.setMaxWidth(350);
+        loginBtn.setOnMouseEntered(e -> loginBtn.setStyle("-fx-background-color: #2980b9; -fx-text-fill: white; " +
+                "-fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 12 30; -fx-font-size: 16px;"));
+        loginBtn.setOnMouseExited(e -> loginBtn.setStyle("-fx-background-color: #3498db; -fx-text-fill: white; " +
+                "-fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 12 30; -fx-font-size: 16px;"));
 
-        Button loginBtn = new Button("login");
-        loginBtn.setStyle("-fx-background-color: #d70041; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5;");
+        HBox linksContainer = new HBox(15);
+        linksContainer.setAlignment(Pos.CENTER);
+        Hyperlink createAcc = new Hyperlink("Create account");
+        createAcc.setStyle("-fx-text-fill: #7f8c8d; -fx-font-size: 13px;");
+        Hyperlink forgotPass = new Hyperlink("Forgot password?");
+        forgotPass.setStyle("-fx-text-fill: #7f8c8d; -fx-font-size: 13px;");
+        linksContainer.getChildren().addAll(createAcc, forgotPass);
 
-        Hyperlink createAcc = new Hyperlink("create new account");
-        Hyperlink forgotPass = new Hyperlink("forgot password");
+        Label errorMessage = new Label();
+        errorMessage.setTextFill(Color.web("#e74c3c"));
+        errorMessage.setFont(Font.font("Arial", FontWeight.NORMAL, 12));
+        errorMessage.setPadding(new Insets(10, 0, 0, 0));
+
+        VBox form = new VBox(15, title, tabs, authentication, password, loginBtn, linksContainer, errorMessage);
+        form.setAlignment(Pos.CENTER);
+        form.setMaxWidth(400);
+
+        formContainer.getChildren().add(form);
+
+        StackPane imagePane = new StackPane();
+        imagePane.setAlignment(Pos.CENTER);
+        imagePane.setStyle("-fx-background-color: #ecf0f1;");
+
+        ImageView logoView = new ImageView(new Image("file:F:/advancedProgramming/untitled/iamges/loginpage.jpg"));
+        logoView.setFitWidth(500);
+        logoView.setPreserveRatio(true);
+        logoView.setStyle("-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 0);");
+
+        imagePane.getChildren().add(logoView);
+
+        root.getChildren().addAll(formContainer, imagePane);
+        HBox.setHgrow(formContainer, Priority.ALWAYS);
+        HBox.setHgrow(imagePane, Priority.ALWAYS);
+
+        Scene scene = new Scene(root);
+        primaryStage.setScene(scene);
+        primaryStage.setTitle("Vendilo - Login");
+        primaryStage.setFullScreen(true);
+        primaryStage.setFullScreenExitHint("");
+        primaryStage.show();
 
 
         createAcc.setOnAction(event -> {
@@ -67,35 +115,6 @@ public class LoginPageUI extends Application {
             createAccountUI.start(stage);
             ((Stage) ((Hyperlink) event.getSource()).getScene().getWindow()).close();
         });
-
-        Label errorMessage = new Label();
-        errorMessage.setTextFill(Color.RED);
-        errorMessage.setFont(Font.font("Arial", 12));
-
-        VBox form = new VBox(15, title, tabs, authentication, password, loginBtn, createAcc, forgotPass, errorMessage);
-        form.setAlignment(Pos.CENTER_LEFT);
-        form.setPadding(new Insets(60, 40, 60, 60));
-        form.setMaxWidth(400);
-
-        StackPane leftPane = new StackPane(form);
-        leftPane.setStyle("-fx-background-color: #f5e6cc;");
-
-        ImageView logoView = new ImageView(new Image("file:F:/advancedProgramming/untitled/iamges/loginpage.jpg"));
-        logoView.setFitWidth(400);
-        logoView.setPreserveRatio(true);
-        StackPane rightPane = new StackPane(logoView);
-        rightPane.setAlignment(Pos.CENTER);
-        rightPane.setStyle("-fx-background-color: #f8ebdc;");
-        rightPane.setPadding(new Insets(20));
-
-        HBox root = new HBox(leftPane, rightPane);
-        HBox.setHgrow(leftPane, Priority.ALWAYS);
-        HBox.setHgrow(rightPane, Priority.ALWAYS);
-
-        Scene scene = new Scene(root, 960, 600);
-        primaryStage.setTitle("Login Page");
-        primaryStage.setScene(scene);
-        primaryStage.show();
 
         loginBtn.setOnAction(e -> {
             String authenticationText = authentication.getText();
@@ -109,55 +128,78 @@ public class LoginPageUI extends Application {
             if (LoginPage.receiveLoginInfo(authenticationText, passwordText, selectedRole)) {
                 Person person = findPerson(authenticationText, passwordText, selectedRole);
                 handleLoginForRole(person, selectedRole, primaryStage, e);
-                }
+            } else {
+                showFloatingMessage("Invalid credentials. Please try again.", true, primaryStage, null);
+            }
         });
     }
 
-    public ToggleButton createRoleTab(String role, ToggleGroup group) {
+    private ToggleButton createRoleTab(String role, ToggleGroup group) {
         ToggleButton tab = new ToggleButton(role);
         tab.setToggleGroup(group);
         tab.setPrefWidth(120);
-        tab.setStyle("-fx-background-radius: 10; -fx-font-weight: bold;");
+        tab.setStyle("-fx-background-radius: 8; -fx-font-weight: bold; -fx-font-size: 14px; " +
+                "-fx-padding: 8 15; -fx-background-color: #ecf0f1; -fx-text-fill: #7f8c8d;");
 
         tab.setOnAction(e -> {
             selectedRole = role;
             updateTabStyle(group);
         });
 
+        tab.setOnMouseEntered(e -> {
+            if (!tab.isSelected()) {
+                tab.setStyle("-fx-background-radius: 8; -fx-font-weight: bold; -fx-font-size: 14px; " +
+                        "-fx-padding: 8 15; -fx-background-color: #dfe6e9; -fx-text-fill: #7f8c8d;");
+            }
+        });
+
+        tab.setOnMouseExited(e -> {
+            if (!tab.isSelected()) {
+                tab.setStyle("-fx-background-radius: 8; -fx-font-weight: bold; -fx-font-size: 14px; " +
+                        "-fx-padding: 8 15; -fx-background-color: #ecf0f1; -fx-text-fill: #7f8c8d;");
+            }
+        });
+
         return tab;
     }
 
-    public void updateTabStyle(ToggleGroup group) {
+    private void updateTabStyle(ToggleGroup group) {
         for (Toggle toggle : group.getToggles()) {
             ToggleButton btn = (ToggleButton) toggle;
             if (btn.isSelected()) {
-                btn.setStyle("-fx-background-color: #f1d9b5; -fx-background-radius: 10; -fx-font-weight: bold;");
+                btn.setStyle("-fx-background-color: #3498db; -fx-background-radius: 8; " +
+                        "-fx-font-weight: bold; -fx-font-size: 14px; -fx-padding: 8 15; " +
+                        "-fx-text-fill: white;");
             } else {
-                btn.setStyle("-fx-background-color: #f5e6cc; -fx-background-radius: 10; -fx-font-weight: normal;");
+                btn.setStyle("-fx-background-radius: 8; -fx-font-weight: bold; -fx-font-size: 14px; " +
+                        "-fx-padding: 8 15; -fx-background-color: #ecf0f1; -fx-text-fill: #7f8c8d;");
             }
         }
     }
 
-    public  void showFloatingMessage(String message, boolean isError, Stage ownerStage, Runnable afterMessage) {
+    private void showFloatingMessage(String message, boolean isError, Stage ownerStage, Runnable afterMessage) {
         Popup popup = new Popup();
 
         Label messageLabel = new Label(message);
         messageLabel.setStyle(
-                "-fx-background-color: " + (isError ? "rgba(255,0,0,0.85);" : "rgba(0,128,0,0.85);") +
-                        " -fx-text-fill: white; -fx-padding: 10; -fx-font-weight: bold; -fx-background-radius: 5;"
+                "-fx-background-color: " + (isError ? "rgba(231,76,60,0.9);" : "rgba(46,204,113,0.9);") +
+                        " -fx-text-fill: white; -fx-padding: 12 20; -fx-font-weight: bold; " +
+                        "-fx-background-radius: 8; -fx-font-size: 14px;"
         );
         messageLabel.setWrapText(true);
         messageLabel.setMaxWidth(300);
 
         StackPane content = new StackPane(messageLabel);
-        content.setStyle("-fx-background-radius: 5;");
+        content.setStyle("-fx-background-radius: 8; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 5, 0, 0, 0);");
         popup.getContent().add(content);
 
         popup.setAutoFix(true);
         popup.setAutoHide(true);
-        popup.show(ownerStage, ownerStage.getX() + 20, ownerStage.getY() + 20);
+        popup.show(ownerStage,
+                ownerStage.getX() + ownerStage.getWidth()/2 - 150,
+                ownerStage.getY() + 50);
 
-        PauseTransition delay = new PauseTransition(Duration.seconds(5));
+        PauseTransition delay = new PauseTransition(Duration.seconds(3));
         delay.setOnFinished(event -> {
             popup.hide();
             if (afterMessage != null) {
@@ -167,7 +209,7 @@ public class LoginPageUI extends Application {
         delay.play();
     }
 
-    public Person findPerson(String authenticationText, String password, String selectedRole) {
+    private Person findPerson(String authenticationText, String password, String selectedRole) {
         List<Person> personList = DataBase.getPersonList();
 
         for (Person person : personList) {
@@ -178,31 +220,30 @@ public class LoginPageUI extends Application {
         return null;
     }
 
-    public boolean authenticate(Person person, String authenticationText, String password) {
+    private boolean authenticate(Person person, String authenticationText, String password) {
         return (person.getUsername().equals(authenticationText)
                 || person.getPhoneNumber().equals(authenticationText)
                 || person.getEmail().equals(authenticationText))
                 && person.getPassword().equals(password);
     }
 
-    public void handleLoginForRole(Person person, String role, Stage primaryStage, javafx.event.ActionEvent e) {
+    private void handleLoginForRole(Person person, String role, Stage primaryStage, javafx.event.ActionEvent e) {
         boolean success = switch (role) {
             case "Customer" -> person instanceof Customer;
             case "Seller" -> person instanceof Seller;
-//            case "Support" -> person instanceof Support;
             default -> false;
         };
 
         if (!success) {
-            showFloatingMessage("Entered data is not for a " + selectedRole, true, primaryStage, null);
+            showFloatingMessage("Entered data is not for a " + role, true, primaryStage, null);
         } else {
-            //TODO : complete here for Seller and Support Page
-            showFloatingMessage("Logged in successfully,\nWelcome dear " + selectedRole, false, primaryStage, () -> {
+            showFloatingMessage("Welcome, " + person.getName(), false, primaryStage, () -> {
                 new MainPageUI(person).start(new Stage());
                 ((Stage)((Node)e.getSource()).getScene().getWindow()).close();
             });
         }
     }
+
     public static void main(String[] args) {
         launch(args);
     }

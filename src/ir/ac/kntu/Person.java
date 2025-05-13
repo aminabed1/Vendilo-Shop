@@ -14,35 +14,18 @@ public abstract class Person {
     private String gender;
     private List<String> errorList;
 
+
     public Person(String name, String surname, String phoneNumber, String email, String username, String password) {
-        this.name = name;
-        this.surname = surname;
-        this.phoneNumber = phoneNumber;
-        this.email = email;
-        this.username = username;
-        this.password = password;
 
         errorList = new ArrayList<>();
-        PersonInfoValidator cv = new PersonInfoValidator();
-
-        boolean isUnique = cv.emailUniquementCheck(email, errorList) &&
-                cv.phoneNumberUniquementCheck(phoneNumber, errorList) &&
-                cv.usernameUniquementCheck(username, errorList);
-
-        boolean isValid = cv.checkNameAndSurnameValidation(name, errorList) &&
-                cv.checkNameAndSurnameValidation(surname, errorList) &&
-                cv.phoneNumberValidation(phoneNumber, errorList) &&
-                cv.emailValidation(email, errorList) &&
-                cv.usernameValidation(username, errorList) &&
-                cv.passwordValidation(password, errorList);
-
-        if (isValid && isUnique) {
-            setName(name);
-            setSurname(surname);
-            setPhoneNumber(phoneNumber);
-            setEmail(email);
-            setUsername(username);
-            setPassword(password);
+        InfoValidator cv = new InfoValidator();
+        if (cv.isPersonInfoValid(name, surname, phoneNumber, email, username, password, errorList)) {
+            this.name = name;
+            this.surname = surname;
+            this.phoneNumber = phoneNumber;
+            this.email = email;
+            this.username = username;
+            this.password = password;
             DataBase.setPersonList(this);
         }
     }

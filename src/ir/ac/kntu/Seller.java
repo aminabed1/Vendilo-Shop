@@ -1,18 +1,18 @@
 package ir.ac.kntu;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 public class Seller extends Person{
-    private List<String> errorList;
+//    private List<String> errorList;
     private String agencyCode;
     private String shopName;
     private Address address;
     private boolean isValidSeller = false;
+    private double wallet;
 
     public Seller(String name, String surname, String phoneNumber, String email, String username,
-                  String password, String agencyCode, String shopName) {
+                  String password, String shopName) {
         super(name, surname, phoneNumber, email, username, password);
         this.agencyCode = agencyCode;
         this.shopName = shopName;
@@ -40,6 +40,18 @@ public class Seller extends Person{
 
     public void setShopName(String shopName) {
         this.shopName = shopName;
+    }
+
+    public boolean getValidSeller() {
+        return isValidSeller;
+    }
+
+    public void setValidSeller(boolean validSeller) {
+        isValidSeller = validSeller;
+    }
+
+    public double getWalletBalance() {
+        return wallet;
     }
 
     public boolean equals(Object object) {
