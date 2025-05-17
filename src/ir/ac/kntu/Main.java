@@ -1,17 +1,13 @@
 package ir.ac.kntu;
 
-import ir.ac.kntu.UI.LoginPageUI;
-import javafx.application.Application;
-
-import java.util.ArrayList;
-import java.util.List;
-
 public class Main {
     public static void main(String[] args) {
-        Customer customer = new Customer("amin", "abdollahi", "09144593348", "adsfd@gmail.com", "amin","1234");
-        List<Person> customerList = DataBase.getPersonList();
-        System.out.println(customerList.size());
-        DataBase.setPersonList(customer);
-        Application.launch(LoginPageUI.class, args);
+        Person customer = new Customer("amin", "abdollahi", "09144593348", "adsfd@gmail.com", "aminabed1","12345678aA@");
+        Person seller = new Seller("amin", "aaaaaa", "09144593347", "adsv@gmail.com", "123456789abcd", "12345678aA@", "aa", "TEHRAN");
+        DataBase.addPerson(customer);
+        DataBase.addPerson(seller);
+        LoginPage.loginPage();
+//        PersonInfo.infoView(customer);
+
     }
 }

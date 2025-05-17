@@ -3,18 +3,17 @@ package ir.ac.kntu;
 import java.util.*;
 
 public class Customer extends Person{
-//    private List<String> errorList;
+    private List<String> errorList;
     private List<Address> addressList;
     private List<String> ratedProductsList;
     private double wallet;
 
-    //TODO instantiate errorList???
     public Customer(String name, String surname, String phoneNumber, String email, String username,
                     String password) {
         super(name, surname, phoneNumber, email, username, password);
-//        errorList = new ArrayList<>();
         addressList = new ArrayList<>();
         ratedProductsList = new ArrayList<>();
+        this.setRole("Customer");
     }
 
     public List<Address> getAddressList() {

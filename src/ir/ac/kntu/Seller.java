@@ -4,26 +4,18 @@ import java.util.List;
 import java.util.Objects;
 
 public class Seller extends Person{
-//    private List<String> errorList;
     private String agencyCode;
     private String shopName;
-    private Address address;
+    private String province;
     private boolean isValidSeller = false;
     private double wallet;
 
     public Seller(String name, String surname, String phoneNumber, String email, String username,
-                  String password, String shopName) {
+                  String password, String shopName, String province) {
         super(name, surname, phoneNumber, email, username, password);
         this.agencyCode = agencyCode;
         this.shopName = shopName;
-    }
-
-    public Address getAddress() {
-        return address;
-    }
-
-    public void setAddress(Address address) {
-        this.address = address;
+        this.setRole("Seller");
     }
 
     public String getAgencyCode() {
@@ -54,6 +46,18 @@ public class Seller extends Person{
         return wallet;
     }
 
+    public void setWalletBalance(double wallet) {
+        this.wallet = wallet;
+    }
+
+    public String getProvince() {
+        return province;
+    }
+
+    public void setProvince(String province) {
+        this.province = province;
+    }
+
     public boolean equals(Object object) {
         if (this == object) {
             return true;
@@ -71,7 +75,7 @@ public class Seller extends Person{
                 this.getEmail().equals(seller.getEmail()) &&
                 this.getUsername().equals(seller.getUsername()) &&
                 this.getPassword().equals(seller.getPassword()) &&
-                this.address.equals(seller.address);
+                this.province.equals(seller.getProvince());
     }
 
     @Override

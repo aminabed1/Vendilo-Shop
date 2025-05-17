@@ -10,23 +10,23 @@ public abstract class Person {
     private String email;
     private String username;
     private String password;
-    private int age;
-    private String gender;
+//    private int age;
+//    private String gender;
     private List<String> errorList;
+    private String role;
 
 
     public Person(String name, String surname, String phoneNumber, String email, String username, String password) {
-
         errorList = new ArrayList<>();
-        InfoValidator cv = new InfoValidator();
-        if (cv.isPersonInfoValid(name, surname, phoneNumber, email, username, password, errorList)) {
+        InfoValidator infoValidator = new InfoValidator();
+        if (infoValidator.isPersonInfoValid(name, surname, phoneNumber, email, username, password, errorList)) {
             this.name = name;
             this.surname = surname;
             this.phoneNumber = phoneNumber;
             this.email = email;
             this.username = username;
             this.password = password;
-            DataBase.setPersonList(this);
+            DataBase.addPerson(this);
         }
     }
 
@@ -46,13 +46,13 @@ public abstract class Person {
         this.surname = surname;
     }
 
-    public String getGender() {
-        return gender;
-    }
-
-    public void setGender(String gender) {
-        this.gender = gender;
-    }
+//    public String getGender() {
+//        return gender;
+//    }
+//
+//    public void setGender(String gender) {
+//        this.gender = gender;
+//    }
 
     public String getPhoneNumber() {
         return phoneNumber;
@@ -86,16 +86,24 @@ public abstract class Person {
         this.password = password;
     }
 
-    public int getAge() {
-        return age;
-    }
-
-    public void setAge(int age) {
-        this.age = age;
-    }
+//    public int getAge() {
+//        return age;
+//    }
+//
+//    public void setAge(int age) {
+//        this.age = age;
+//    }
 
     public List<String> getErrorList() {
         return errorList;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 
     public abstract boolean equals(Object object);

@@ -1,13 +1,13 @@
 package ir.ac.kntu;
 
 public class Address {
-    private Province province;
+    private String province;
     private String street;
     private String city;
     private String postalCode;
     private String plateNumber;
 
-    public Address(Province province, String street, String city, String postalCode, String plateNumber) {
+    public Address(String province, String street, String city, String postalCode, String plateNumber) {
         this.province = province;
         this.street = street;
         this.city = city;
@@ -15,11 +15,11 @@ public class Address {
         this.plateNumber = plateNumber;
     }
 
-    public Province getProvince() {
+    public String getProvince() {
         return province;
     }
 
-    public void setProvince(Province province) {
+    public void setProvince(String province) {
         this.province = province;
     }
 
