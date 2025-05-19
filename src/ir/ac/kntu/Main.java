@@ -2,12 +2,18 @@ package ir.ac.kntu;
 
 public class Main {
     public static void main(String[] args) {
-        Person customer = new Customer("amin", "abdollahi", "09144593348", "adsfd@gmail.com", "aminabed1","12345678aA@");
+        Person person = new Customer("amin", "abddd", "09144593348", "aafdsz@adsf", "amin1amin1","12345678aA@");
         Person seller = new Seller("amin", "aaaaaa", "09144593347", "adsv@gmail.com", "123456789abcd", "12345678aA@", "aa", "TEHRAN");
-        DataBase.addPerson(customer);
-        DataBase.addPerson(seller);
-        LoginPage.loginPage();
-//        PersonInfo.infoView(customer);
+        Book book = new Book("hezar o yek Shab", "121", "dafdsfjafadsfadsf", "unknown", "121", "druma", "1231", "afd", "99", 12);
 
+        DataBase.addPerson(person);
+        DataBase.addPerson(seller);
+        Customer customer = (Customer) person;
+//        customer = (Customer) customer;
+        ;
+        customer.addProduct(book);
+
+
+        LoginPage.loginPage();
     }
 }

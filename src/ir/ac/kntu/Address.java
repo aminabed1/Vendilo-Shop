@@ -6,13 +6,15 @@ public class Address {
     private String city;
     private String postalCode;
     private String plateNumber;
+    private String details;
 
-    public Address(String province, String street, String city, String postalCode, String plateNumber) {
+    public Address(String province, String street, String city, String postalCode, String plateNumber, String details) {
         this.province = province;
         this.street = street;
         this.city = city;
         this.postalCode = postalCode;
         this.plateNumber = plateNumber;
+        this.details = details;
     }
 
     public String getProvince() {
@@ -53,5 +55,13 @@ public class Address {
 
     public void setPlateNumber(String plateNumber) {
         this.plateNumber = plateNumber;
+    }
+
+    public String getDetails() {
+        return details;
+    }
+
+    public void setDetails(String details) {
+        this.details = details;
     }
 }

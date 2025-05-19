@@ -1,26 +1,20 @@
 package ir.ac.kntu;
 
 import java.util.*;
-import ir.ac.kntu.*;
 
 public class LoginPage {
 
     public static void loginPage() {
-        Person customer = new Customer("amin", "abdollahi", "09144593348", "adsfd@gmail.com", "aminabed1", "12345678aA@");
-        Person seller = new Seller("amin", "aaaaaa", "09144593347", "adsv@gmail.com", "123456789abcd", "12345678aA@", "aa", "TEHRAN");
-        DataBase.addPerson(customer);
-        DataBase.addPerson(seller);
-
         showWelcomeScreen();
         readLoginInfo();
     }
 
     public static void showWelcomeScreen() {
-        System.out.println("=========================================");
-        System.out.println("|                                       |");
-        System.out.println("|      WELCOME TO OUR APPLICATION       |");
-        System.out.println("|                                       |");
-        System.out.println("=========================================");
+        System.out.println("\u001B[36m=========================================\u001B[0m");
+        System.out.println("\u001B[36m|                                       |\u001B[0m");
+        System.out.println("\u001B[36m|    WELCOME TO VENDILO ONLINE SHOP     |\u001B[0m");
+        System.out.println("\u001B[36m|                                       |\u001B[0m");
+        System.out.println("\u001B[36m=========================================\u001B[0m");
         System.out.println();
     }
 
@@ -30,23 +24,24 @@ public class LoginPage {
         while (true) {
             displayLoginMenu();
 
-            String role = scan.next().trim();
+            String choice = scan.next().trim();
 
-            if (role.equals("0")) {
-//                 TODO: Implement account creation
+            if (choice.equals("BACK")) {
+                break;
+            } else if (choice.equals("0")) {
                 CreateAccountPage.createAccount();
                 continue;
             }
 
-            if (!isValidRole(role)) {
-                System.out.println("\n\u001B[31mERROR: Please enter a valid option (0-3)\u001B[0m\n");
+            if (!isValidRole(choice)) {
+                System.out.println("\n\u001B[31mERROR: Please enter a valid option (0-3) or BACK\u001B[0m\n");
                 continue;
             }
 
-            String roleName = getRoleName(role);
+            String roleName = getRoleName(choice);
             System.out.println("\n\u001B[32mSelected Role: " + roleName + "\u001B[0m");
 
-            System.out.print("\nEnter Username/Phone/Email: ");
+            System.out.print("\nEnter Username, Phone or Email: ");
             String authenticationField = scan.next().trim();
 
             System.out.print("Enter Password: ");
@@ -55,8 +50,8 @@ public class LoginPage {
             //TODO complete here
             if (receiveLoginInfo(authenticationField, passwordField, roleName)) {
                 Person person = findPerson(authenticationField, passwordField, roleName);
-                showLoginSuccess(person);
-                break;
+                    showLoginSuccess(person);
+                    MainPage.mainPage(person);
             } else {
                 System.out.println("\n\u001B[31mInvalid credentials. Please try again.\u001B[0m\n");
             }
@@ -68,9 +63,9 @@ public class LoginPage {
         System.out.println("|              LOGIN PAGE               |");
         System.out.println("+---------------------------------------+");
         System.out.println("| Select your role:                     |");
-        System.out.println("| 1. Customer                          |");
-        System.out.println("| 2. Seller                            |");
-        System.out.println("| 3. Support                           |");
+        System.out.println("| 1. Customer                           |");
+        System.out.println("| 2. Seller                             |");
+        System.out.println("| 3. Support                            |");
         System.out.println("|                                       |");
         System.out.println("| Don't have an account? Create one (0) |");
         System.out.println("+---------------------------------------+");

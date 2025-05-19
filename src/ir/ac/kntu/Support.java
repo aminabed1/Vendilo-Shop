@@ -10,6 +10,24 @@ public class Support extends Person {
         super(name, surname, phoneNumber, email, username, password);
     }
 
+    public String generateAgencyCode() {
+        StringBuilder code = new StringBuilder();
+        for (int i = 0; i < 3; i++) {
+            code.append(generateRandomNumber());
+            code.append(generateCharacter());
+        }
+
+        return code.toString();
+    }
+
+    public int generateRandomNumber() {
+        return (int) (Math.random() * 10);
+    }
+
+    public static String generateCharacter() {
+        return String.valueOf((char) ((int) (Math.random() * 25) + 65));
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {

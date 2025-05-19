@@ -58,6 +58,10 @@ public class Seller extends Person{
         this.province = province;
     }
 
+    public void makeRequest() {
+
+    }
+    @Override
     public boolean equals(Object object) {
         if (this == object) {
             return true;
@@ -70,7 +74,7 @@ public class Seller extends Person{
         Seller seller = (Seller) object;
 
         return this.getName().equals(seller.getName()) &&
-                this.getSurname().equals(seller.getSurname() )&&
+                this.getSurname().equals(seller.getSurname()) &&
                 this.getPhoneNumber().equals(seller.getPhoneNumber()) &&
                 this.getEmail().equals(seller.getEmail()) &&
                 this.getUsername().equals(seller.getUsername()) &&
