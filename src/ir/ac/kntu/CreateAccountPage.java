@@ -1,11 +1,22 @@
 package ir.ac.kntu;
 
 import java.util.*;
-//TODO create account for seller is coming soon
+
 public class CreateAccountPage {
     private static final Scanner scan = new Scanner(System.in);
 
-    public static void createAccount() {
+    private static final String RESET = "\u001B[0m";
+    private static final String TITLE = "\u001B[38;5;45m";
+    private static final String MENU = "\u001B[38;5;39m";
+    private static final String OPTION = "\u001B[38;5;159m";
+    private static final String PROMPT = "\u001B[38;5;228m";
+    private static final String SUCCESS = "\u001B[38;5;46m";
+    private static final String ERROR = "\u001B[38;5;203m";
+    private static final String HIGHLIGHT = "\u001B[38;5;231m";
+    private static final String BOLD = "\u001B[1m";
+
+    public void createAccount() {
+        clearScreen();
         displayCreateAccountHeader();
 
         while (true) {
@@ -21,33 +32,46 @@ public class CreateAccountPage {
         }
     }
 
-    public static void displayCreateAccountHeader() {
-        System.out.println("\n\u001B[36m=========================================\u001B[0m");
-        System.out.println("\u001B[36m|        ACCOUNT REGISTRATION           |\u001B[0m");
-        System.out.println("\u001B[36m=========================================\u001B[0m\n");
+    private void clearScreen() {
+        System.out.print("\033[H\033[2J");
+        System.out.flush();
     }
 
-    public static String selectRole() {
-        System.out.println("+---------------------------------------+");
-        System.out.println("| Select account type:                  |");
-        System.out.println("| 1. Customer                           |");
-        System.out.println("| 2. Seller                             |");
-        System.out.println("+---------------------------------------+");
-        System.out.print("Your choice (1-2) / BACK: ");
+    public void displayCreateAccountHeader() {
+        System.out.println(TITLE + "╔═════════════════════════════════════╗");
+        System.out.println("║                                     ║");
+        System.out.println("║" + BOLD + HIGHLIGHT + "        ACCOUNT REGISTRATION        " + RESET + TITLE + " ║");
+        System.out.println("║                                     ║");
+        System.out.println("╚═════════════════════════════════════╝" + RESET);
+        System.out.println();
+    }
 
-        String input = scan.next().trim();
-        if (input.equals("BACK")) {
+    public String selectRole() {
+        System.out.println(MENU + "╔═════════════════════════════════════╗");
+        System.out.println("║" + BOLD + "        SELECT ACCOUNT TYPE        " + RESET + MENU + "  ║");
+        System.out.println("╠═════════════════════════════════════╣");
+        System.out.println("║ " + OPTION + "1. Customer" + MENU + "                         ║");
+        System.out.println("║ " + OPTION + "2. Seller" + MENU + "                           ║");
+        System.out.println("╠═════════════════════════════════════╣");
+        System.out.println("║ " + OPTION + "Type " + BOLD + "BACK" + RESET + OPTION + " to return" + MENU + "                 ║");
+        System.out.println("╚═════════════════════════════════════╝" + RESET);
+        System.out.print(PROMPT + "Your choice (1-2): " + RESET + HIGHLIGHT);
+
+        String input = scan.nextLine().trim();
+        System.out.print(RESET);
+
+        if (input.equalsIgnoreCase("BACK")) {
             return "BACK";
         }
         if (!input.equals("1") && !input.equals("2")) {
-            System.out.println("\n\u001B[31mERROR: Please enter 1, 2 or BACK\u001B[0m\n");
+            showError("Please enter 1, 2 or BACK");
             return null;
         }
         return input.equals("1") ? "Customer" : "Seller";
     }
 
-    public static Person collectUserInfo(String role) {
-        System.out.println("\n\u001B[33mPlease enter your information:\u001B[0m");
+    public Person collectUserInfo(String role) {
+        System.out.println("\n" + PROMPT + "Please enter your information:" + RESET);
 
         UserInfo userInfo = new UserInfo();
         boolean confirmationGiven = false;
@@ -55,7 +79,10 @@ public class CreateAccountPage {
         while (true) {
             printUserInfoMenu(userInfo, role);
 
-            String choice = scan.next().trim();
+            System.out.print(PROMPT + "Enter your choice: " + RESET + HIGHLIGHT);
+            String choice = scan.nextLine().trim();
+            System.out.print(RESET);
+
             if (choice.equals("8")) {
                 return null;
             }
@@ -63,15 +90,15 @@ public class CreateAccountPage {
             if (choice.equals("7")) {
                 confirmationGiven = true;
             } else {
-                processUserInput(choice, userInfo);
+                processUserInput(choice, userInfo, role);
                 continue;
             }
 
             if (confirmationGiven) {
-                if (validateUserInfoCompletion(userInfo)) {
+                if (validateUserInfoCompletion(userInfo, role)) {
                     break;
                 } else {
-                    System.out.println("\n\u001B[31mERROR: Please fill all fields...!\u001B[0m\n");
+                    showError("Please fill all required fields");
                 }
             }
         }
@@ -79,50 +106,109 @@ public class CreateAccountPage {
         return validateAndCreateUser(role, userInfo);
     }
 
-    private static class UserInfo {
+    private class UserInfo {
         String name = "";
         String surname = "";
         String phone = "";
         String email = "";
         String username = "";
         String password = "";
+        String shopName = "";
+        String province = "";
     }
 
-    private static void printUserInfoMenu(UserInfo info, String role) {
-        System.out.println("1.name : " + (info.name.isEmpty() ? "Empty" : info.name));
-        System.out.println("2.surname : " + (info.surname.isEmpty() ? "Empty" : info.surname));
-        System.out.println("3.phone : " + (info.phone.isEmpty() ? "Empty" : info.phone));
-        System.out.println("4.email : " + (info.email.isEmpty() ? "Empty" : info.email));
-        System.out.println("5.username : " + (info.username.isEmpty() ? "Empty" : info.username));
-        System.out.println("6.password : " + (info.password.isEmpty() ? "Empty" : info.password));
-        //TODO complete here
-        if (role.equals("Seller")) {}
-        System.out.println("7.Confirm Information");
-        System.out.println("8.Back");
-        System.out.println("Enter your choice: ");
-    }
+    private void printUserInfoMenu(UserInfo info, String role) {
+        int maxLabelLength = 15;
+        int maxValueLength = 30;
 
-    private static void processUserInput(String choice, UserInfo info) {
-        System.out.println("\u001B[31mEnter data : \u001B[0m");
-        switch (choice) {
-            case "1": info.name = scan.next().trim(); break;
-            case "2": info.surname = scan.next().trim(); break;
-            case "3": info.phone = scan.next().trim(); break;
-            case "4": info.email = scan.next().trim(); break;
-            case "5": info.username = scan.next().trim(); break;
-            case "6": info.password = scan.next().trim(); break;
-            default: System.out.println("\n\u001B[31mERROR: Please enter a valid choice!\n");
+        System.out.println(MENU + "╔══════════════════════════════════════════════════════╗");
+        System.out.println("║" + BOLD + "                ENTER YOUR INFORMATION            " + RESET + MENU + "    ║");
+        System.out.println("╠══════════════════════════════════════════════════════╣");
+
+        printInfoLine("1. Name", info.name, maxLabelLength, maxValueLength);
+        printInfoLine("2. Surname", info.surname, maxLabelLength, maxValueLength);
+        printInfoLine("3. Phone", info.phone, maxLabelLength, maxValueLength);
+        printInfoLine("4. Email", info.email, maxLabelLength, maxValueLength);
+        printInfoLine("5. Username", info.username, maxLabelLength, maxValueLength);
+        printInfoLine("6. Password", info.password.isEmpty() ? "Empty" : "******", maxLabelLength, maxValueLength);
+
+        if (role.equals("Seller")) {
+            printInfoLine("9. Shop Name", info.shopName, maxLabelLength, maxValueLength);
+            printInfoLine("10. Province", info.province, maxLabelLength, maxValueLength);
         }
+
+        System.out.println("╠══════════════════════════════════════════════════════╣");
+        System.out.println("║ " + OPTION + "7. Confirm Information" + MENU + "                               ║");
+        System.out.println("║ " + OPTION + "8. Back" + MENU + "                                              ║");
+        System.out.println("╚══════════════════════════════════════════════════════╝" + RESET);
     }
 
-    private static boolean validateUserInfoCompletion(UserInfo info) {
-        return !(info.name.isEmpty() || info.surname.isEmpty() || info.phone.isEmpty() ||
-                info.email.isEmpty() || info.username.isEmpty() || info.password.isEmpty());
+    private void printInfoLine(String label, String value, int labelWidth, int valueWidth) {
+        String displayValue = value.isEmpty() ? "Empty" : value;
+        System.out.printf("║ " + OPTION + "%-" + labelWidth + "s: " + HIGHLIGHT + "%-" + valueWidth + "s" + MENU + "      ║\n",
+                label, displayValue.length() > valueWidth ? displayValue.substring(0, valueWidth-3) + "..." : displayValue);
     }
 
-    private static Person validateAndCreateUser(String role, UserInfo info) {
+    private void processUserInput(String choice, UserInfo info, String role) {
+        switch (choice) {
+            case "1":
+                System.out.print(PROMPT + "Enter name: " + RESET + HIGHLIGHT);
+                info.name = scan.nextLine().trim();
+                break;
+            case "2":
+                System.out.print(PROMPT + "Enter surname: " + RESET + HIGHLIGHT);
+                info.surname = scan.nextLine().trim();
+                break;
+            case "3":
+                System.out.print(PROMPT + "Enter phone: " + RESET + HIGHLIGHT);
+                info.phone = scan.nextLine().trim();
+                break;
+            case "4":
+                System.out.print(PROMPT + "Enter email: " + RESET + HIGHLIGHT);
+                info.email = scan.nextLine().trim();
+                break;
+            case "5":
+                System.out.print(PROMPT + "Enter username: " + RESET + HIGHLIGHT);
+                info.username = scan.nextLine().trim();
+                break;
+            case "6":
+                System.out.print(PROMPT + "Enter password: " + RESET);
+                info.password = new String(System.console().readPassword());
+                break;
+            case "9":
+                if (role.equals("Seller")) {
+                    System.out.print(PROMPT + "Enter shop name: " + RESET + HIGHLIGHT);
+                    info.shopName = scan.nextLine().trim();
+                }
+                break;
+            case "10":
+                if (role.equals("Seller")) {
+                    System.out.print(PROMPT + "Enter province: " + RESET + HIGHLIGHT);
+                    info.province = scan.nextLine().trim();
+                }
+                break;
+            default:
+                showError("Please enter a valid choice!");
+        }
+        System.out.print(RESET);
+    }
+
+    private boolean validateUserInfoCompletion(UserInfo info, String role) {
+        if (info.name.isEmpty() || info.surname.isEmpty() || info.phone.isEmpty() ||
+                info.email.isEmpty() || info.username.isEmpty() || info.password.isEmpty()) {
+            return false;
+        }
+
+        if (role.equals("Seller") && (info.shopName.isEmpty() || info.province.isEmpty())) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private Person validateAndCreateUser(String role, UserInfo info) {
         if (isExistingAccount(info.email, info.phone, info.username)) {
-            System.out.println("\n\u001B[31mERROR: Email or phone number already in use\u001B[0m");
+            showError("Email, phone or username already in use");
             return null;
         }
 
@@ -133,56 +219,64 @@ public class CreateAccountPage {
             return null;
         }
 
-        return createUser(role, info.name, info.surname, info.phone,
-                info.email, info.username, info.password);
+        if (role.equals("Customer")) {
+            return new Customer(info.name, info.surname, info.phone,
+                    info.email, info.username, info.password);
+        } else {
+            return new Seller(info.name, info.surname, info.phone,
+                    info.email, info.username, info.password,
+                    info.shopName, info.province);
+        }
     }
 
-    private static void completeAccountCreation(Person newUser) {
+    private void completeAccountCreation(Person newUser) {
         showSuccessMessage(newUser);
         DataBase.addPerson(newUser);
 
         if (newUser instanceof Seller) {
             new Request(newUser.getUsername());
+            System.out.println(SUCCESS + "Your seller request has been submitted for approval" + RESET);
         }
     }
 
-    public static String getInput(String prompt, boolean visible) {
-        System.out.print(prompt);
-        return visible ? scan.next().trim() : new String(System.console().readPassword());
-    }
-
-    public static boolean isExistingAccount(String email, String phone, String username) {
-        System.out.println(DataBase.getPersonList().size());
-
+    public boolean isExistingAccount(String email, String phone, String username) {
         return DataBase.getPersonList().stream()
                 .anyMatch(c -> c.getEmail().equals(email)
                         || c.getPhoneNumber().equals(phone)
                         || c.getUsername().equals(username));
     }
 
-    public static void displayErrors(List<String> errors) {
-        System.out.println("\n\u001B[31mAccount creation failed due to the following errors:\u001B[0m");
-        errors.forEach(error -> System.out.println(" - " + error));
+    public void displayErrors(List<String> errors) {
+        System.out.println(ERROR + "\nAccount creation failed due to the following errors:" + RESET);
+        errors.forEach(error -> System.out.println(ERROR + " - " + error + RESET));
         System.out.println();
     }
 
-    public static Person createUser(String role, String name, String surname, String phone,
-                                     String email, String username, String password) {
-        if (role.equals("Customer")) {
-            return new Customer(name, surname, phone, email, username, password);
-        } else {
-            System.out.print("Enter shop name: ");
-            String shopName = scan.next().trim();
-            System.out.print("Enter province: ");
-            String province = scan.next().trim();
-            return new Seller(name, surname, phone, email, username, password, shopName, province);
+    public void showError(String message) {
+        System.out.println(ERROR + "\n⚠ " + message + RESET);
+        pause(1000);
+    }
+
+    private void pause(int ms) {
+        try {
+            Thread.sleep(ms);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
     }
 
-    public static void showSuccessMessage(Person user) {
-        System.out.println("\n\u001B[32m=========================================\u001B[0m");
-        System.out.println("\u001B[32m|      ACCOUNT CREATED SUCCESSFULLY     |\u001B[0m");
-        System.out.printf("\u001B[32m| Role: %-30s |\n", user.getRole());
-        System.out.println("\u001B[32m=========================================\u001B[0m\n");
+    public void showSuccessMessage(Person user) {
+        System.out.println(SUCCESS + "\n╔═════════════════════════════════════╗");
+        System.out.println("║                                         ║");
+        System.out.println("║" + BOLD + "      ACCOUNT CREATED SUCCESSFULLY     " + RESET + SUCCESS + "║");
+        System.out.printf("║ Role: %-31s ║\n", user.getRole());
+        if (user instanceof Seller) {
+            Seller seller = (Seller)user;
+            System.out.printf("║ Shop: %-31s ║\n", seller.getShopName());
+            System.out.printf("║ Province: %-27s ║\n", seller.getProvince());
+        }
+        System.out.println("║                                         ║");
+        System.out.println("╚═════════════════════════════════════╝" + RESET);
+        pause(2000);
     }
 }

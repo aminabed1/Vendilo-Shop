@@ -5,6 +5,16 @@ import java.util.*;
 public abstract class Person {
     private final static Scanner scan = new Scanner(System.in);
 
+    private static final String RESET = "\u001B[0m";
+    private static final String TITLE = "\u001B[38;5;45m";
+    private static final String MENU = "\u001B[38;5;39m";
+    private static final String OPTION = "\u001B[38;5;159m";
+    private static final String PROMPT = "\u001B[38;5;228m";
+    private static final String SUCCESS = "\u001B[38;5;46m";
+    private static final String ERROR = "\u001B[38;5;203m";
+    private static final String HIGHLIGHT = "\u001B[38;5;231m";
+    private static final String BOLD = "\u001B[1m";
+
     private String name;
     private String surname;
     private String phoneNumber;
@@ -109,55 +119,107 @@ public abstract class Person {
 
     public abstract int hashCode();
 
-    public  void wallet(Person person) {
+    public void wallet(Person person) {
+        clearScreen();
 
-        System.out.println("My Wallet\n");
+        System.out.println(TITLE + "╔═════════════════════════════════════╗");
+        System.out.println("║                                     ║");
+        System.out.println("║" + BOLD + HIGHLIGHT + "               MY WALLET             " + RESET + TITLE + "║");
+        System.out.println("║                                     ║");
+        System.out.println("╠═════════════════════════════════════╣" + RESET);
+
         if (person instanceof Customer customer) {
-            System.out.println("Balance : " + customer.getWalletBalance());
-            System.out.println("Do you want to add money to your balance? (y/n or BACK)");
+            System.out.println(OPTION + "  Balance: " + HIGHLIGHT +
+                    String.format("%.2f $", customer.getWalletBalance()) + RESET);
+            System.out.println(TITLE + "╠═════════════════════════════════════╣" + RESET);
+            System.out.println(OPTION + "  Add money to your balance?" + RESET);
+            System.out.println(OPTION + "  [Y] Yes     [N] No     [BACK] Return" + RESET);
+            System.out.print(PROMPT + "\n  Your choice: " + RESET + HIGHLIGHT);
 
             String choice = scan.nextLine().trim();
+            System.out.print(RESET);
+
             if (choice.equalsIgnoreCase("BACK")) {
                 return;
-            } else if (choice.equalsIgnoreCase("y")) {
+            } else if (choice.equalsIgnoreCase("Y")) {
                 addBalance(customer);
-            } else if (choice.equalsIgnoreCase("n")) {
+            } else if (choice.equalsIgnoreCase("N")) {
                 wallet(person);
             } else {
-                System.out.println("Please enter a valid choice.");
+                showError("Please enter a valid choice (Y/N/BACK)");
                 wallet(person);
             }
 
         } else if (person instanceof Seller seller) {
-            System.out.println("Balance : " + seller.getWalletBalance());
-            System.out.println("Back to menu? (y/n)");
+            System.out.println(OPTION + "  Balance: " + HIGHLIGHT +
+                    String.format("%.2f $", seller.getWalletBalance()) + RESET);
+            System.out.println(TITLE + "╠═════════════════════════════════════╣" + RESET);
+            System.out.println(OPTION + "  Press any key to return to menu" + RESET);
+            System.out.print(PROMPT + "  > " + RESET + HIGHLIGHT);
 
-            String choice = scan.nextLine().trim();
-            if (choice.equalsIgnoreCase("y") || choice.equalsIgnoreCase("BACK")) {
-                return;
-            } else {
-                System.out.println("Please enter a valid choice.");
-                wallet(person);
-            }
+            scan.nextLine();
+            System.out.print(RESET);
         }
     }
 
-    public static void addBalance(Customer customer) {
-        System.out.print("Enter amount to add / cancel: ");
+    public void addBalance(Customer customer) {
+        clearScreen();
+
+        System.out.println(TITLE + "╔═════════════════════════════════════╗");
+        System.out.println("║                                     ║");
+        System.out.println("║" + BOLD + HIGHLIGHT + "           ADD TO BALANCE            " + RESET + TITLE + "║");
+        System.out.println("║                                     ║");
+        System.out.println("╠═════════════════════════════════════╣" + RESET);
+        System.out.println(OPTION + "  Current Balance: " + HIGHLIGHT +
+                String.format("%.2f $", customer.getWalletBalance()) + RESET);
+        System.out.print(OPTION + "  Enter amount or type " + BOLD + "CANCEL" + RESET + OPTION + ": " + RESET + HIGHLIGHT);
+
         String balance = scan.nextLine().trim();
-        if (balance.equalsIgnoreCase("cancel")) {
+        System.out.print(RESET);
+
+        if (balance.equalsIgnoreCase("CANCEL")) {
             return;
         }
 
         if (!balance.matches("\\d+(\\.\\d+)?")) {
-            System.out.println("Please enter a valid amount.");
+            showError("Please enter a valid amount (e.g. 50 or 12.50)");
             addBalance(customer);
             return;
         }
 
         double amount = Double.parseDouble(balance);
+        if (amount <= 0) {
+            showError("Amount must be greater than 0");
+            addBalance(customer);
+            return;
+        }
+
         customer.setWalletBalance(customer.getWalletBalance() + amount);
-        System.out.println("Balance updated successfully!");
+
+        System.out.println(SUCCESS + "\n╔═════════════════════════════════════╗");
+        System.out.println("║                                     ║");
+        System.out.println("║" + BOLD + "    BALANCE UPDATED SUCCESSFULLY!    " + RESET + SUCCESS + "║");
+        System.out.printf("║ New Balance: %.2f $ \n", customer.getWalletBalance());
+        System.out.println("║                                     ║");
+        System.out.println("╚═════════════════════════════════════╝" + RESET);
+        pause(2000);
     }
 
+    private void showError(String message) {
+        System.out.println(ERROR + "\n⚠ " + message + RESET);
+        pause(1000);
+    }
+
+    private void pause(int milliseconds) {
+        try {
+            Thread.sleep(milliseconds);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    public void clearScreen() {
+        System.out.print("\033[H\033[2J");
+        System.out.flush();
+    }
 }

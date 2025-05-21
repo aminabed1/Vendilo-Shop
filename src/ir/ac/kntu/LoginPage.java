@@ -3,80 +3,96 @@ package ir.ac.kntu;
 import java.util.*;
 
 public class LoginPage {
+    private static final Scanner scan = new Scanner(System.in);
 
-    public static void loginPage() {
+    private static final String RESET = "\u001B[0m";
+    private static final String TITLE = "\u001B[38;5;45m";
+    private static final String MENU = "\u001B[38;5;39m";
+    private static final String OPTION = "\u001B[38;5;159m";
+    private static final String PROMPT = "\u001B[38;5;228m";
+    private static final String SUCCESS = "\u001B[38;5;46m";
+    private static final String ERROR = "\u001B[38;5;203m";
+    private static final String HIGHLIGHT = "\u001B[38;5;231m";
+    private static final String BOLD = "\u001B[1m";
+
+    public void loginPage() {
+        clearScreen();
         showWelcomeScreen();
         readLoginInfo();
     }
 
-    public static void showWelcomeScreen() {
-        System.out.println("\u001B[36m=========================================\u001B[0m");
-        System.out.println("\u001B[36m|                                       |\u001B[0m");
-        System.out.println("\u001B[36m|    WELCOME TO VENDILO ONLINE SHOP     |\u001B[0m");
-        System.out.println("\u001B[36m|                                       |\u001B[0m");
-        System.out.println("\u001B[36m=========================================\u001B[0m");
+    private void showWelcomeScreen() {
+        System.out.println(TITLE + "=========================================");
+        System.out.println("|                                       |");
+        System.out.println("|    " + BOLD + HIGHLIGHT + "WELCOME TO VENDILO ONLINE SHOP" + RESET + TITLE + "     |");
+        System.out.println("|                                       |");
+        System.out.println("=========================================" + RESET);
         System.out.println();
     }
 
-    public static void readLoginInfo() {
-        Scanner scan = new Scanner(System.in);
-
+    private void readLoginInfo() {
         while (true) {
             displayLoginMenu();
 
-            String choice = scan.next().trim();
+            String choice = scan.nextLine().trim();
 
-            if (choice.equals("BACK")) {
+            if (choice.equalsIgnoreCase("BACK")) {
                 break;
-            } else if (choice.equals("0")) {
-                CreateAccountPage.createAccount();
+            }
+
+            if (choice.equals("0")) {
+                CreateAccountPage createAccountPage = new CreateAccountPage();
+                createAccountPage.createAccount();
                 continue;
             }
 
             if (!isValidRole(choice)) {
-                System.out.println("\n\u001B[31mERROR: Please enter a valid option (0-3) or BACK\u001B[0m\n");
+                showError("Please enter a valid option (0-3) or BACK");
                 continue;
             }
 
             String roleName = getRoleName(choice);
-            System.out.println("\n\u001B[32mSelected Role: " + roleName + "\u001B[0m");
+            System.out.println("\n" + PROMPT + "Selected Role: " + OPTION + roleName + RESET + "\n");
 
-            System.out.print("\nEnter Username, Phone or Email: ");
-            String authenticationField = scan.next().trim();
+            System.out.print(PROMPT + "Enter Username, Phone or Email: " + RESET + HIGHLIGHT);
+            String authenticationField = scan.nextLine().trim();
+            System.out.print(RESET);
 
-            System.out.print("Enter Password: ");
-            String passwordField = scan.next().trim();
+            System.out.print(PROMPT + "Enter Password: " + RESET + HIGHLIGHT);
+            String passwordField = scan.nextLine().trim();
+            System.out.print(RESET);
 
-            //TODO complete here
-            if (receiveLoginInfo(authenticationField, passwordField, roleName)) {
-                Person person = findPerson(authenticationField, passwordField, roleName);
-                    showLoginSuccess(person);
-                    MainPage.mainPage(person);
+            Person person = authenticateUser(authenticationField, passwordField, roleName);
+            if (person != null) {
+                showLoginSuccess(person);
+                MainPage mainPage = new MainPage();
+                mainPage.mainPage(person);
+//                break;
             } else {
-                System.out.println("\n\u001B[31mInvalid credentials. Please try again.\u001B[0m\n");
+                showError("Invalid credentials. Please try again.");
             }
         }
     }
 
-    private static void displayLoginMenu() {
+    private void displayLoginMenu() {
+        System.out.println(MENU + "+---------------------------------------+");
+        System.out.println("|              " + BOLD + "LOGIN PAGE" + RESET + MENU + "               |");
         System.out.println("+---------------------------------------+");
-        System.out.println("|              LOGIN PAGE               |");
-        System.out.println("+---------------------------------------+");
-        System.out.println("| Select your role:                     |");
-        System.out.println("| 1. Customer                           |");
-        System.out.println("| 2. Seller                             |");
-        System.out.println("| 3. Support                            |");
+        System.out.println("| " + PROMPT + "Select your role:" + MENU + "                     |");
+        System.out.println("| " + OPTION + "1. Customer" + MENU + "                           |");
+        System.out.println("| " + OPTION + "2. Seller" + MENU + "                             |");
+        System.out.println("| " + OPTION + "3. Support" + MENU + "                            |");
         System.out.println("|                                       |");
-        System.out.println("| Don't have an account? Create one (0) |");
+        System.out.println("| " + OPTION + "0. Create New Account" + MENU + "                 |");
         System.out.println("+---------------------------------------+");
-        System.out.print("Your choice: ");
+        System.out.print(PROMPT + "Your choice: " + RESET + HIGHLIGHT);
     }
 
-    private static boolean isValidRole(String input) {
-        return input.length() == 1 && (input.equals("1") || input.equals("2") || input.equals("3") || input.equals("0"));
+    private boolean isValidRole(String input) {
+        return input.matches("[0-3]");
     }
 
-    private static String getRoleName(String roleCode) {
+    private String getRoleName(String roleCode) {
         switch (roleCode) {
             case "1": return "Customer";
             case "2": return "Seller";
@@ -85,38 +101,41 @@ public class LoginPage {
         }
     }
 
-    private static void showLoginSuccess(Person person) {
-        System.out.println("\n\u001B[32m=========================================\u001B[0m");
-        System.out.println("\u001B[32m|                                       |\u001B[0m");
-        System.out.printf("\u001B[32m|   Login Successful! Welcome %-10s |\n", person.getName());
-        System.out.println("\u001B[32m|                                       |\u001B[0m");
-        System.out.println("\u001B[32m=========================================\u001B[0m\n");
+    private void showLoginSuccess(Person person) {
+        System.out.println("\n" + SUCCESS + "=========================================");
+        System.out.println("|                                       |");
+        System.out.println("|   " + BOLD + "LOGIN SUCCESSFUL!" + RESET + SUCCESS + "                   |");
+        System.out.println("|                                       |");
+        System.out.println("=========================================" + RESET);
+        pause(1500);
     }
 
-    public static boolean receiveLoginInfo(String authenticationText, String password, String role) {
+    private void showError(String message) {
+        System.out.println("\n" + ERROR + "⚠ " + message + RESET + "\n");
+        pause(1000);
+    }
+
+    private Person authenticateUser(String authText, String password, String role) {
         return DataBase.getPersonList().stream()
-                .anyMatch(c -> (c.getUsername().equals(authenticationText)
-                        || c.getEmail().equals(authenticationText)
-                        || c.getPhoneNumber().equals(authenticationText))
-                        && c.getRole().equals(role)
-                        && c.getPassword().equals(password));
+                .filter(p -> p.getRole().equals(role) &&
+                        (p.getUsername().equals(authText) ||
+                                p.getEmail().equals(authText) ||
+                                p.getPhoneNumber().equals(authText)) &&
+                        p.getPassword().equals(password))
+                .findFirst()
+                .orElse(null);
     }
 
-    public static Person findPerson(String authenticationText, String password, String selectedRole) {
-        List<Person> personList = DataBase.getPersonList();
+    private void clearScreen() {
+        System.out.print("\033[H\033[2J");
+        System.out.flush();
+    }
 
-        for (Person person : personList) {
-            if (authenticate(person, authenticationText, password)) {
-                return person;
-            }
+    private void pause(int ms) {
+        try {
+            Thread.sleep(ms);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
-        return null;
-    }
-
-    private static boolean authenticate(Person person, String authenticationText, String password) {
-        return (person.getUsername().equals(authenticationText)
-                || person.getPhoneNumber().equals(authenticationText)
-                || person.getEmail().equals(authenticationText))
-                && person.getPassword().equals(password);
     }
 }
