@@ -223,9 +223,10 @@ public class CreateAccountPage {
             return new Customer(info.name, info.surname, info.phone,
                     info.email, info.username, info.password);
         } else {
+            //TODO complete here
             return new Seller(info.name, info.surname, info.phone,
                     info.email, info.username, info.password,
-                    info.shopName, info.province);
+                    info.shopName, info.province, "123");
         }
     }
 

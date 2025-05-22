@@ -41,9 +41,9 @@ public class Cart {
 
         if (productList.isEmpty()) {
             System.out.println(TITLE + "\n╔═════════════════════════════════════╗");
-            System.out.println("║                                         ║");
-            System.out.println("║" + OPTION + "       YOUR CART IS EMPTY        " + TITLE + "║");
-            System.out.println("║                                         ║");
+            System.out.println("║                                     ║");
+            System.out.println("║" + OPTION + "       YOUR CART IS EMPTY            " + TITLE + "║");
+            System.out.println("║                                     ║");
             System.out.println("╚═════════════════════════════════════╝" + RESET);
             pause(1500);
             return;
@@ -106,7 +106,6 @@ public class Cart {
             if (choice.equalsIgnoreCase("DONE")) {
                 HandleOrder.getInstance().handleOrder(person);
                 pause(2000);
-                person.setCart(new Cart());
                 return;
             }
 

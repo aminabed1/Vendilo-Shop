@@ -66,4 +66,8 @@ public abstract class Product {
     public String getSellerAgencyCode() {
         return sellerAgencyCode;
     }
+
+    public void setSellerAgencyCode(String sellerAgencyCode) {
+        this.sellerAgencyCode = sellerAgencyCode;
+    }
 }

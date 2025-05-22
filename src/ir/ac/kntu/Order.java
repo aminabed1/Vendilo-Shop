@@ -8,12 +8,15 @@ public class Order {
     private Instant orderDate;
     private List<String> sellersAgencyCode;
     private Address deliveryAddress;
+    final private double totalPrice;
 
-    public Order(List<Product> productList, Instant orderDate,List<String> sellersAgencyCode, Address deliveryAddress) {
+    public Order(List<Product> productList, Instant orderDate,List<String> sellersAgencyCode, Address deliveryAddress, double totalPrice) {
         this.productList = productList;
         this.orderDate = orderDate;
         this.sellersAgencyCode = sellersAgencyCode;
         this.deliveryAddress = deliveryAddress;
+        this.totalPrice = totalPrice;
+
     }
 
     public Instant getOrderDate() {
@@ -48,6 +51,13 @@ public class Order {
         this.productList = productList;
     }
 
+    public double getTotalPrice() {
+        return totalPrice;
+    }
+
+//    public void setTotalPrice(double totalPrice) {
+//        this.totalPrice = totalPrice;
+//    }
 
 }
 

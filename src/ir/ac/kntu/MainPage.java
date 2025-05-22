@@ -125,8 +125,8 @@ public class MainPage {
                 case "2":
                     customer.displayCart();
                     break;
-                //TODO complete here
                 case "3":
+                    DisplayOrder.getInstance().display(customer);
                     break;
                 case "4":
                     customer.wallet(customer);

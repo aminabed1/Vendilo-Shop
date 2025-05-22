@@ -2,20 +2,32 @@ package ir.ac.kntu;
 
 import java.time.Instant;
 import java.util.*;
+
 public class HandleOrder {
     private final static Scanner scan = new Scanner(System.in);
+    private static final double basePrice = 15;
     private static double finalPrice;
     private static List<Product> products;
-    private static List<Person> sellerList;
     private static List<String> sellersAgencyCode;
     private static Address selectedAddress;
 
+    public static final String WARNING = "\u001B[33m";
+    private static final String RESET = "\u001B[0m";
+    private static final String TITLE = "\u001B[38;5;45m";
+    private static final String MENU = "\u001B[38;5;39m";
+    private static final String OPTION = "\u001B[38;5;159m";
+    private static final String PROMPT = "\u001B[38;5;228m";
+    private static final String SUCCESS = "\u001B[38;5;46m";
+    private static final String ERROR = "\u001B[38;5;203m";
+    private static final String HIGHLIGHT = "\u001B[38;5;231m";
+    private static final String BOLD = "\u001B[1m";
 
     public static HandleOrder getInstance() {
         return new HandleOrder();
     }
 
     public void handleOrder(Person person) {
+        clearScreen();
         finalPrice = 0;
         products = new ArrayList<>();
         selectedAddress = null;
@@ -27,165 +39,115 @@ public class HandleOrder {
         }
     }
 
+    private void clearScreen() {
+        System.out.print("\033[H\033[2J");
+        System.out.flush();
+    }
+
     public void customerOrder(Person person) {
-        if (!checkProductsStock(((Customer) person).getCart())) {
-            return;
-        }
         Cart cart = ((Customer) person).getCart();
+        if (!checkProductsStock(cart)) return;
+
         selectedAddress = addressSelection((Customer) person);
-        double postingPrice = calcPostingPrice(selectedAddress.getProvince(), ((Customer) person).getCart());
-        double finalPrice = getFinalPrice(cart, postingPrice);
-        finalDisplayingCart(cart);
-        option(person);
+        if (selectedAddress == null) return;
 
+        double postingPrice = calcPostingPrice(selectedAddress.getProvince(), cart);
+        finalPrice = getFinalPrice(cart, postingPrice);
+        displayCartSummary(cart);
+        displayFinalizeOption(person);
     }
-
+    //TODO Future implementation
     public void sellerOrder(Person person) {
-
     }
 
-    public Boolean checkProductsStock(Cart cart) {
-        List<Product> productList = cart.getProductList();
-
-        for (Product product : productList) {
+    public boolean checkProductsStock(Cart cart) {
+        for (Product product : cart.getProductList()) {
             if (product.getStock() == 0) {
-                System.out.println("Product : " + product.getFullName());
-//                System.out.println("Product is out of stock. Removing from cart");
-                System.out.println("Product is out of stock");
-//                cart.removeProduct(product);
+                displayOutOfStock(product);
+                pause(2000);
                 return false;
             }
         }
         return true;
     }
 
-    public Address addressSelection(Customer customer) {
-        List<Address> addressList = customer.getAddressList();
-        PersonInfo personInfo = new PersonInfo();
-        while (true) {
-            if (addressList.isEmpty()) {
-                System.out.println("No address has been registered yet");
-                System.out.println("Do you want to add an address ? (y / n)");
-                String choice = scan.nextLine();
-                if (choice.equalsIgnoreCase("y")) {
-                    personInfo.addNewAddress(customer);
-                } else if (choice.equalsIgnoreCase("n")) {
-                    return null;
-                } else {
-                    System.out.println("Please enter a valid option");
-                }
-            } else {
-                System.out.println("Address List : \n");
-                personInfo.displayAddresses(addressList);
-                System.out.println("Please select an address by it's index");
-                //TODO complete here
-                int selectedIndex = scan.nextInt();
-                if (selectedIndex < 0 || selectedIndex > addressList.size()) {
-                    System.out.println("Please enter a valid index");
-                    continue;
-                }
-
-                return addressList.get(selectedIndex - 1);
-            }
-        }
-    }
     public double calcPostingPrice(String province, Cart cart) {
-        final double basePrice = 15;
-        double finalPrice;
         products = cart.getProductList();
         for (Product product : products) {
-            String agencyCode = product.getSellerAgencyCode();
-            if (!(getSellerProvince(agencyCode).equals(province))) {
-                 return getFinalPostingPrice(cart, "No");
+            String sellerProvince = getSellerProvince(product.getSellerAgencyCode());
+            if (!province.equals(sellerProvince)) {
+                return calculatePostingCost(cart, false);
             }
         }
+        return calculatePostingCost(cart, true);
+    }
 
-        return getFinalPostingPrice(cart, "No");
+    private double calculatePostingCost(Cart cart, boolean sameProvince) {
+        double totalBase = basePrice * cart.getProductList().size();
+        return sameProvince ? totalBase / 3 : totalBase;
     }
 
     public String getSellerProvince(String agencyCode) {
-        sellerList = DataBase.getPersonList();
-
-        for (Person person : sellerList) {
-            if (!(person instanceof Seller)) {
-                continue;
-            }
-            if (agencyCode.equals(((Seller) person).getAgencyCode())) {
+        for (Person person : DataBase.getPersonList()) {
+            if (person instanceof Seller && agencyCode.equals(((Seller) person).getAgencyCode())) {
                 return ((Seller) person).getProvince();
             }
         }
-
         return null;
     }
 
     public String getShopName(String agencyCode) {
-        sellerList = DataBase.getPersonList();
-
-        for (Person person : sellerList) {
-            if (!(person instanceof Seller)) {
-                continue;
-            }
-            if (agencyCode.equals(((Seller) person).getAgencyCode())) {
+        for (Person person : DataBase.getPersonList()) {
+            if (person instanceof Seller && agencyCode.equals(((Seller) person).getAgencyCode())) {
                 return ((Seller) person).getShopName();
             }
         }
-
         return null;
     }
 
-    public double getFinalPostingPrice(Cart cart, String coordinate) {
-        products = cart.getProductList();
-
-        for (Product product : products) {
-            finalPrice += Double.parseDouble(product.getPrice());
-        }
-
-        return (coordinate.equals("No") ? finalPrice : finalPrice / 3);
+    public double getFinalPrice(Cart cart, double postingPrice) {
+        return cart.getProductList().stream()
+                .mapToDouble(p -> Double.parseDouble(p.getPrice()))
+                .sum() + postingPrice;
     }
 
-    public double getFinalPrice(Cart cart, double postingPrice) {
-        double finalPrice = postingPrice;
+    public void displayCartSummary(Cart cart) {
+        clearScreen();
+        double totalPrice = 0;
+
+        displayOrderSummaryHeader();
 
         for (Product product : cart.getProductList()) {
-            finalPrice += Double.parseDouble(product.getPrice());
+            displayProductSummary(product);
+            totalPrice += Double.parseDouble(product.getPrice());
         }
 
-        return finalPrice;
+        displayTotalPrice(totalPrice);
     }
 
-    public void finalDisplayingCart(Cart cart) {
+    public void displayFinalizeOption(Person person) {
+        while (true) {
+            displayFinalizePrompt();
+            String choice = scan.nextLine().trim();
 
-
-        for (Product product : products) {
-            System.out.println("=====================================================================================");
-            System.out.println("Product : " + product.getFullName());
-            System.out.println("Category : " + product.getCategory());
-            System.out.println("Price : " + product.getPrice());
-//            System.out.println("=====================================================================================\n");
-        }
-    }
-
-    public void option(Person person) {
-        while(true) {
-            System.out.println("Do you want to finalize your order ? (y / n)");
-            String choice = scan.nextLine();
-            if (choice.equalsIgnoreCase("y")) {
+            if (choice.equalsIgnoreCase("Y")) {
                 if (checkEnoughBalance(person)) {
                     finalizeOrder(person);
                 }
                 break;
-            } else if (choice.equalsIgnoreCase("n")) {
+            } else if (choice.equalsIgnoreCase("N")) {
                 return;
             } else {
-                System.out.println("Please enter a valid option");
+                showError("Please enter Y or N");
             }
         }
     }
 
     public boolean checkEnoughBalance(Person person) {
-        double personBalance = ((Customer) person).getWalletBalance();
-        if (personBalance < finalPrice) {
-            System.out.println("You do not have enough balance. Returning...");
+        double balance = ((Customer) person).getWalletBalance();
+        if (balance < finalPrice) {
+            displayInsufficientBalance(balance);
+            pause(2000);
             return false;
         }
         return true;
@@ -200,7 +162,149 @@ public class HandleOrder {
 
     public void finalizeOrder(Person person) {
         setSellersCodeList();
-        ((Customer) person).addOrder(new Order(products, Instant.now(), sellersAgencyCode, selectedAddress));
-        System.out.println("Order completed successfully");
+        Customer customer = (Customer) person;
+        customer.addOrder(new Order(products, Instant.now(), sellersAgencyCode, selectedAddress, finalPrice));
+        double newBalance = customer.getWalletBalance() - finalPrice;
+        customer.setWalletBalance(newBalance);
+        customer.setCart(new Cart());
+
+        displayOrderCompleted(newBalance);
+        reduceProductsStock();
+        pause(3000);
+    }
+
+    public void reduceProductsStock() {
+        for (Product product : products) {
+            product.setStock(product.getStock() - 1);
+        }
+    }
+
+    private void displayOutOfStock(Product product) {
+        System.out.println(ERROR + "╔═════════════════════════════════════╗");
+        System.out.println("║                                     ║");
+        System.out.println("║" + BOLD + "        PRODUCT OUT OF STOCK        " + RESET + ERROR + "║");
+        System.out.println("║                                     ║");
+        System.out.println("╠═════════════════════════════════════╣");
+        System.out.printf("║ Product: %s \n", product.getFullName());
+        System.out.println("╚═════════════════════════════════════╝" + RESET);
+    }
+
+    public Address addressSelection(Customer customer) {
+        List<Address> addressList = customer.getAddressList();
+        PersonInfo personInfo = new PersonInfo();
+
+        while (true) {
+            clearScreen();
+            displayAddressSelectionHeader();
+
+            if (addressList.isEmpty()) {
+                System.out.println(WARNING + "You have no saved addresses.\n" + RESET);
+            } else {
+                System.out.println(SUCCESS + "Your saved addresses:" + RESET);
+                personInfo.displayAddresses(addressList);
+            }
+
+            System.out.println();
+            System.out.println(TITLE + "╔═════════════════════════════════════╗");
+            System.out.println("║" + OPTION + "  Would you like to add an address?  " + TITLE + "║");
+            System.out.println("║" + OPTION + "  [Y] Yes       [N] No               " + TITLE + "║");
+            System.out.println("╚═════════════════════════════════════╝" + RESET);
+            System.out.print(PROMPT + "Your choice: " + RESET + HIGHLIGHT);
+
+            String choice = scan.nextLine().trim();
+            if (choice.equalsIgnoreCase("Y")) {
+                personInfo.addNewAddress(customer);
+                addressList = customer.getAddressList(); // Refresh after add
+            } else if (choice.equalsIgnoreCase("N")) {
+                if (addressList.isEmpty()) {
+                    return null;
+                }
+
+                System.out.print(PROMPT + "\nEnter address number (1-" + addressList.size() + "): " + RESET + HIGHLIGHT);
+                try {
+                    int selectedIndex = Integer.parseInt(scan.nextLine().trim());
+                    if (selectedIndex < 1 || selectedIndex > addressList.size()) {
+                        showError("Please enter a valid number");
+                        continue;
+                    }
+                    return addressList.get(selectedIndex - 1);
+                } catch (NumberFormatException e) {
+                    showError("Please enter a valid number");
+                }
+            } else {
+                showError("Please enter Y or N");
+            }
+        }
+    }
+
+    private void displayAddressSelectionHeader() {
+        System.out.println(TITLE + "╔═════════════════════════════════════╗");
+        System.out.println("║                                     ║");
+        System.out.println("║" + BOLD + "       SELECT DELIVERY ADDRESS       " + RESET + TITLE + "║");
+        System.out.println("║                                     ║");
+        System.out.println("╚═════════════════════════════════════╝" + RESET);
+    }
+
+    private void displayOrderSummaryHeader() {
+        System.out.println(TITLE + "╔══════════════════════════════════════════════════════╗");
+        System.out.println("║" + BOLD + "                 ORDER SUMMARY                        " + RESET + TITLE + "║");
+        System.out.println("╠══════════════════════════════════════════════════════╣" + RESET);
+    }
+
+    private void displayProductSummary(Product product) {
+        System.out.println(MENU + "╔══════════════════════════════════════════════════════╗");
+        System.out.printf(OPTION + "  %-30s " + HIGHLIGHT + "%10.2f $\n", product.getFullName(), Double.parseDouble(product.getPrice()));
+        System.out.println(OPTION + "  Category: " + HIGHLIGHT + product.getCategory());
+        System.out.println(OPTION + "  Seller: " + HIGHLIGHT + getShopName(product.getSellerAgencyCode()));
+        System.out.println(MENU + "╚══════════════════════════════════════════════════════╝" + RESET);
+    }
+
+    private void displayTotalPrice(double total) {
+        System.out.println(TITLE + "╔══════════════════════════════════════════════════════╗");
+        System.out.printf("║" + BOLD + "  TOTAL PRICE: " + HIGHLIGHT + "%-37.2f $" + TITLE + "║\n", total);
+        System.out.println("╚══════════════════════════════════════════════════════╝" + RESET);
+    }
+
+    private void displayFinalizePrompt() {
+        System.out.println("\n" + MENU + "╔═════════════════════════════════════╗");
+        System.out.println("║" + OPTION + "  Finalize your order?               " + MENU + "║");
+        System.out.println("║" + OPTION + "  [Y] Yes       [N] No               " + MENU + "║");
+        System.out.println("╚═════════════════════════════════════╝" + RESET);
+        System.out.print(PROMPT + "Your choice: " + RESET + HIGHLIGHT);
+    }
+
+    private void displayInsufficientBalance(double current) {
+        System.out.println(ERROR + "╔═════════════════════════════════════╗");
+        System.out.println("║                                     ║");
+        System.out.println("║" + BOLD + "      INSUFFICIENT BALANCE!          " + RESET + ERROR + "║");
+        System.out.println("║                                     ║");
+        System.out.println("╚═════════════════════════════════════╝");
+        System.out.printf("  Current: %.2f $\n", current);
+        System.out.printf("  Needed: %.2f $ \n", finalPrice);
+        System.out.println("═══════════════════════════════════════" + RESET);
+    }
+
+    private void displayOrderCompleted(double newBalance) {
+        System.out.println(SUCCESS + "╔═════════════════════════════════════╗");
+        System.out.println("║                                     ║");
+        System.out.println("║" + BOLD + "      ORDER COMPLETED SUCCESSFULLY!  " + RESET + SUCCESS + "║");
+        System.out.println("║                                     ║");
+        System.out.println("╠═════════════════════════════════════╣");
+        System.out.printf("║ Total Paid: %.2f $ \n", finalPrice);
+        System.out.printf("║ New Balance: %.2f $ \n", newBalance);
+        System.out.println("╚═════════════════════════════════════╝" + RESET);
+    }
+
+    private void showError(String message) {
+        System.out.println(ERROR + "\n " + message + RESET);
+        pause(1000);
+    }
+
+    private void pause(int milliseconds) {
+        try {
+            Thread.sleep(milliseconds);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 }

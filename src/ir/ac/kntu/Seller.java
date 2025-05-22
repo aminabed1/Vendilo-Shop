@@ -11,10 +11,12 @@ public class Seller extends Person{
     private double wallet;
 
     public Seller(String name, String surname, String phoneNumber, String email, String username,
-                  String password, String shopName, String province) {
+                  String password, String shopName, String province, String agencyCode) {
         super(name, surname, phoneNumber, email, username, password);
         this.agencyCode = agencyCode;
         this.shopName = shopName;
+        this.province = province;
+
         this.setRole("Seller");
     }
 

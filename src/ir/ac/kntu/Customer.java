@@ -12,6 +12,7 @@ public class Customer extends Person{
     public Customer(String name, String surname, String phoneNumber, String email, String username,
                     String password) {
         super(name, surname, phoneNumber, email, username, password);
+        orderList = new ArrayList<>();
         addressList = new ArrayList<>();
         ratedProductsList = new ArrayList<>();
         cart = new Cart();

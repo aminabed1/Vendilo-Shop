@@ -28,6 +28,7 @@ public class Book extends Product {
             this.setDescription(description);
             this.setWeight(weight);
             this.setStock(stock);
+            this.setSellerAgencyCode(sellerAgencyCode);
             DataBase.setProductList(this);
         }
     }
