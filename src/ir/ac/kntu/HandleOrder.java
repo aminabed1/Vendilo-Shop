@@ -7,6 +7,7 @@ public class HandleOrder {
     private final static Scanner scan = new Scanner(System.in);
     private static final double basePrice = 15;
     private static double finalPrice;
+    private static double postPrice;
     private static List<Product> products;
     private static List<String> sellersAgencyCode;
     private static Address selectedAddress;
@@ -29,6 +30,7 @@ public class HandleOrder {
     public void handleOrder(Person person) {
         clearScreen();
         finalPrice = 0;
+        postPrice = 0;
         products = new ArrayList<>();
         selectedAddress = null;
 
@@ -49,9 +51,14 @@ public class HandleOrder {
         if (!checkProductsStock(cart)) return;
 
         selectedAddress = addressSelection((Customer) person);
-        if (selectedAddress == null) return;
+        if (selectedAddress == null) {
+            return;
+        }
 
         double postingPrice = calcPostingPrice(selectedAddress.getProvince(), cart);
+        postPrice = postingPrice;
+
+
         finalPrice = getFinalPrice(cart, postingPrice);
         displayCartSummary(cart);
         displayFinalizeOption(person);
@@ -83,8 +90,7 @@ public class HandleOrder {
     }
 
     private double calculatePostingCost(Cart cart, boolean sameProvince) {
-        double totalBase = basePrice * cart.getProductList().size();
-        return sameProvince ? totalBase / 3 : totalBase;
+        return sameProvince ? (double) 5 : 15;
     }
 
     public String getSellerProvince(String agencyCode) {
@@ -122,7 +128,7 @@ public class HandleOrder {
             totalPrice += Double.parseDouble(product.getPrice());
         }
 
-        displayTotalPrice(totalPrice);
+        displayPrices(totalPrice, postPrice);
     }
 
     public void displayFinalizeOption(Person person) {
@@ -144,7 +150,7 @@ public class HandleOrder {
     }
 
     public boolean checkEnoughBalance(Person person) {
-        double balance = ((Customer) person).getWalletBalance();
+        double balance = ((Customer) person).getWallet().getWalletBalance();
         if (balance < finalPrice) {
             displayInsufficientBalance(balance);
             pause(2000);
@@ -163,16 +169,17 @@ public class HandleOrder {
     public void finalizeOrder(Person person) {
         setSellersCodeList();
         Customer customer = (Customer) person;
-        customer.addOrder(new Order(products, Instant.now(), sellersAgencyCode, selectedAddress, finalPrice));
-        double newBalance = customer.getWalletBalance() - finalPrice;
-        customer.setWalletBalance(newBalance);
+        Order newOrder = new Order(products, Instant.now(), sellersAgencyCode,customer.getEmail(), selectedAddress, finalPrice, postPrice);
+        customer.addOrder(newOrder);
+        double newBalance = customer.getWallet().getWalletBalance() - finalPrice;
+        customer.getWallet().setWalletBalance(newBalance, newOrder);
         customer.setCart(new Cart());
 
         displayOrderCompleted(newBalance);
         reduceProductsStock();
         pause(3000);
     }
-
+    //TODO complete for more than  one stock
     public void reduceProductsStock() {
         for (Product product : products) {
             product.setStock(product.getStock() - 1);
@@ -191,7 +198,7 @@ public class HandleOrder {
 
     public Address addressSelection(Customer customer) {
         List<Address> addressList = customer.getAddressList();
-        PersonInfo personInfo = new PersonInfo();
+        PersonAccount personInfo = new PersonAccount();
 
         while (true) {
             clearScreen();
@@ -214,7 +221,7 @@ public class HandleOrder {
             String choice = scan.nextLine().trim();
             if (choice.equalsIgnoreCase("Y")) {
                 personInfo.addNewAddress(customer);
-                addressList = customer.getAddressList(); // Refresh after add
+                addressList = customer.getAddressList();
             } else if (choice.equalsIgnoreCase("N")) {
                 if (addressList.isEmpty()) {
                     return null;
@@ -259,10 +266,12 @@ public class HandleOrder {
         System.out.println(MENU + "╚══════════════════════════════════════════════════════╝" + RESET);
     }
 
-    private void displayTotalPrice(double total) {
-        System.out.println(TITLE + "╔══════════════════════════════════════════════════════╗");
-        System.out.printf("║" + BOLD + "  TOTAL PRICE: " + HIGHLIGHT + "%-37.2f $" + TITLE + "║\n", total);
-        System.out.println("╚══════════════════════════════════════════════════════╝" + RESET);
+    private void displayPrices(double total, double postingPrice) {
+        System.out.println(TITLE + "════════════════════════════════════════════════════════");
+        System.out.printf(" " + BOLD + "  POSTING PRICE: " + HIGHLIGHT + "%.2f $" + TITLE + "\n", postingPrice);
+        System.out.printf(" " + BOLD + "  PRODUCTS PRICE: " + HIGHLIGHT + "%.2f $" + TITLE + "\n", total);
+        System.out.printf(" " + BOLD + "  TOTAL PRICE: " + HIGHLIGHT + "%.2f $" + TITLE + "\n", total + postingPrice);
+        System.out.println("════════════════════════════════════════════════════════" + RESET);
     }
 
     private void displayFinalizePrompt() {
@@ -289,10 +298,10 @@ public class HandleOrder {
         System.out.println("║                                     ║");
         System.out.println("║" + BOLD + "      ORDER COMPLETED SUCCESSFULLY!  " + RESET + SUCCESS + "║");
         System.out.println("║                                     ║");
-        System.out.println("╠═════════════════════════════════════╣");
-        System.out.printf("║ Total Paid: %.2f $ \n", finalPrice);
-        System.out.printf("║ New Balance: %.2f $ \n", newBalance);
-        System.out.println("╚═════════════════════════════════════╝" + RESET);
+        System.out.println("╚═════════════════════════════════════╝");
+        System.out.printf("  Total Paid: %.2f $ \n", finalPrice);
+        System.out.printf("  New Balance: %.2f $ \n", newBalance);
+        System.out.println("═══════════════════════════════════════" + RESET);
     }
 
     private void showError(String message) {

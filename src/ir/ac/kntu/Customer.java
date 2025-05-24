@@ -5,7 +5,7 @@ import java.util.*;
 public class Customer extends Person{
     private List<Address> addressList;
     private List<String> ratedProductsList;
-    private double wallet;
+    private Wallet wallet;
     private Cart cart;
     private List<Order> orderList;
 
@@ -16,6 +16,7 @@ public class Customer extends Person{
         addressList = new ArrayList<>();
         ratedProductsList = new ArrayList<>();
         cart = new Cart();
+        wallet = new Wallet();
         this.setRole("Customer");
     }
 
@@ -31,14 +32,6 @@ public class Customer extends Person{
         this.ratedProductsList = ratedProductsList;
     }
 
-    public double getWalletBalance() {
-        return wallet;
-    }
-
-    public void setWalletBalance(double wallet) {
-        this.wallet = wallet;
-    }
-
     public Cart getCart() {
         return cart;
     }
@@ -47,13 +40,20 @@ public class Customer extends Person{
         this.cart = cart;
     }
 
-
     public List<Order> getOrder() {
         return orderList;
     }
 
     public void addOrder(Order order) {
         orderList.add(order);
+    }
+
+    public Wallet getWallet() {
+        return wallet;
+    }
+
+    public void setWallet(Wallet wallet) {
+        this.wallet = wallet;
     }
 
     public void addProduct(Product product) {

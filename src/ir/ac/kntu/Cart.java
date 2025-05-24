@@ -70,7 +70,6 @@ public class Cart {
             for (int i = 0; i < productList.size(); i++) {
                 Product product = productList.get(i);
                 String formattedPrice = String.format("%.2f $", Double.parseDouble(product.getPrice()));
-                System.out.println("\n");
                 System.out.println(OPTION + "  " + (i+1) + ". " + MENU + "╔" + "═".repeat(boxWidth) + "╗");
                 System.out.println(OPTION + "     " + BOLD + "     Name: " + RESET + HIGHLIGHT +
                         String.format("%-" + maxNameLength + "s", product.getFullName()));
@@ -78,9 +77,8 @@ public class Cart {
                         String.format("%" + maxPriceLength + "s ", formattedPrice));
                 System.out.println(OPTION + "     " + BOLD + "     Category: " + RESET + HIGHLIGHT +
                         product.getCategory());
-                System.out.println(MENU + "     ╚" + "═".repeat(boxWidth) + "╝" + RESET);
+                System.out.println(MENU + "     ╚" + "═".repeat(boxWidth) + "╝\n" + RESET);
                 totalPrice += Double.parseDouble(product.getPrice());
-                System.out.println("\n");
             }
 
             String totalLine = "TOTAL:  " + String.format("%.2f $      ", totalPrice);

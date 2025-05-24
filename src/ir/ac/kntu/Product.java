@@ -10,9 +10,13 @@ public abstract class Product {
     private int stock;
     private String category;
     private String sellerAgencyCode;
+    private String serialNumber;
 
     public Product(String category, String sellerAgencyCode) {
+        int serialNumber = (int) (Math.random() * 899999 + 100000);
+        this.serialNumber = String.valueOf(serialNumber);
         this.category = category;
+        this.sellerAgencyCode = sellerAgencyCode;
     }
 
     public String getFullName() {
@@ -70,4 +74,9 @@ public abstract class Product {
     public void setSellerAgencyCode(String sellerAgencyCode) {
         this.sellerAgencyCode = sellerAgencyCode;
     }
+
+    public String getSerialNumber() {
+        return serialNumber;
+    }
+
 }

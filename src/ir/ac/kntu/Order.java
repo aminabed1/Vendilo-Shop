@@ -7,15 +7,19 @@ public class Order {
     private List<Product> productList;
     private Instant orderDate;
     private List<String> sellersAgencyCode;
+    private String customerEmail;
     private Address deliveryAddress;
+    final private double postingPrice;
     final private double totalPrice;
 
-    public Order(List<Product> productList, Instant orderDate,List<String> sellersAgencyCode, Address deliveryAddress, double totalPrice) {
+    public Order(List<Product> productList, Instant orderDate,List<String> sellersAgencyCode, String customerEmail,Address deliveryAddress, double totalPrice, double postingPrice) {
         this.productList = productList;
         this.orderDate = orderDate;
         this.sellersAgencyCode = sellersAgencyCode;
+        this.customerEmail = customerEmail;
         this.deliveryAddress = deliveryAddress;
         this.totalPrice = totalPrice;
+        this.postingPrice = postingPrice;
 
     }
 
@@ -29,6 +33,14 @@ public class Order {
 
     public List<String> getSellersAgencyCode() {
         return sellersAgencyCode;
+    }
+
+    public String getCustomerEmail() {
+        return customerEmail;
+    }
+
+    public void setCustomerEmail(String customerEmail) {
+        this.customerEmail = customerEmail;
     }
 
     public void setShopName(List<String> sellersAgencyCode) {
@@ -55,9 +67,8 @@ public class Order {
         return totalPrice;
     }
 
-//    public void setTotalPrice(double totalPrice) {
-//        this.totalPrice = totalPrice;
-//    }
-
+    public double getPostingPrice() {
+        return postingPrice;
+    }
 }
 

@@ -1,0 +1,262 @@
+package ir.ac.kntu;
+
+import ir.ac.kntu.util.*;
+import ir.ac.kntu.util.Calendar;
+import java.time.ZoneId;
+
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+
+public class Wallet {
+
+    private static final String RESET = "\u001B[0m";
+    private static final String TITLE = "\u001B[38;5;45m";
+    private static final String MENU = "\u001B[38;5;39m";
+    private static final String OPTION = "\u001B[38;5;159m";
+    private static final String PROMPT = "\u001B[38;5;228m";
+    private static final String SUCCESS = "\u001B[38;5;46m";
+    private static final String ERROR = "\u001B[38;5;203m";
+    private static final String HIGHLIGHT = "\u001B[38;5;231m";
+    private static final String BOLD = "\u001B[1m";
+    private static final Scanner scan = new Scanner(System.in);
+
+    private double balance;
+    private List<Transaction> transactionList;
+
+    public Wallet() {
+        transactionList = new ArrayList<>();
+    }
+
+    public double getWalletBalance() {
+        return balance;
+    }
+
+    public void setWalletBalance(double balance, Order order) {
+        double oldBalance = this.balance;
+        double amount = balance - oldBalance;
+        if (amount != 0) {
+            Transaction transaction = new Transaction(Calendar.now(), amount, order);
+            transactionList.add(transaction);
+        }
+        this.balance = balance;
+    }
+
+    public List<Transaction> getTransactionList() {
+        return transactionList;
+    }
+
+    public void setTransactionList(List<Transaction> transactionList) {
+        this.transactionList = transactionList;
+    }
+
+    public void walletOptionHandler(Person person) {
+        while (true) {
+            clearScreen();
+            System.out.println(TITLE + "╔═════════════════════════════════════╗");
+            System.out.println("║" + BOLD + HIGHLIGHT + "           WALLET MENU               " + RESET + TITLE + "║");
+            System.out.println("╠═════════════════════════════════════╣");
+            System.out.println("║" + OPTION + " 1. Display Wallet                   " + TITLE + "║");
+            System.out.println("║" + OPTION + " 2. Show Transactions                " + TITLE + "║");
+            System.out.println("║" + OPTION + " 3. Back to Main Menu                " + TITLE + "║");
+            System.out.println("╚═════════════════════════════════════╝" + RESET);
+            System.out.print(PROMPT + "Your choice: " + RESET);
+
+            String choice = scan.nextLine().trim();
+            switch (choice) {
+                case "1" -> displayWallet(person);
+                case "2" -> displayTransactions((Customer) person);
+                case "3" -> { return; }
+                default -> showError("Invalid option. Please try again!");
+            }
+        }
+    }
+
+    public void displayWallet(Person person) {
+        clearScreen();
+        System.out.println();
+        System.out.println(TITLE + "╔═════════════════════════════════════╗");
+        System.out.println("║" + BOLD + HIGHLIGHT + "             MY WALLET               " + RESET + TITLE + "║");
+        System.out.println("╚═════════════════════════════════════╝" + RESET);
+
+        if (person instanceof Customer customer) {
+            System.out.println(OPTION + "  Balance: " + HIGHLIGHT +
+                    String.format("%.2f $", this.getWalletBalance()) + RESET);
+            System.out.println(TITLE + "═══════════════════════════════════════" + RESET);
+            System.out.println(OPTION + "  Would you like to add money?");
+            System.out.println("  [Y] Yes     [N] No     [BACK] Return");
+            System.out.print(PROMPT + "\n  Your choice: " + RESET + HIGHLIGHT);
+
+            String choice = scan.nextLine().trim();
+            System.out.print(RESET);
+
+            switch (choice.toUpperCase()) {
+                case "Y" -> addBalance(customer);
+                case "N", "BACK" -> {}
+                default -> {
+                    showError("⚠ Please enter a valid choice (Y/N/BACK)");
+                    displayWallet(person);
+                }
+            }
+
+        } else if (person instanceof Seller seller) {
+            System.out.println(OPTION + "  Balance: " + HIGHLIGHT +
+                    String.format("%.2f $", seller.getWalletBalance()) + RESET);
+            System.out.println(TITLE + "╠═════════════════════════════════════╣" + RESET);
+            System.out.println(OPTION + "  Press Enter to return to menu" + RESET);
+            System.out.print(PROMPT + "  > " + RESET);
+            scan.nextLine();
+        }
+    }
+
+    public void addBalance(Customer customer) {
+        clearScreen();
+
+        System.out.println(TITLE + "╔═════════════════════════════════════╗");
+        System.out.println("║" + BOLD + HIGHLIGHT + "           ADD TO BALANCE            " + RESET + TITLE + "║");
+        System.out.println("╚═════════════════════════════════════╝" + RESET);
+        System.out.println(OPTION + "  Current Balance: " + HIGHLIGHT +
+                String.format("%.2f $", this.getWalletBalance()) + RESET);
+        System.out.print(OPTION + "  Enter amount (or type CANCEL): " + RESET + HIGHLIGHT);
+
+        String input = scan.nextLine().trim();
+        System.out.print(RESET);
+
+        if (input.equalsIgnoreCase("CANCEL")) {
+            return;
+        }
+
+        if (!input.matches("\\d+(\\.\\d+)?")) {
+            showError("Invalid amount! Example: 50 or 12.5");
+            addBalance(customer);
+            return;
+        }
+
+        double amount = Double.parseDouble(input);
+        if (amount <= 0) {
+            showError("Amount must be greater than 0.");
+            addBalance(customer);
+            return;
+        }
+
+        setWalletBalance(this.getWalletBalance() + amount, null);
+
+        System.out.println(SUCCESS + "\n═══════════════════════════════════════");
+        System.out.println("  🎉 " + BOLD + "BALANCE UPDATED SUCCESSFULLY!    " + RESET + SUCCESS);
+        System.out.printf("  New Balance: %.2f $%23s %n", this.getWalletBalance(), "");
+        System.out.println("═══════════════════════════════════════" + RESET);
+        pause(2000);
+    }
+
+    public void displayTransactions(Customer customer) {
+        while (true) {
+            clearScreen();
+            System.out.println(TITLE + "╔═════════════════════════════════════╗");
+            System.out.println("║" + BOLD + HIGHLIGHT + "          TRANSACTION HISTORY        " + RESET + TITLE + "║");
+            System.out.println("╚═════════════════════════════════════╝" + RESET);
+
+            List<Transaction> list = this.getTransactionList();
+            if (list.isEmpty()) {
+                System.out.println(ERROR + "No transactions found." + RESET);
+                pause(1500);
+                return;
+            }
+
+            int counter = 1;
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+                    .withZone(ZoneId.systemDefault());
+
+            for (Transaction t : list) {
+                String formattedTime = formatter.format(t.getTimestamp());
+                double amount = t.getAmount();
+                String color = amount > 0 ? SUCCESS : ERROR;
+
+                System.out.println(BOLD + "\n[" + counter++ + "]" + RESET);
+                System.out.println(OPTION + "• Time: " + HIGHLIGHT + formattedTime + RESET);
+                System.out.println(OPTION + "• Amount: " + color +
+                        String.format("%.2f $", amount) + RESET);
+                if (t.getOrder() != null) {
+                    System.out.println(OPTION + "• Type: " + HIGHLIGHT + "• Pay Order Price " + RESET);
+                } else {
+                    System.out.println(OPTION + "• Type: " + HIGHLIGHT + "• Wallet Charge " + RESET);
+                }
+            }
+
+            System.out.print(PROMPT + "\nSelect a transaction by index (or type BACK): " + RESET);
+            String choice = scan.nextLine().trim();
+
+            if (choice.equalsIgnoreCase("BACK")) {
+                return;
+            }
+
+            if (!choice.matches("\\d+")) {
+                showError("⚠ Enter a valid index number!");
+                continue;
+            }
+
+            int selectedTransaction = Integer.parseInt(choice);
+
+            if (selectedTransaction <= 0 || selectedTransaction > this.getTransactionList().size()) {
+                showError("⚠ Selected index out of range!");
+                continue;
+            }
+
+            Transaction transaction = list.get(selectedTransaction - 1);
+            if (transaction.getOrder() == null) {
+                System.out.println(ERROR + "\n No additional data for this transaction." + RESET);
+                System.out.println(OPTION + "• Type: " + HIGHLIGHT + "Wallet Charge" + RESET);
+                System.out.println(PROMPT + "\nPress anything to continue..." + RESET);
+                scan.nextLine();
+                continue;
+            }
+
+            Order order = transaction.getOrder();
+            System.out.println(OPTION + "\n• Linked Order: " + HIGHLIGHT + "(Shown Below)" + RESET);
+            DisplayOrder.getInstance().display(customer);
+
+            while (true) {
+                System.out.println(TITLE + "\n╔═════════════════════════════════════╗");
+                System.out.println("║" + BOLD + HIGHLIGHT + "       TRANSACTION OPTIONS           " + RESET + TITLE + "║");
+                System.out.println("╠═════════════════════════════════════╣");
+                System.out.println("║" + OPTION + " 1. Display Order Details            " + TITLE + "║");
+                System.out.println("║" + OPTION + " 2. Back to Transaction List         " + TITLE + "║");
+                System.out.println("║" + OPTION + " 0. Return to Wallet Menu            " + TITLE + "║");
+                System.out.println("╚═════════════════════════════════════╝" + RESET);
+                System.out.print(PROMPT + "Your choice: " + RESET);
+
+                choice = scan.nextLine().trim();
+
+                if (!choice.matches("[0-2]")) {
+                    showError("⚠ Please enter 0, 1, or 2.");
+                    continue;
+                }
+
+                switch (choice) {
+                    case "1" -> DisplayOrder.getInstance().display(customer);
+                    case "2" -> {}
+                    case "0" -> {
+                        return;
+                    }
+                }
+                break;
+            }
+        }
+    }
+
+    private void showError(String message) {
+        System.out.println(ERROR + "\n " + message + RESET);
+        pause(1500);
+    }
+
+    private void pause(int milliseconds) {
+        try {
+            Thread.sleep(milliseconds);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    public void clearScreen() {
+        System.out.print("\033[H\033[2J");
+        System.out.flush();
+    }
+}

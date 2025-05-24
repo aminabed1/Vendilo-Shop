@@ -267,8 +267,8 @@ public class CreateAccountPage {
     }
 
     public void showSuccessMessage(Person user) {
-        System.out.println(SUCCESS + "\n╔═════════════════════════════════════╗");
-        System.out.println("║                                         ║");
+        System.out.println(SUCCESS + "\n╔═══════════════════════════════════════╗");
+        System.out.println("║                                       ║");
         System.out.println("║" + BOLD + "      ACCOUNT CREATED SUCCESSFULLY     " + RESET + SUCCESS + "║");
         System.out.printf("║ Role: %-31s ║\n", user.getRole());
         if (user instanceof Seller) {
@@ -276,8 +276,8 @@ public class CreateAccountPage {
             System.out.printf("║ Shop: %-31s ║\n", seller.getShopName());
             System.out.printf("║ Province: %-27s ║\n", seller.getProvince());
         }
-        System.out.println("║                                         ║");
-        System.out.println("╚═════════════════════════════════════╝" + RESET);
+        System.out.println("║                                       ║");
+        System.out.println("╚═══════════════════════════════════════╝" + RESET);
         pause(2000);
     }
 }

@@ -119,7 +119,7 @@ public class MainPage {
 
             switch (choice) {
                 case "1":
-                    PersonInfo personInfo = new PersonInfo();
+                    PersonAccount personInfo = new PersonAccount();
                     personInfo.infoView(customer);
                     break;
                 case "2":
@@ -129,7 +129,7 @@ public class MainPage {
                     DisplayOrder.getInstance().display(customer);
                     break;
                 case "4":
-                    customer.wallet(customer);
+                    customer.getWallet().walletOptionHandler(customer);
                     break;
                 case "5":
                     backButtonPressed = true;
@@ -208,7 +208,7 @@ public class MainPage {
             break;
         }
     }
-
+    //TODO complete here
     public void browseCategories(Customer customer) {
         clearScreen();
         System.out.println(TITLE + "╔══════════════ CATEGORIES ══════════════╗");
@@ -232,6 +232,7 @@ public class MainPage {
                 case "2":
                     displayBooks(customer);
                     return;
+
                 case "3":
                     return;
                 default:

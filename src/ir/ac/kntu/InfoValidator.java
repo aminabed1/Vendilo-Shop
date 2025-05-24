@@ -192,8 +192,10 @@ public class InfoValidator {
                 emailValidation(email, errorList) &&
                 usernameValidation(username, errorList) &&
                 passwordValidation(password, errorList);
+
         return isValid && isUnique;
     }
+
     public boolean stockValidation(int stock, List<String> errorList) {
         if (stock < 0) {
             errorList.add("invalid product stock");
