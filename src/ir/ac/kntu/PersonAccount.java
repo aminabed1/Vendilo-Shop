@@ -72,7 +72,6 @@ public class PersonAccount {
 
     public void handleUserOptions() {
         while (true) {
-//            displayAccountInfo();
             displayOptionsMenu();
             String choice = scan.nextLine().trim().toLowerCase();
 
@@ -130,14 +129,6 @@ public class PersonAccount {
                 System.out.println("\n\u001B[31mInvalid option. Please try again.");
             }
         }
-    }
-
-    public boolean isAccountInfoDuplicate(String email, String phone, String username) {
-        return DataBase.getPersonList().stream()
-                .filter(p -> !p.equals(currentPerson))
-                .anyMatch(p -> p.getEmail().equalsIgnoreCase(email)
-                        || p.getPhoneNumber().equals(phone)
-                        || p.getUsername().equals(username));
     }
 
     public String getInput(String prompt, boolean visible) {

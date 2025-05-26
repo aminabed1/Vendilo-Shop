@@ -36,8 +36,6 @@ public class HandleOrder {
 
         if (person instanceof Customer) {
             customerOrder(person);
-        } else {
-            sellerOrder(person);
         }
     }
 
@@ -62,9 +60,6 @@ public class HandleOrder {
         finalPrice = getFinalPrice(cart, postingPrice);
         displayCartSummary(cart);
         displayFinalizeOption(person);
-    }
-    //TODO Future implementation
-    public void sellerOrder(Person person) {
     }
 
     public boolean checkProductsStock(Cart cart) {
@@ -169,16 +164,19 @@ public class HandleOrder {
     public void finalizeOrder(Person person) {
         setSellersCodeList();
         Customer customer = (Customer) person;
-        Order newOrder = new Order(products, Instant.now(), sellersAgencyCode,customer.getEmail(), selectedAddress, finalPrice, postPrice);
+        Order newOrder = new Order(products, Instant.now(), sellersAgencyCode, customer.getEmail(), selectedAddress, finalPrice, postPrice);
         customer.addOrder(newOrder);
         double newBalance = customer.getWallet().getWalletBalance() - finalPrice;
         customer.getWallet().setWalletBalance(newBalance, newOrder);
         customer.setCart(new Cart());
 
         displayOrderCompleted(newBalance);
+        chargeSellersWallet(person, products);
         reduceProductsStock();
+        createSellerOrder(selectedAddress, person.getEmail());
         pause(3000);
     }
+
     //TODO complete for more than  one stock
     public void reduceProductsStock() {
         for (Product product : products) {
@@ -186,13 +184,43 @@ public class HandleOrder {
         }
     }
 
+    public void chargeSellersWallet(Person person, List<Product> products) {
+        for (Product product : products) {
+            String agencyCode = product.getSellerAgencyCode();
+            Seller seller = findSellerByAgencyCode(agencyCode);
+            if (seller != null) {
+                double productPrice = Double.parseDouble(product.getPrice());
+                double sellerShare = productPrice * 0.9;
+                double currentBalance = seller.getWallet().getWalletBalance();
+
+                Order sellerOrder = new Order(
+                        Instant.now(),
+                        sellerShare,
+                        "Sale of product: " + product.getFullName()
+                );
+
+                seller.getWallet().setWalletBalance(currentBalance + sellerShare, sellerOrder);
+
+//                product.setStock(product.getStock() - 1);
+            }
+        }
+    }
+
+    public void createSellerOrder(Address deliveryAddress, String customerEmail) {
+        for (Product product : products) {
+            Order newOrder = new Order(product, Instant.now(), Double.parseDouble(product.getPrice()), deliveryAddress, customerEmail);
+            Seller seller = findSellerByAgencyCode(product.getSellerAgencyCode());
+            seller.addOrder(newOrder);
+        }
+    }
+
     private void displayOutOfStock(Product product) {
         System.out.println(ERROR + "╔═════════════════════════════════════╗");
         System.out.println("║                                     ║");
-        System.out.println("║" + BOLD + "        PRODUCT OUT OF STOCK        " + RESET + ERROR + "║");
+        System.out.println("║" + BOLD + "        PRODUCT OUT OF STOCK         " + RESET + ERROR + "║");
         System.out.println("║                                     ║");
         System.out.println("╠═════════════════════════════════════╣");
-        System.out.printf("║ Product: %s \n", product.getFullName());
+        System.out.printf("  Product: %s \n", product.getFullName());
         System.out.println("╚═════════════════════════════════════╝" + RESET);
     }
 
@@ -315,5 +343,14 @@ public class HandleOrder {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
+    }
+
+    public Seller findSellerByAgencyCode(String agencyCode) {
+        return DataBase.getPersonList().stream()
+                .filter(p -> p instanceof Seller)
+                .map(p -> (Seller) p)
+                .filter(s -> s.getAgencyCode().equals(agencyCode))
+                .findFirst()
+                .orElse(null);
     }
 }

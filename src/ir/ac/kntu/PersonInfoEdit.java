@@ -9,7 +9,6 @@ public class PersonInfoEdit {
     private static String nameTemp, surNameTemp, phoneTemp, emailTemp,
             usernameTemp, passwordTemp, shopNameTemp;
 
-    // ANSI Color Codes
     private static final String RESET = "\u001B[0m";
     private static final String MENU = "\u001B[38;5;39m";
     private static final String OPTION = "\u001B[38;5;159m";
@@ -82,7 +81,6 @@ public class PersonInfoEdit {
     private boolean tryApplyChanges() {
         List<String> errorList = new ArrayList<>();
 
-        // Temporarily clear for validation
         String oldUsername = currentPerson.getUsername();
         String oldEmail = currentPerson.getEmail();
         String oldPhone = currentPerson.getPhoneNumber();
@@ -93,7 +91,6 @@ public class PersonInfoEdit {
         boolean isValid = InfoValidator.isPersonInfoValid(
                 nameTemp, surNameTemp, phoneTemp, emailTemp, usernameTemp, passwordTemp, errorList);
 
-        // Restore originals before proceeding
         currentPerson.setUsername(oldUsername);
         currentPerson.setEmail(oldEmail);
         currentPerson.setPhoneNumber(oldPhone);

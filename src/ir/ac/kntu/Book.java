@@ -14,23 +14,17 @@ public class Book extends Product {
     public Book(String fullName, String price, String description, String author, String numberOfPage,
                 String genre, String ISBN, String publishDate, String weight, int stock, String sellerAgencyCode) {
         super("Book", sellerAgencyCode);
-        List<String> errorList = new ArrayList<>();
-
-        InfoValidator cv = new InfoValidator();
-        if (cv.isBookInfoValid(fullName, price, description, author, numberOfPage, genre, ISBN, publishDate, weight, stock, errorList)) {
-            this.author = author;
-            this.numberOfPage = numberOfPage;
-            this.genre = genre;
-            this.ISBN = ISBN;
-//        this.publishDate = publishDate;
-            this.setFullName(fullName);
-            this.setPrice(price);
-            this.setDescription(description);
-            this.setWeight(weight);
-            this.setStock(stock);
-            this.setSellerAgencyCode(sellerAgencyCode);
-            DataBase.setProductList(this);
-        }
+        this.author = author;
+        this.numberOfPage = numberOfPage;
+        this.genre = genre;
+        this.ISBN = ISBN;
+        this.publishDate = publishDate;
+        this.setFullName(fullName);
+        this.setPrice(price);
+        this.setDescription(description);
+        this.setWeight(weight);
+        this.setStock(stock);
+        this.setSellerAgencyCode(sellerAgencyCode);
     }
 
     public String  getAuthor() {

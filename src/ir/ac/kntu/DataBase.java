@@ -23,7 +23,7 @@ public class DataBase {
         return productList;
     }
 
-    public static void setProductList(Product product) {
+    public static void addProduct(Product product) {
         productList.add(product);
     }
 
@@ -34,7 +34,6 @@ public class DataBase {
     public static void addRequest(Request request) {
         requestList.add(request);
     }
-
 
     public List<Product> getProductsByCategory(String category) {
         List<Product> result = new ArrayList<>();

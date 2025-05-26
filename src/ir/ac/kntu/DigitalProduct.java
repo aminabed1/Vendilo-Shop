@@ -8,14 +8,17 @@ public class DigitalProduct extends Product {
     private String batteryCapacity;
     private String chipset;
 
-    public DigitalProduct(String brand, String internalStorage, String RAM, String OS, String batteryCapacity, String chipset, String sellerAgencyCode) {
+    public DigitalProduct(String brand, String price, String internalStorage, String RAM, String OS, String batteryCapacity, String chipset, int stock, String sellerAgencyCode) {
         super("Digital Product", sellerAgencyCode);
         this.Brand = brand;
+        this.setFullName(brand);
         this.internalStorage = internalStorage;
         this.RAM = RAM;
         this.OS = OS;
         this.batteryCapacity = batteryCapacity;
         this.chipset = chipset;
+        this.setStock(stock);
+        this.setPrice(price);
     }
     public String getBrand() {
         return Brand;

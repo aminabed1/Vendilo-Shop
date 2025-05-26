@@ -46,15 +46,6 @@ public class InfoValidator {
         return true;
     }
 
-    public static boolean bookNameUniquementCheck(String bookName, List<String> errorList) {
-        for (Product product : productList) {
-            if (product.getFullName().equals(bookName)) {
-                errorList.add("Book name already in use");
-                return false;
-            }
-        }
-        return true;
-    }
     public static boolean nameValidation(String name, List<String> errorList) {
         boolean result = true;
 
@@ -195,38 +186,4 @@ public class InfoValidator {
 
         return isValid && isUnique;
     }
-
-    public boolean stockValidation(int stock, List<String> errorList) {
-        if (stock < 0) {
-            errorList.add("invalid product stock");
-            return false;
-        }
-
-        return true;
-    }
-    
-
-    public boolean isBookInfoValid(String fullName, String price, String description, String author,
-                                   String numberOfPage, String genre, String ISBN, String publishDate,
-                                   String weight, int stock, List<String> errorList) {
-
-        productList = DataBase.getProductList();
-
-        boolean isValid = nameValidation(author, errorList)
-                && PageCountValidation(numberOfPage, errorList)
-                && stockValidation(stock, errorList);
-
-        boolean isUnique = bookNameUniquementCheck(fullName, errorList);
-
-        return isValid && isUnique;
-    }
-//    
-//    public boolean isPhoneInfoValid(String brand, String internalStorage, String RAM, String OS, String batteryCapacity, String chipset,
-//                                    String mainCamResolution, String frontCamResolution, String networkInfo, boolean supportSDCard,
-//                                    List<String> errorList) {
-//        
-//    productList = DataBase.getProductList();     
-//    
-//    boolean isValid = ;
-//    }
 }

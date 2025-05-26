@@ -115,6 +115,7 @@ public class CreateAccountPage {
         String password = "";
         String shopName = "";
         String province = "";
+        String sellerID = "";
     }
 
     private void printUserInfoMenu(UserInfo info, String role) {
@@ -135,6 +136,7 @@ public class CreateAccountPage {
         if (role.equals("Seller")) {
             printInfoLine("9. Shop Name", info.shopName, maxLabelLength, maxValueLength);
             printInfoLine("10. Province", info.province, maxLabelLength, maxValueLength);
+            printInfoLine("11. SellerID", info.sellerID, maxLabelLength, maxValueLength);
         }
 
         System.out.println("╠══════════════════════════════════════════════════════╣");
@@ -187,6 +189,12 @@ public class CreateAccountPage {
                     info.province = scan.nextLine().trim();
                 }
                 break;
+            case "11":
+                if (role.equals("Seller")) {
+                    System.out.print(PROMPT + "Enter sellerID: " + RESET);
+                    info.sellerID = scan.nextLine().trim();
+                }
+                break;
             default:
                 showError("Please enter a valid choice!");
         }
@@ -199,15 +207,18 @@ public class CreateAccountPage {
             return false;
         }
 
-        if (role.equals("Seller") && (info.shopName.isEmpty() || info.province.isEmpty())) {
-            return false;
-        }
-
-        return true;
+        return (!role.equals("Seller") || (!info.shopName.isEmpty() && !info.province.isEmpty())) && !info.sellerID.isEmpty();
     }
 
     private Person validateAndCreateUser(String role, UserInfo info) {
-        if (isExistingAccount(info.email, info.phone, info.username)) {
+        if (role.equals("Seller")) {
+            if (isExistingSeller(info.email, info.phone, info.username, info.sellerID)) {
+                showError("Email, phone, username or sellerID already in use!");
+                return null;
+            }
+        }
+
+        if (isExistingCustomer(info.email, info.phone, info.username)) {
             showError("Email, phone or username already in use");
             return null;
         }
@@ -223,10 +234,9 @@ public class CreateAccountPage {
             return new Customer(info.name, info.surname, info.phone,
                     info.email, info.username, info.password);
         } else {
-            //TODO complete here
             return new Seller(info.name, info.surname, info.phone,
                     info.email, info.username, info.password,
-                    info.shopName, info.province, "123");
+                    info.shopName, info.sellerID, info.province, generateAgencyCode());
         }
     }
 
@@ -235,12 +245,23 @@ public class CreateAccountPage {
         DataBase.addPerson(newUser);
 
         if (newUser instanceof Seller) {
-            new Request(newUser.getUsername());
-            System.out.println(SUCCESS + "Your seller request has been submitted for approval" + RESET);
+            String description = "New seller sign up";
+            new Request(((Seller) newUser).getAgencyCode(), description);
+            System.out.println("Your agency code is : " + ((Seller) newUser).getAgencyCode());
+            System.out.println(SUCCESS + "Your seller request has been submitted for Support" + RESET);
+            pause(5000);
         }
     }
 
-    public boolean isExistingAccount(String email, String phone, String username) {
+    public boolean isExistingSeller(String email, String phone, String username, String sellerID) {
+        return DataBase.getPersonList().stream()
+                .anyMatch(c -> c.getEmail().equals(email)
+                        || c.getPhoneNumber().equals(phone)
+                        || c.getUsername().equals(username)
+                        || (c instanceof Seller && ((Seller) c).getSellerID().equals(sellerID)));
+    }
+
+    public boolean isExistingCustomer(String email, String phone, String username) {
         return DataBase.getPersonList().stream()
                 .anyMatch(c -> c.getEmail().equals(email)
                         || c.getPhoneNumber().equals(phone)
@@ -271,13 +292,31 @@ public class CreateAccountPage {
         System.out.println("║                                       ║");
         System.out.println("║" + BOLD + "      ACCOUNT CREATED SUCCESSFULLY     " + RESET + SUCCESS + "║");
         System.out.printf("║ Role: %-31s ║\n", user.getRole());
-        if (user instanceof Seller) {
-            Seller seller = (Seller)user;
+        if (user instanceof Seller seller) {
             System.out.printf("║ Shop: %-31s ║\n", seller.getShopName());
             System.out.printf("║ Province: %-27s ║\n", seller.getProvince());
+            System.out.printf("║ sellerID: %-27s ║\n", seller.getSellerID());
         }
         System.out.println("║                                       ║");
         System.out.println("╚═══════════════════════════════════════╝" + RESET);
         pause(2000);
+    }
+
+    public String generateAgencyCode() {
+        StringBuilder code = new StringBuilder();
+        for (int i = 0; i < 3; i++) {
+            code.append(generateRandomNumber());
+            code.append(generateCharacter());
+        }
+
+        return code.toString();
+    }
+
+    public int generateRandomNumber() {
+        return (int) (Math.random() * 10);
+    }
+
+    public String generateCharacter() {
+        return String.valueOf((char) ((int) (Math.random() * 25) + 65));
     }
 }

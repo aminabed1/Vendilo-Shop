@@ -36,7 +36,7 @@ public class LoginPage {
 
             String choice = scan.nextLine().trim();
 
-            if (choice.equalsIgnoreCase("BACK")) {
+            if (choice.equalsIgnoreCase("4")) {
                 break;
             }
 
@@ -46,15 +46,22 @@ public class LoginPage {
                 continue;
             }
 
-            if (!isValidRole(choice)) {
-                showError("Please enter a valid option (0-3) or BACK");
+            if (!choice.matches("[0-3]")) {
+                showError("Please enter a valid option (0-4)");
                 continue;
             }
 
             String roleName = getRoleName(choice);
             System.out.println("\n" + PROMPT + "Selected Role: " + OPTION + roleName + RESET + "\n");
 
-            System.out.print(PROMPT + "Enter Username, Phone or Email: " + RESET + HIGHLIGHT);
+            if (roleName.equals("Customer")) {
+                System.out.print(PROMPT + "Enter Phone or Email: " + RESET + HIGHLIGHT);
+            } else if (roleName.equals("Seller")) {
+                System.out.print(PROMPT + "Enter Agency code: " + RESET + HIGHLIGHT);
+            } else {
+                System.out.println("Enter username: " + RESET + HIGHLIGHT);
+            }
+
             String authenticationField = scan.nextLine().trim();
             System.out.print(RESET);
 
@@ -65,8 +72,13 @@ public class LoginPage {
             Person person = authenticateUser(authenticationField, passwordField, roleName);
             if (person != null) {
                 showLoginSuccess(person);
-                MainPage mainPage = new MainPage();
-                mainPage.mainPage(person);
+                if (person instanceof Customer) {
+                    CustomerMainPage.getInstance().mainPage(person);
+                } else if (person instanceof Seller) {
+                    SellerMainPage.getInstance().sellerMenu(person);
+                } else {
+                    //TODO support
+                }
 //                break;
             } else {
                 showError("Invalid credentials. Please try again.");
@@ -82,23 +94,20 @@ public class LoginPage {
         System.out.println("| " + OPTION + "1. Customer" + MENU + "                           |");
         System.out.println("| " + OPTION + "2. Seller" + MENU + "                             |");
         System.out.println("| " + OPTION + "3. Support" + MENU + "                            |");
+        System.out.println("| " + OPTION + "4. exit   " + MENU + "                            |");
         System.out.println("|                                       |");
         System.out.println("| " + OPTION + "0. Create New Account" + MENU + "                 |");
         System.out.println("+---------------------------------------+");
         System.out.print(PROMPT + "Your choice: " + RESET + HIGHLIGHT);
     }
 
-    private boolean isValidRole(String input) {
-        return input.matches("[0-3]");
-    }
-
     private String getRoleName(String roleCode) {
-        switch (roleCode) {
-            case "1": return "Customer";
-            case "2": return "Seller";
-            case "3": return "Support";
-            default: return "";
-        }
+        return switch (roleCode) {
+            case "1" -> "Customer";
+            case "2" -> "Seller";
+            case "3" -> "Support";
+            default -> "";
+        };
     }
 
     private void showLoginSuccess(Person person) {
@@ -116,14 +125,29 @@ public class LoginPage {
     }
 
     private Person authenticateUser(String authText, String password, String role) {
-        return DataBase.getPersonList().stream()
-                .filter(p -> p.getRole().equals(role) &&
-                        (p.getUsername().equals(authText) ||
-                                p.getEmail().equals(authText) ||
-                                p.getPhoneNumber().equals(authText)) &&
-                        p.getPassword().equals(password))
-                .findFirst()
-                .orElse(null);
+        if (role.equals("Customer")) {
+            return DataBase.getPersonList().stream()
+                    .filter(p -> p.getRole().equals(role) &&
+                            (p.getEmail().equals(authText) ||
+                                    p.getPhoneNumber().equals(authText)) &&
+                            p.getPassword().equals(password))
+                    .findFirst()
+                    .orElse(null);
+        } else if (role.equals("Seller")) {
+            return DataBase.getPersonList().stream()
+                    .filter(p -> p.getRole().equals(role) &&
+                            (((Seller) p).getAgencyCode().equals(authText)) &&
+                            p.getPassword().equals(password))
+                    .findFirst()
+                    .orElse(null);
+        } else {
+            return DataBase.getPersonList().stream()
+                    .filter(p -> p.getRole().equals(role) &&
+                            (p.getUsername().equals(authText)) &&
+                                    p.getPassword().equals(password))
+                    .findFirst()
+                    .orElse(null);
+        }
     }
 
     private void clearScreen() {

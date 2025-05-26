@@ -9,8 +9,14 @@ public class Order {
     private List<String> sellersAgencyCode;
     private String customerEmail;
     private Address deliveryAddress;
-    final private double postingPrice;
-    final private double totalPrice;
+    private double postingPrice = 0;
+    private double totalPrice = 0;
+    private double productPrice = 0;
+    private Product product;
+
+
+
+    private String transactionDescription;
 
     public Order(List<Product> productList, Instant orderDate,List<String> sellersAgencyCode, String customerEmail,Address deliveryAddress, double totalPrice, double postingPrice) {
         this.productList = productList;
@@ -21,6 +27,24 @@ public class Order {
         this.totalPrice = totalPrice;
         this.postingPrice = postingPrice;
 
+    }
+
+    public Order (Instant orderDate, double price, String description) {
+        this.orderDate = orderDate;
+        this.totalPrice = totalPrice;
+        this.productPrice = price;
+        this.transactionDescription = description;
+    }
+
+    public Order(Product product, Instant orderDate, double price,
+                 Address deliveryAddress, String customerEmail) {
+        this.productList = List.of(product);
+        this.orderDate = orderDate;
+        this.totalPrice = price;
+        this.productPrice = price;
+        this.deliveryAddress = deliveryAddress;
+        this.customerEmail = customerEmail;
+        this.sellersAgencyCode = List.of(product.getSellerAgencyCode());
     }
 
     public Instant getOrderDate() {
@@ -69,6 +93,31 @@ public class Order {
 
     public double getPostingPrice() {
         return postingPrice;
+    }
+
+    public void setPostingPrice(double postingPrice) {
+        this.postingPrice = postingPrice;
+    }
+
+    public double getProductPrice() {
+        return productPrice;
+    }
+
+    public void setProductPrice(double productPrice) {
+        this.productPrice = productPrice;
+    }
+
+    public String getTransactionDescription() {
+        return transactionDescription;
+    }
+
+
+    public Product getProduct() {
+        return product;
+    }
+
+    public void setProduct(Product product) {
+        this.product = product;
     }
 }
 

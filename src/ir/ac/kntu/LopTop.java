@@ -6,9 +6,9 @@ public class LopTop extends DigitalProduct {
     private boolean hasWebCam;
     private String RAMGeneration;
 
-    public LopTop(String brand, String internalStorage, String RAM, String OS, String batteryCapacity,
-                  String chipset, String GPUChipset, boolean supportBluetooth, boolean hasWebCam, String RAMGeneration, String sellerAgencyCode) {
-        super(brand, internalStorage, RAM, OS, batteryCapacity, chipset, sellerAgencyCode);
+    public LopTop(String brand,String price, String internalStorage, String RAM, String OS, String batteryCapacity,
+                  String chipset, String GPUChipset, boolean supportBluetooth, boolean hasWebCam, String RAMGeneration, int stock, String sellerAgencyCode) {
+        super(brand, price, internalStorage, RAM, OS, batteryCapacity, chipset, stock, sellerAgencyCode);
         this.GPUChipset = GPUChipset;
         this.supportBluetooth = supportBluetooth;
         this.hasWebCam = hasWebCam;
