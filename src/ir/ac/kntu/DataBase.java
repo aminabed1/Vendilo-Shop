@@ -10,6 +10,7 @@ public class DataBase {
     private static List<Person> personList = new ArrayList<>();
     private static List<Product> productList = new ArrayList<>();
     private static List<Request> requestList = new ArrayList<>();
+    private static List<Order> orderList = new ArrayList<>();
 
     public static List<Person> getPersonList() {
         return personList;
@@ -33,6 +34,15 @@ public class DataBase {
 
     public static void addRequest(Request request) {
         requestList.add(request);
+    }
+
+
+    public static List<Order> getOrderList() {
+        return orderList;
+    }
+
+    public static void addOrder(Order order) {
+        orderList.add(order);
     }
 
     public List<Product> getProductsByCategory(String category) {

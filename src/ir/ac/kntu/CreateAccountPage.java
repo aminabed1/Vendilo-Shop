@@ -1,5 +1,6 @@
 package ir.ac.kntu;
 
+import java.time.Instant;
 import java.util.*;
 
 public class CreateAccountPage {
@@ -246,8 +247,8 @@ public class CreateAccountPage {
 
         if (newUser instanceof Seller) {
             String description = "New seller sign up";
-            new Request(((Seller) newUser).getAgencyCode(), description);
             System.out.println("Your agency code is : " + ((Seller) newUser).getAgencyCode());
+            DataBase.addRequest(new SellerRequest(((Seller) newUser).getAgencyCode(), description, Instant.now()));
             System.out.println(SUCCESS + "Your seller request has been submitted for Support" + RESET);
             pause(5000);
         }

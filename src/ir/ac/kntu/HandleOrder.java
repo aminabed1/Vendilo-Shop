@@ -165,6 +165,7 @@ public class HandleOrder {
         setSellersCodeList();
         Customer customer = (Customer) person;
         Order newOrder = new Order(products, Instant.now(), sellersAgencyCode, customer.getEmail(), selectedAddress, finalPrice, postPrice);
+        DataBase.addOrder(newOrder);
         customer.addOrder(newOrder);
         double newBalance = customer.getWallet().getWalletBalance() - finalPrice;
         customer.getWallet().setWalletBalance(newBalance, newOrder);
@@ -208,7 +209,7 @@ public class HandleOrder {
 
     public void createSellerOrder(Address deliveryAddress, String customerEmail) {
         for (Product product : products) {
-            Order newOrder = new Order(product, Instant.now(), Double.parseDouble(product.getPrice()), deliveryAddress, customerEmail);
+            Order newOrder = new Order(product, Instant.now(), Double.parseDouble(product.getPrice()), deliveryAddress, customerEmail);//seller order
             Seller seller = findSellerByAgencyCode(product.getSellerAgencyCode());
             seller.addOrder(newOrder);
         }

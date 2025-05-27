@@ -75,9 +75,9 @@ public class LoginPage {
                 if (person instanceof Customer) {
                     CustomerMainPage.getInstance().mainPage(person);
                 } else if (person instanceof Seller) {
-                    SellerMainPage.getInstance().sellerMenu(person);
+                    SellerMainPage.getInstance().mainPage(person);
                 } else {
-                    //TODO support
+                    SupportMainPage.getInstance().mainPage(person);
                 }
 //                break;
             } else {

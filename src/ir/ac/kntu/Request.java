@@ -1,19 +1,15 @@
 package ir.ac.kntu;
 
 import java.time.Instant;
-import java.util.List;
 
-public class Request {
-    private String sellerAgencyCode;
+public abstract class Request {
     private String description;
-    private Instant timestamp;
+    private final Instant timestamp;
     private boolean isChecked = false;
 
-    public Request(String sellerAgencyCode, String description) {
-        this.sellerAgencyCode = sellerAgencyCode;
+    public Request(Instant timestamp, String description) {
+        this.timestamp = timestamp;
         this.description = description;
-        this.timestamp = Instant.now();
-        DataBase.addRequest(this);
     }
 
     public String getDescription() {
@@ -24,27 +20,17 @@ public class Request {
         this.description = description;
     }
 
-    public String getSellerAgencyCode() {
-        return sellerAgencyCode;
-    }
-
-    public void setSellerAgencyCode(String sellerAgencyCode) {
-        this.sellerAgencyCode = sellerAgencyCode;
-    }
-
     public Instant getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(Instant timestamp) {
-        this.timestamp = timestamp;
-    }
 
-    public boolean isChecked() {
+    public boolean getIsChecked() {
         return isChecked;
     }
 
-    public void setChecked(boolean isChecked) {
+    public void setIsChecked(boolean isChecked) {
         this.isChecked = isChecked;
     }
+
 }

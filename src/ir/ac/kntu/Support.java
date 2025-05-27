@@ -6,8 +6,10 @@ import java.util.Objects;
 
 public class Support extends Person {
 
-    public Support(String name, String surname, String phoneNumber, String email, String username, String password) {
-        super(name, surname, phoneNumber, email, username, password);
+    public Support(String name, String surname, String username, String password) {
+        //TODO fix here for null phone number and email
+        super(name, surname, "11", "11", username, password);
+        this.setRole("Support");
     }
 
     @Override

@@ -7,7 +7,7 @@ public class Seller extends Person{
     private String shopName;
     private String sellerID;
     private String province;
-    private boolean isValidSeller = true;
+    private boolean isValidSeller = false;
     private Wallet wallet;
     private List<Order> orders = new ArrayList<>();
 
@@ -20,7 +20,6 @@ public class Seller extends Person{
         this.province = province;
         this.sellerID = sellerID;
         wallet = new Wallet();
-
         this.setRole("Seller");
     }
 
@@ -44,7 +43,7 @@ public class Seller extends Person{
         return isValidSeller;
     }
 
-    public void setValidSeller(boolean validSeller) {
+    public void setIsValidSeller(boolean validSeller) {
         isValidSeller = validSeller;
     }
 

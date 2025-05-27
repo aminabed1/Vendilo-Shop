@@ -26,6 +26,10 @@ public class InfoValidator {
 
     public static boolean phoneNumberUniquementCheck(String phoneNumber, List<String> errorList) {
         for (Person person : personList) {
+            if (person instanceof Support)  {
+                continue;
+            }
+
             if (person.getPhoneNumber().equals(phoneNumber)) {
                 errorList.add("Phone number already in use");
                 return false;

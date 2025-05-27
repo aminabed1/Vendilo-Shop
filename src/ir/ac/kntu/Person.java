@@ -18,15 +18,12 @@ public abstract class Person {
 
 
     public Person(String name, String surname, String phoneNumber, String email, String username, String password) {
-        errorList = new ArrayList<>();
-        if (InfoValidator.isPersonInfoValid(name, surname, phoneNumber, email, username, password, errorList)) {
-            this.name = name;
-            this.surname = surname;
-            this.phoneNumber = phoneNumber;
-            this.email = email;
-            this.username = username;
-            this.password = password;
-        }
+        this.name = name;
+        this.surname = surname;
+        this.phoneNumber = phoneNumber;
+        this.email = email;
+        this.username = username;
+        this.password = password;
     }
 
     public String getName() {
@@ -93,9 +90,9 @@ public abstract class Person {
         this.age = age;
     }
 
-    public List<String> getErrorList() {
-        return errorList;
-    }
+//    public List<String> getErrorList() {
+//        return errorList;
+//    }
 
     public String getRole() {
         return role;
