@@ -6,7 +6,7 @@ import java.util.Scanner;
 import java.util.stream.Collectors;
 
 public class SupportMainPage {
-    
+
     private static final String RESET = "\u001B[0m";
     private static final String TITLE = "\u001B[38;5;45m";
     private static final String MENU = "\u001B[38;5;39m";
@@ -155,9 +155,105 @@ public class SupportMainPage {
     }
 
     private void handleCustomerRequests() {
-        clearScreen();
-        displayHeader("CUSTOMER REQUESTS");
-        showComingSoonMessage();
+        List<CustomerRequest> customerRequests = getPendingCustomerRequests();
+
+        while (true) {
+            clearScreen();
+            displayHeader("CUSTOMER REQUESTS");
+
+            if (customerRequests.isEmpty()) {
+                showSuccessMessage("No pending customer requests found.");
+                pause(1500);
+                return;
+            }
+
+            displayCustomerRequestsList(customerRequests);
+
+            int selectedIndex = getSelectedIndex(customerRequests.size());
+            if (selectedIndex == -1) return;
+
+            CustomerRequest selectedRequest = customerRequests.get(selectedIndex);
+            handleCustomerRequestDetails(selectedRequest);
+            
+            customerRequests = getPendingCustomerRequests();
+        }
+    }
+
+    private List<CustomerRequest> getPendingCustomerRequests() {
+        return DataBase.getRequestList().stream()
+                .filter(r -> r instanceof CustomerRequest)
+                .map(r -> (CustomerRequest) r)
+                .filter(r -> r.getStatus().equals("unchecked"))
+                .collect(Collectors.toList());
+    }
+
+    private void displayCustomerRequestsList(List<CustomerRequest> requests) {
+        System.out.println(MENU + "Pending Customer Requests:" + RESET);
+        System.out.println(DIVIDER);
+
+        for (int i = 0; i < requests.size(); i++) {
+            CustomerRequest request = requests.get(i);
+            String status = request.getStatus().equals("unchecked")
+                    ? ERROR + "PENDING" + RESET
+                    : SUCCESS + "CHECKED" + RESET;
+
+            System.out.printf(HIGHLIGHT + "%2d" + RESET + " | %-20s | %-10s | %-15s | %s\n",
+                    i + 1,
+                    request.getRequestTitle(),
+                    status,
+                    request.getCustomerPhone(),
+                    truncate(request.getDescription()));
+        }
+        System.out.println(DIVIDER);
+    }
+
+    private void handleCustomerRequestDetails(CustomerRequest request) {
+        while (true) {
+            clearScreen();
+            displayHeader("CUSTOMER REQUEST DETAILS");
+
+            System.out.println(MENU + "Request Information:" + RESET);
+            System.out.println(DIVIDER);
+            System.out.printf("%-15s: %s\n", "Title", request.getRequestTitle());
+            System.out.printf("%-15s: %s\n", "Status",
+                    request.getStatus().equals("unchecked") ? ERROR + "PENDING" + RESET : SUCCESS + "CHECKED" + RESET);
+            System.out.printf("%-15s: %s\n", "Customer Phone", request.getCustomerPhone());
+            System.out.printf("%-15s: %s\n", "Serial Number", request.getSerialNumber());
+            System.out.printf("%-15s: %s\n", "Date", request.getTimestamp());
+            System.out.println(DIVIDER);
+            System.out.println(MENU + "\nOriginal Description:" + RESET);
+            System.out.println(request.getDescription());
+            System.out.println(DIVIDER);
+
+            System.out.println(OPTION + "\n1. Add response and mark as checked");
+            System.out.println("0. Back to list" + RESET);
+
+            System.out.print(PROMPT + "\nEnter your choice: " + RESET);
+            String choice = scan.nextLine().trim();
+
+            switch (choice) {
+                case "0" -> { return; }
+                case "1" -> {
+                    addResponseToRequest(request);
+                    return;
+                }
+                default -> showInvalidOptionError(1);
+            }
+        }
+    }
+
+    private void addResponseToRequest(CustomerRequest request) {
+        System.out.print(PROMPT + "\nEnter your response to this request: " + RESET);
+        String response = scan.nextLine().trim();
+
+        String updatedDescription = request.getDescription() +
+                "\n\n=== SUPPORT RESPONSE ===\n" + response;
+
+        request.setDescription(updatedDescription);
+        request.setStatus("checked");
+
+        showSuccessMessage("Request updated successfully!");
+        pause(1500);
     }
 
     private void handleOrderManagement() {
@@ -293,10 +389,6 @@ public class SupportMainPage {
         System.out.println(SUCCESS + "[✓] " + message + RESET);
     }
 
-    private void showComingSoonMessage() {
-        System.out.println(SUCCESS + "Feature coming soon!" + RESET);
-        pause(1500);
-    }
 
     private void showInvalidOptionError(int maxOption) {
         showErrorMessage("Please enter a valid option (0-" + maxOption + ")");
