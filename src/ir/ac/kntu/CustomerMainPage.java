@@ -1,5 +1,6 @@
 package ir.ac.kntu;
 
+import java.io.IOException;
 import java.time.Instant;
 import java.util.*;
 
@@ -93,10 +94,11 @@ public class CustomerMainPage {
                     backButtonPressed = true;
                     break;
                 case "6":
-                    browseCategories(customer);
+                    displayProductsList(customer);
+//                    browseCategories(customer);
                     break;
                 case "7":
-                    Search.getInstance().handleSearch();
+                    Search.getInstance().handleSearch(customer);
                     break;
                 case "8":
                     displaySupportOptions(customer);
@@ -260,43 +262,101 @@ public class CustomerMainPage {
         scan.nextLine();
     }
 
-    public void browseCategories(Customer customer) {
-        clearScreen();
-        System.out.println(TITLE + "╔══════════════ CATEGORIES ══════════════╗");
-        System.out.println("║                                        ║");
-        System.out.println("║ " + OPTION + "1. Digital Products" + TITLE + "                    ║");
-        System.out.println("║ " + OPTION + "2. Books" + TITLE + "                               ║");
-        System.out.println("║ " + OPTION + "3. Back to Main Menu" + TITLE + "                   ║");
-        System.out.println("║                                        ║");
-        System.out.println("╚════════════════════════════════════════╝" + RESET);
-        System.out.println();
+    public void displayProductsList(Person person) {
+        Scanner scan = new Scanner(System.in);
 
         while (true) {
-            System.out.print(PROMPT + "Choose a category (1-3): " + RESET + HIGHLIGHT);
-            String choice = scan.nextLine().trim();
-            System.out.print(RESET);
+            clearScreen();
+            System.out.println("Select product category to display:");
+            System.out.println("1. Books");
+            System.out.println("2. Phones");
+            System.out.println("3. Laptops");
+            System.out.println("0. Back to previous menu");
+            System.out.print("Enter choice (0-3): ");
 
-            switch (choice) {
+            String categoryChoice = scan.nextLine().trim();
+
+            if ("0".equals(categoryChoice)) {
+                return;
+            }
+
+            String selectedCategory = null;
+            switch (categoryChoice) {
                 case "1":
-                    displayDigitalProducts(customer);
-                    return;
+                    selectedCategory = "Book";
+                    break;
                 case "2":
-                    displayBooks(customer);
-                    return;
+                    selectedCategory = "Phone";
+                    break;
                 case "3":
-                    return;
+                    selectedCategory = "Laptop";
+                    break;
                 default:
-                    System.out.println(ERROR + "Invalid choice! Please try again." + RESET);
+                    System.out.println("Invalid choice! Please try again.");
+                    pauseForUser();
+                    continue;
+            }
+
+            List<Product> products = new ArrayList<>();
+            for (Product p : DataBase.getProductList()) {
+                if (p.getCategory().equalsIgnoreCase(selectedCategory)) {
+                    products.add(p);
+                }
+            }
+
+            if (products.isEmpty()) {
+                System.out.println("No products found in this category.");
+                pauseForUser();
+                continue;
+            }
+
+            while (true) {
+                clearScreen();
+                System.out.println("╔══════════════ PRODUCTS LIST ══════════════╗");
+                System.out.println("║ 0. Back to category selection              ║");
+
+                for (int i = 0; i < products.size(); i++) {
+                    Product p = products.get(i);
+                    System.out.printf("║ %d. %s | Price: %s | Type: %s%n",
+                            i + 1,
+                            p.getFullName(),
+                            p.getPrice(),
+                            p.getCategory()
+                    );
+                }
+                System.out.println("╚═══════════════════════════════════════════╝");
+                System.out.println();
+
+                System.out.print("Choose product index to see details or 0 to go back: ");
+                String input = scan.nextLine().trim();
+
+                if ("0".equals(input)) {
+                    break;
+                }
+
+                try {
+                    int index = Integer.parseInt(input);
+                    if (index >= 1 && index <= products.size()) {
+                        Product selectedProduct = products.get(index - 1);
+                        DisplayProduct.getInstance().display(selectedProduct, (Customer)person);
+                    } else {
+                        System.out.println("Invalid index! Try again.");
+                        pauseForUser();
+                    }
+                } catch (NumberFormatException e) {
+                    System.out.println("Please enter a valid number!");
+                    pauseForUser();
+                }
             }
         }
     }
 
-    public void displayDigitalProducts(Customer customer) {
-        System.out.println("\n" + OPTION + "Displaying Digital Products..." + RESET + "\n");
-    }
 
-    public void displayBooks(Customer customer) {
-        System.out.println("\n" + OPTION + "Displaying Books..." + RESET + "\n");
+    private void pauseForUser() {
+        System.out.println("Press Enter to continue...");
+        try {
+            System.in.read();
+        } catch (IOException ignored) {}
     }
 
     public void clearScreen() {

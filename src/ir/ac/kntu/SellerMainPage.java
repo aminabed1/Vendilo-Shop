@@ -246,7 +246,7 @@ public class SellerMainPage {
 
             String choice = scan.nextLine().trim();
             switch (choice) {
-                case "1" -> DisplayProduct.getInstance().display(product);
+                case "1" -> DisplayProduct.getInstance().display(product, null);
                 case "2" -> changeProductStock(product);
                 case "3" -> { return; }
                 default -> System.out.println(ERROR + "Invalid choice. Please try again." + RESET);

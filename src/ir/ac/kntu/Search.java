@@ -3,12 +3,14 @@ package ir.ac.kntu;
 import java.util.*;
 
 public class Search {
+    private Customer currentCustomer;
     private final static Scanner scan = new Scanner(System.in);
     public static Search getInstance() {
         return new Search();
     }
 
-    public void handleSearch() {
+    public void handleSearch(Customer customer) {
+        currentCustomer = customer;
 
         while (true) {
             System.out.print("Enter search term: ");
@@ -42,7 +44,7 @@ public class Search {
 
         for (Product product : products) {
             if (product.getFullName().toLowerCase().contains(name.toLowerCase())) {
-                display.display(product);
+                display.display(product, currentCustomer);
             }
         }
     }
@@ -67,7 +69,7 @@ public class Search {
 
         for (Product product : products) {
             if (product.getCategory().toLowerCase().contains(category.toLowerCase())) {
-                display.display(product);
+                display.display(product, currentCustomer);
             }
         }
     }
@@ -119,7 +121,7 @@ public class Search {
             System.out.println("Filtered products:");
             DisplayProduct display = DisplayProduct.getInstance();
             for (Product product : finalFiltered) {
-                display.display(product);
+                display.display(product, currentCustomer);
             }
 
         }

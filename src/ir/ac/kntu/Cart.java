@@ -130,7 +130,7 @@ public class Cart {
 
             switch (action) {
                 case "1":
-                    DisplayProduct.getInstance().display(selectedProduct);
+                    DisplayProduct.getInstance().display(selectedProduct, null);
                     break;
                 case "2":
                     cart.getProductList().remove(selectedProduct);

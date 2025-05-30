@@ -85,7 +85,7 @@ public class DisplayOrder {
 
             if (choice == 0) return;
 
-            DisplayProduct.getInstance().display(productList.get(choice - 1));
+            DisplayProduct.getInstance().display(productList.get(choice - 1), null);
         }
     }
 

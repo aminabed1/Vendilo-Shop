@@ -1,17 +1,21 @@
 package ir.ac.kntu;
 
+import java.util.Scanner;
+
 public class DisplayProduct {
     private static final String ANSI_RESET = "\u001B[0m";
     private static final String ANSI_RED = "\u001B[31m";
     private static final String ANSI_GREEN = "\u001B[32m";
     private static final String ANSI_YELLOW = "\u001B[33m";
     private static final String ANSI_CYAN = "\u001B[36m";
+    private static final String ANSI_BLUE = "\u001B[34m";
+    private static final String ANSI_PURPLE = "\u001B[35m";
 
     public static DisplayProduct getInstance() {
         return new DisplayProduct();
     }
 
-    public void display(Product product) {
+    public void display(Product product, Customer customer) {
         System.out.println(ANSI_CYAN + "==================== Product View ===================" + ANSI_RESET);
 
         displayField("Name", product.getFullName());
@@ -37,6 +41,46 @@ public class DisplayProduct {
         }
 
         System.out.println(ANSI_CYAN + "==================================================" + ANSI_RESET);
+
+        showActionMenu(product, customer);
+    }
+
+    private void showActionMenu(Product product, Customer customer) {
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.println("\n" + ANSI_PURPLE + "╔════════════════════════════════════╗");
+        System.out.println("║          ACTIONS MENU           ║");
+        System.out.println("╠════════════════════════════════════╣");
+        System.out.println("║ " + ANSI_BLUE + "1. Add to Cart" + ANSI_PURPLE +
+                "                   ║");
+        System.out.println("║ " + ANSI_BLUE + "2. Back to List" + ANSI_PURPLE +
+                "                  ║");
+        System.out.println("╚════════════════════════════════════╝" + ANSI_RESET);
+
+        System.out.print(ANSI_GREEN + "Enter your choice: " + ANSI_RESET);
+        String choice = scanner.nextLine().trim();
+
+        switch (choice) {
+            case "1":
+                if (product.getStock() > 0) {
+                    customer.getCart().addProduct(product);
+                    System.out.println(ANSI_GREEN + "\nProduct added to cart successfully!" + ANSI_RESET);
+                } else {
+                    System.out.println(ANSI_RED + "\nProduct is out of stock!" + ANSI_RESET);
+                }
+                break;
+            case "2":
+
+                break;
+            default:
+                System.out.println(ANSI_RED + "Invalid choice!" + ANSI_RESET);
+        }
+
+        try {
+            Thread.sleep(1500);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 
     public void displayField(String label, String value) {
