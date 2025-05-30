@@ -96,7 +96,7 @@ public class CustomerMainPage {
                     browseCategories(customer);
                     break;
                 case "7":
-                    // Search products functionality
+                    Search.getInstance().handleSearch();
                     break;
                 case "8":
                     displaySupportOptions(customer);

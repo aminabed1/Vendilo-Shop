@@ -174,7 +174,7 @@ public class SupportMainPage {
 
             CustomerRequest selectedRequest = customerRequests.get(selectedIndex);
             handleCustomerRequestDetails(selectedRequest);
-            
+
             customerRequests = getPendingCustomerRequests();
         }
     }
