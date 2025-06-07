@@ -1,13 +1,13 @@
 package ir.ac.kntu;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.time.Instant;
 import java.util.*;
 
-public class CustomerMainPage {
+public class CustomerMainPage implements Serializable {
     private static final Scanner scan = new Scanner(System.in);
     private static boolean backButtonPressed = false;
-
     private static final String RESET = "\u001B[0m";
     private static final String TITLE = "\u001B[38;5;45m";
     private static final String MENU = "\u001B[38;5;39m";
@@ -18,8 +18,10 @@ public class CustomerMainPage {
     private static final String HIGHLIGHT = "\u001B[38;5;231m";
     private static final String BOLD = "\u001B[1m";
 
+    private static final CustomerMainPage customerMainPage = new CustomerMainPage();
+
     public static CustomerMainPage getInstance() {
-        return new CustomerMainPage();
+        return customerMainPage;
     }
 
     public void mainPage(Person person) {
@@ -95,7 +97,6 @@ public class CustomerMainPage {
                     break;
                 case "6":
                     displayProductsList(customer);
-//                    browseCategories(customer);
                     break;
                 case "7":
                     Search.getInstance().handleSearch(customer);
@@ -147,7 +148,7 @@ public class CustomerMainPage {
            System.out.println("4. Back ");
            System.out.println("Select an option ");
            String choice = scan.nextLine().trim();
-           if (!choice.matches("[1-4]}")) {
+           if (!choice.matches("[1-4]")) {
                System.out.println(ERROR + "Please enter a valid choice (1-4) or BACK" + RESET);
                continue;
            }

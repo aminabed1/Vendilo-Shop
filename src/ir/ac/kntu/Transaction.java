@@ -1,8 +1,9 @@
 package ir.ac.kntu;
 
+import java.io.Serializable;
 import java.time.Instant;
 import java.util.*;
-public class Transaction {
+public class Transaction implements Serializable {
     private final Instant timestamp;
     private double amount;
     private Order order;

@@ -1,8 +1,9 @@
 package ir.ac.kntu;
 
+import java.io.Serializable;
 import java.util.*;
 
-public class AddProduct {
+public class AddProduct implements Serializable {
     private static final String RESET = "\u001B[0m";
     private static final String TITLE = "\u001B[38;5;45m";
     private static final String MENU = "\u001B[38;5;39m";
@@ -340,7 +341,6 @@ public class AddProduct {
                 } else {
                     showError("Please fix the validation errors");
                     pause(2000);
-                    continue;
                 }
             } else {
                 processProductInput(choice, info);
@@ -366,7 +366,7 @@ public class AddProduct {
 
         System.out.println(MENU + "╔" + "═".repeat(BOX_WIDTH - 2) + "╗");
 
-        String centeredTitle = centerText(title, BOX_WIDTH - 4);
+        String centeredTitle = centerText(title);
         System.out.println("║ " + BOLD + centeredTitle + RESET + MENU + " ║");
 
         System.out.println("╠" + "═".repeat(BOX_WIDTH - 2) + "╣");
@@ -397,10 +397,10 @@ public class AddProduct {
         System.out.println("╚" + "═".repeat(BOX_WIDTH - 2) + "╝" + RESET);
     }
 
-    private String centerText(String text, int width) {
-        if (text.length() >= width) return text.substring(0, width);
-        int leftPadding = (width - text.length()) / 2;
-        int rightPadding = width - text.length() - leftPadding;
+    private String centerText(String text) {
+        if (text.length() >= 56) return text.substring(0, 56);
+        int leftPadding = (56 - text.length()) / 2;
+        int rightPadding = 56 - text.length() - leftPadding;
         return " ".repeat(leftPadding) + text + " ".repeat(rightPadding);
     }
 

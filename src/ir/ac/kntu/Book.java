@@ -1,14 +1,14 @@
 package ir.ac.kntu;
 
-import java.util.ArrayList;
-import java.util.List;
 
-public class Book extends Product {
-    private String author;
-    private String numberOfPage;
-    private String genre;
-    private String ISBN;
-    private String publishDate;
+import java.io.Serializable;
+
+public class Book extends Product implements Serializable {
+    final private String author;
+    final private String numberOfPage;
+    final private String genre;
+    final private String ISBN;
+    final private String publishDate;
     private String weight;
 
     public Book(String fullName, String price, String description, String author, String numberOfPage,
@@ -31,40 +31,21 @@ public class Book extends Product {
         return author;
     }
 
-    public void setAuthor(String author) {
-        this.author = author;
-    }
 
     public String getNumberOfPage() {
         return numberOfPage;
-    }
-
-    public void setNumberOfPage(String numberOfPage) {
-        this.numberOfPage = numberOfPage;
     }
 
     public String getGenre() {
         return genre;
     }
 
-    public void setGenre(String genre) {
-        this.genre = genre;
-    }
-
     public String getISBN() {
         return ISBN;
     }
 
-    public void setISBN(String ISBN) {
-        this.ISBN = ISBN;
-    }
-
     public String getPublishDate() {
         return publishDate;
-    }
-
-    public void setPublishDate(String publishDate) {
-        this.publishDate = publishDate;
     }
 
     public String getWeight() {

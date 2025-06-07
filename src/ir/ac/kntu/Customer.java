@@ -1,8 +1,9 @@
 package ir.ac.kntu;
 
+import java.io.Serializable;
 import java.util.*;
 
-public class Customer extends Person{
+public class Customer extends Person implements Serializable {
     private List<Address> addressList;
     private List<String> ratedProductsList;
     private Wallet wallet;
@@ -58,7 +59,7 @@ public class Customer extends Person{
 
     public void addProduct(Product product) {
         Cart newCart = this.getCart();
-        newCart.addProduct(product);
+        newCart.addProductToMap(product);
         this.setCart(newCart);
     }
 

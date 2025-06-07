@@ -1,9 +1,10 @@
 package ir.ac.kntu;
 
+import java.io.Serializable;
 import java.time.Instant;
 import java.util.*;
 
-public class CreateAccountPage {
+public class CreateAccountPage implements Serializable {
     private static final Scanner scan = new Scanner(System.in);
 
     private static final String RESET = "\u001B[0m";
@@ -203,12 +204,11 @@ public class CreateAccountPage {
     }
 
     private boolean validateUserInfoCompletion(UserInfo info, String role) {
-        if (info.name.isEmpty() || info.surname.isEmpty() || info.phone.isEmpty() ||
-                info.email.isEmpty() || info.username.isEmpty() || info.password.isEmpty()) {
-            return false;
-        }
+        return !(info.name.isEmpty() || info.surname.isEmpty() || info.phone.isEmpty() ||
+                info.email.isEmpty() || info.username.isEmpty() || info.password.isEmpty());
 
-        return (!role.equals("Seller") || (!info.shopName.isEmpty() && !info.province.isEmpty())) && !info.sellerID.isEmpty();
+
+//        return (!role.equals("Seller") || (!info.shopName.isEmpty() && !info.province.isEmpty())) && !info.sellerID.isEmpty();
     }
 
     private Person validateAndCreateUser(String role, UserInfo info) {
@@ -225,7 +225,8 @@ public class CreateAccountPage {
         }
 
         List<String> errors = new ArrayList<>();
-        if (!InfoValidator.isPersonInfoValid(info.name, info.surname, info.phone,
+        InfoValidator validator = new InfoValidator();
+        if (!validator.isPersonInfoValid(info.name, info.surname, info.phone,
                 info.email, info.username, info.password, errors)) {
             displayErrors(errors);
             return null;
@@ -255,19 +256,33 @@ public class CreateAccountPage {
     }
 
     public boolean isExistingSeller(String email, String phone, String username, String sellerID) {
-        return DataBase.getPersonList().stream()
-                .anyMatch(c -> c.getEmail().equals(email)
-                        || c.getPhoneNumber().equals(phone)
-                        || c.getUsername().equals(username)
-                        || (c instanceof Seller && ((Seller) c).getSellerID().equals(sellerID)));
+        for (Person c : DataBase.getPersonList()) {
+            if (c.getEmail().equals(email)
+                    || c.getPhoneNumber().equals(phone)
+                    || c.getUsername().equals(username)) {
+                return true;
+            }
+            if (c instanceof Seller) {
+                Seller seller = (Seller) c;
+                if (seller.getSellerID().equals(sellerID)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     public boolean isExistingCustomer(String email, String phone, String username) {
-        return DataBase.getPersonList().stream()
-                .anyMatch(c -> c.getEmail().equals(email)
-                        || c.getPhoneNumber().equals(phone)
-                        || c.getUsername().equals(username));
+        for (Person c : DataBase.getPersonList()) {
+            if (c.getEmail().equals(email)
+                    || c.getPhoneNumber().equals(phone)
+                    || c.getUsername().equals(username)) {
+                return true;
+            }
+        }
+        return false;
     }
+
 
     public void displayErrors(List<String> errors) {
         System.out.println(ERROR + "\nAccount creation failed due to the following errors:" + RESET);

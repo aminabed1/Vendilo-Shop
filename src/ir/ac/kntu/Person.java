@@ -1,8 +1,9 @@
 package ir.ac.kntu;
 
+import java.io.Serializable;
 import java.util.*;
 
-public abstract class Person {
+public abstract class Person implements Serializable {
     private final static Scanner scan = new Scanner(System.in);
 
     private String name;
@@ -89,10 +90,6 @@ public abstract class Person {
     public void setAge(int age) {
         this.age = age;
     }
-
-//    public List<String> getErrorList() {
-//        return errorList;
-//    }
 
     public String getRole() {
         return role;

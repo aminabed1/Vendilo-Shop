@@ -1,8 +1,9 @@
 package ir.ac.kntu;
 
+import java.io.Serializable;
 import java.util.*;
 
-public class Seller extends Person{
+public class Seller extends Person implements Serializable {
     private String agencyCode;
     private String shopName;
     private String sellerID;
@@ -47,7 +48,6 @@ public class Seller extends Person{
         isValidSeller = validSeller;
     }
 
-
     public String getProvince() {
         return province;
     }
@@ -70,11 +70,6 @@ public class Seller extends Person{
 
     public void setSellerID(String sellerID) {
         this.sellerID = sellerID;
-    }
-
-
-    public void makeRequest() {
-
     }
 
     public void addOrder(Order order) {

@@ -1,8 +1,9 @@
 package ir.ac.kntu;
 
+import java.io.Serializable;
 import java.util.*;
 
-public class PersonAccount {
+public class PersonAccount implements Serializable {
     private static Person currentPerson;
     private static final Scanner scan = new Scanner(System.in);
 

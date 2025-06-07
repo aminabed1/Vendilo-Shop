@@ -1,8 +1,9 @@
 package ir.ac.kntu;
 
+import java.io.Serializable;
 import java.util.*;
 
-public class PersonInfoEdit {
+public class PersonInfoEdit implements Serializable {
     private static final Scanner scan = new Scanner(System.in);
     private static Person currentPerson;
 
@@ -87,8 +88,8 @@ public class PersonInfoEdit {
         currentPerson.setUsername("");
         currentPerson.setEmail("");
         currentPerson.setPhoneNumber("");
-
-        boolean isValid = InfoValidator.isPersonInfoValid(
+        InfoValidator validator = new InfoValidator();
+        boolean isValid = validator.isPersonInfoValid(
                 nameTemp, surNameTemp, phoneTemp, emailTemp, usernameTemp, passwordTemp, errorList);
 
         currentPerson.setUsername(oldUsername);

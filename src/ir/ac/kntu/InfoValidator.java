@@ -1,9 +1,10 @@
 package ir.ac.kntu;
 
+import java.io.Serializable;
 import java.util.*;
 import java.util.regex.*;
 
-public class InfoValidator {
+public class InfoValidator implements Serializable {
     private static final String ALL_NUMERIC_REGEX = "^09[0-9]{9}$";
     private static final String EMAIL_REGEX = "^[A-Za-z0-9+_.-]+@(.+)$";
     private static final String USERNAME_REGEX = "^[a-zA-Z0-9._-]{6,}$";
@@ -13,7 +14,7 @@ public class InfoValidator {
     static List<Person> personList ;
     static List<Product> productList ;
 
-    public static boolean emailUniquementCheck(String email, List<String> errorList) {
+    public boolean emailUniquementCheck(String email, List<String> errorList) {
         for (Person person : personList) {
             if (person.getEmail().equals(email)) {
                 errorList.add("Email already in use");
@@ -24,7 +25,7 @@ public class InfoValidator {
         return true;
     }
 
-    public static boolean phoneNumberUniquementCheck(String phoneNumber, List<String> errorList) {
+    public boolean phoneNumberUniquementCheck(String phoneNumber, List<String> errorList) {
         for (Person person : personList) {
             if (person instanceof Support)  {
                 continue;
@@ -39,7 +40,7 @@ public class InfoValidator {
         return true;
     }
 
-    public static boolean usernameUniquementCheck(String username, List<String> errorList) {
+    public boolean usernameUniquementCheck(String username, List<String> errorList) {
         for (Person person : personList) {
             if (person.getUsername().equals(username)) {
                 errorList.add("Username already in use");
@@ -50,7 +51,7 @@ public class InfoValidator {
         return true;
     }
 
-    public static boolean nameValidation(String name, List<String> errorList) {
+    public boolean nameValidation(String name, List<String> errorList) {
         boolean result = true;
 
         if (name == null || name.isEmpty()) {
@@ -71,7 +72,7 @@ public class InfoValidator {
         return result;
     }
 
-    public static boolean phoneNumberValidation(String phoneNumber, List<String> errorList) {
+    public boolean phoneNumberValidation(String phoneNumber, List<String> errorList) {
         boolean result = true;
 
         if (!phoneNumber.matches(ALL_NUMERIC_REGEX)) {
@@ -87,7 +88,7 @@ public class InfoValidator {
         return result;
     }
 
-    public static boolean emailValidation(String email, List<String> errorList) {
+    public boolean emailValidation(String email, List<String> errorList) {
         boolean result = true;
 
         if (email.length() > 40) {
@@ -103,7 +104,7 @@ public class InfoValidator {
         return result;
     }
 
-    public static boolean usernameValidation(String username, List<String> errorList) {
+    public boolean usernameValidation(String username, List<String> errorList) {
         boolean result = true;
 
         if (username.length() < 6) {
@@ -119,7 +120,7 @@ public class InfoValidator {
         return result;
     }
 
-    public static boolean passwordValidation(String password, List<String> errorList) {
+    public boolean passwordValidation(String password, List<String> errorList) {
         boolean result = true;
 
         if (password.length() < 8) {
@@ -135,46 +136,7 @@ public class InfoValidator {
         return result;
     }
 
-    public boolean AgeValidation(String age, List<String> errorList) {
-        Pattern agePatt = Pattern.compile("[0-9]{2,3}");
-        Matcher ageMath = agePatt.matcher(age);
-
-        int intAge = Integer.parseInt(age);
-
-        if (intAge < 10) {
-            errorList.add("You are not old enough");
-            return false;
-        }
-
-        if (intAge > 120) {
-            errorList.add("You are Nouh. Go and build your ship");
-            return false;
-        }
-
-        if (!ageMath.find()) {
-            errorList.add("Age is not valid");
-            return false;
-        }
-
-        return true;
-    }
-
-    public static boolean PageCountValidation(String pageCount, List<String> errorList) {
-
-        if (pageCount.length() > 4) {
-            errorList.add("Page count is too much, unreal info available");
-            return false;
-        }
-
-        if (pageCount.matches(ALL_NUMERIC_REGEX)) {
-            errorList.add("Page number is contains invalid characters");
-            return false;
-        }
-
-        return true;
-    }
-
-    public static boolean isPersonInfoValid(String name, String surname, String phoneNumber, String email,
+    public boolean isPersonInfoValid(String name, String surname, String phoneNumber, String email,
                                      String username, String password, List<String> errorList) {
         personList = DataBase.getPersonList();
         boolean isUnique = emailUniquementCheck(email, errorList) &&

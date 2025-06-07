@@ -1,16 +1,17 @@
 package ir.ac.kntu;
 
+import java.io.*;
 import java.util.*;
-//import java.io.*;
-//import java.io.FileOutputStream;
-//import java.io.IOException;
-//import java.io.ObjectOutputStream;
+//TODO make methods non-static
+public class DataBase implements Serializable {
+    private static final long serialVersionUID = 1L;
 
-public class DataBase {
     private static List<Person> personList = new ArrayList<>();
     private static List<Product> productList = new ArrayList<>();
     private static List<Request> requestList = new ArrayList<>();
     private static List<Order> orderList = new ArrayList<>();
+
+    private static final String DATA_FILE = "data.db";
 
     public static List<Person> getPersonList() {
         return personList;
@@ -36,7 +37,6 @@ public class DataBase {
         requestList.add(request);
     }
 
-
     public static List<Order> getOrderList() {
         return orderList;
     }
@@ -48,33 +48,41 @@ public class DataBase {
     public List<Product> getProductsByCategory(String category) {
         List<Product> result = new ArrayList<>();
         for (Product product : productList) {
-            if (category.equals("Digital") && product instanceof DigitalProduct) {
+            if ("Digital".equalsIgnoreCase(category) && product instanceof DigitalProduct) {
                 result.add(product);
-            } else if (category.equals("Book") && product instanceof Book) {
+            } else if ("Book".equalsIgnoreCase(category) && product instanceof Book) {
                 result.add(product);
             }
         }
         return result;
     }
 
-//
-//    public void savaData() {
-//        try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream("data.db"))) {
-//            out.writeObject(DataBase.getPersonList());
-//            out.writeObject(DataBase.getProductList());
-//        } catch (IOException e) {
-//            //nothing
-//        }
-//    }
-//
-//    public void loadData() {
-//        try (ObjectInputStream in = new ObjectInputStream(new FileInputStream("data.db"))) {
-//            List<Person> persons = (List<Person>) in.readObject();
-//            List<Product> products = (List<Product>) in.readObject();
-//
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        }
-//    }
+    public static void saveData() {
+        try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(DATA_FILE))) {
+            out.writeObject(personList);
+            out.writeObject(productList);
+            out.writeObject(requestList);
+            out.writeObject(orderList);
+            System.out.println("Data saved successfully to " + DATA_FILE);
+        } catch (IOException e) {
+            System.err.println("Error saving data: " + e.getMessage());
+        }
+    }
 
+    public static void loadData() {
+        File file = new File(DATA_FILE);
+        if (!file.exists()) {
+            System.out.println("Data file not found, starting with empty database.");
+            return;
+        }
+        try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(DATA_FILE))) {
+            personList = (List<Person>) in.readObject();
+            productList = (List<Product>) in.readObject();
+            requestList = (List<Request>) in.readObject();
+            orderList = (List<Order>) in.readObject();
+            System.out.println("Data loaded successfully from " + DATA_FILE);
+        } catch (IOException | ClassNotFoundException e) {
+            System.err.println("Error loading data: " + e.getMessage());
+        }
+    }
 }

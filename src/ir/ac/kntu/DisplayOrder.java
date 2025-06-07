@@ -1,10 +1,10 @@
 package ir.ac.kntu;
 
+import java.io.Serializable;
 import java.time.Instant;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
-public class DisplayOrder {
+public class DisplayOrder implements Serializable {
     private final Scanner scan = new Scanner(System.in);
 
     public static DisplayOrder getInstance() {
@@ -32,7 +32,7 @@ public class DisplayOrder {
             if (choice == 0) return;
 
             Order selectedOrder = orderList.get(choice - 1);
-            displayOrderDetails(selectedOrder);
+            displayOrderDetails(selectedOrder, person);
         }
     }
 
@@ -50,7 +50,7 @@ public class DisplayOrder {
 
         System.out.printf("💰 \u001B[36mTotal Price:\u001B[0m \u001B[32m%.2f\u001B[0m\n", order.getTotalPrice());
 
-        System.out.println("🛍️  \u001B[36mNumber of Products:\u001B[0m " + order.getProductList().size());
+        System.out.println("🛍️  \u001B[36mNumber of Products:\u001B[0m " + order.getProductMap().size());
 
         Address addr = order.getDeliveryAddress();
         if (addr != null) {
@@ -69,23 +69,89 @@ public class DisplayOrder {
     }
 
 
-    public void displayOrderDetails(Order order) {
-        List<Product> productList = order.getProductList();
+    public void displayOrderDetails(Order order, Person person) {
+        HashMap<Product, Integer> productMap = order.getProductMap();
+        List<Product> productList = new ArrayList<>(productMap.keySet());
 
         while (true) {
             System.out.println("\n\u001B[36m🛍️  Products in this order:\u001B[0m");
+
             for (int j = 0; j < productList.size(); j++) {
                 Product p = productList.get(j);
+                int quantity = productMap.get(p);
                 System.out.println("   \u001B[32m" + (j + 1) + ".\u001B[0m " +
-                        "🛒 " + p.getFullName() + " | 🏷️ " + p.getCategory() + " | 💰 " + p.getPrice());
+                        "🛒 " + p.getFullName() + " | 🏷️ " + p.getCategory() +
+                        " | 💰 " + p.getPrice() + " | 📦 Qty: " + quantity);
             }
 
-            System.out.println("\u001B[34m🔍 Select a product to view more details (press 0 to go back):\u001B[0m");
-            int choice = getValidatedChoice(productList.size());
+            System.out.println("   \u001B[33m0. Go back\u001B[0m");
 
-            if (choice == 0) return;
+            if (!(person instanceof Seller)) {
+                System.out.println("   \u001B[33mR. Rate a product\u001B[0m");
+            }
 
-            DisplayProduct.getInstance().display(productList.get(choice - 1), null);
+            System.out.println("\u001B[34m🔍 Select a product to view more details, " +
+                    (person instanceof Seller ? "'0' to go back:" : "'R' to rate a product, or '0' to go back:") + "\u001B[0m");
+
+            String input = scan.nextLine().trim();
+
+            if (input.equalsIgnoreCase("0")) {
+                return;
+            } else if (input.equalsIgnoreCase("R")) {
+                if (person instanceof Seller) {
+                    System.out.println("\u001B[31mSellers cannot rate products.\u001B[0m");
+                } else {
+                    rateProduct(productList, person);
+                }
+            } else {
+                try {
+                    int choice = Integer.parseInt(input);
+                    if (choice < 1 || choice > productList.size()) {
+                        System.out.println("\u001B[31mInvalid product number.\u001B[0m");
+                    } else {
+                        DisplayProduct.getInstance().display(productList.get(choice - 1), null);
+                    }
+                } catch (NumberFormatException e) {
+                    System.out.println("\u001B[31mInvalid input.\u001B[0m");
+                }
+            }
+        }
+    }
+
+    private void rateProduct(List<Product> productList, Person person) {
+        System.out.println("\u001B[34mEnter the number of the product you want to rate (0 to cancel):\u001B[0m");
+        int choice = getValidatedChoice(productList.size());
+        if (choice == 0) return;
+
+        Product productToRate = productList.get(choice - 1);
+        Person currentUser = person;
+
+        if (productToRate.getRatingMap().containsKey(currentUser)) {
+            System.out.println("\u001B[31mYou have already rated this product.\u001B[0m");
+            return;
+        }
+
+        System.out.println("\u001B[34mPlease enter your rating (1 to 5):\u001B[0m");
+        double rating;
+        while (true) {
+            String ratingInput = scan.nextLine().trim();
+            try {
+                rating = Double.parseDouble(ratingInput);
+                if (rating < 1 || rating > 5) {
+                    System.out.println("\u001B[31mRating must be between 1 and 5. Try again:\u001B[0m");
+                } else {
+                    break;
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("\u001B[31mInvalid rating. Please enter a number between 1 and 5.\u001B[0m");
+            }
+        }
+
+        boolean added = productToRate.addRating(currentUser, rating);
+        if (added) {
+            System.out.println("\u001B[32mThank you! Your rating has been recorded.\u001B[0m");
+        } else {
+            System.out.println("\u001B[31mYou have already rated this product.\u001B[0m");
         }
     }
 
@@ -94,7 +160,6 @@ public class DisplayOrder {
                 .withZone(java.time.ZoneId.systemDefault())
                 .format(instant);
     }
-
 
     private int getValidatedChoice(int max) {
         int choice;

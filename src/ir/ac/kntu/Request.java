@@ -1,8 +1,9 @@
 package ir.ac.kntu;
 
+import java.io.Serializable;
 import java.time.Instant;
 
-public abstract class Request {
+public abstract class Request implements Serializable {
     private String description;
     private final Instant timestamp;
     private boolean isChecked = false;

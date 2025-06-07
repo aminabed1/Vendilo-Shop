@@ -1,6 +1,8 @@
 package ir.ac.kntu;
 
-public class DigitalProduct extends Product {
+import java.io.Serializable;
+
+public class DigitalProduct extends Product implements Serializable {
     private String Brand;
     private String internalStorage;
     private String RAM;
@@ -20,6 +22,7 @@ public class DigitalProduct extends Product {
         this.setStock(stock);
         this.setPrice(price);
     }
+
     public String getBrand() {
         return Brand;
     }

@@ -1,11 +1,12 @@
 package ir.ac.kntu;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 
-public class SupportMainPage {
+public class SupportMainPage implements Serializable {
 
     private static final String RESET = "\u001B[0m";
     private static final String TITLE = "\u001B[38;5;45m";
@@ -75,10 +76,13 @@ public class SupportMainPage {
     }
 
     private List<SellerRequest> getPendingSellerRequests() {
-        return DataBase.getRequestList().stream()
-                .filter(r -> r instanceof SellerRequest)
-                .map(r -> (SellerRequest) r)
-                .collect(Collectors.toList());
+        List<SellerRequest> pendingRequests = new ArrayList<>();
+        for (Request r : DataBase.getRequestList()) {
+            if (r instanceof SellerRequest) {
+                pendingRequests.add((SellerRequest) r);
+            }
+        }
+        return pendingRequests;
     }
 
     private void displaySellerRequestsList(List<SellerRequest> requests) {
@@ -180,11 +184,15 @@ public class SupportMainPage {
     }
 
     private List<CustomerRequest> getPendingCustomerRequests() {
-        return DataBase.getRequestList().stream()
-                .filter(r -> r instanceof CustomerRequest)
-                .map(r -> (CustomerRequest) r)
-                .filter(r -> r.getStatus().equals("unchecked"))
-                .collect(Collectors.toList());
+        List<CustomerRequest> pendingRequests = new ArrayList<>();
+        for (Request r : DataBase.getRequestList()) {
+            if (r instanceof CustomerRequest cr) {
+                if ("unchecked".equals(cr.getStatus())) {
+                    pendingRequests.add(cr);
+                }
+            }
+        }
+        return pendingRequests;
     }
 
     private void displayCustomerRequestsList(List<CustomerRequest> requests) {
@@ -298,7 +306,7 @@ public class SupportMainPage {
             }
 
             Order selectedOrder = mainOrders.get(Integer.parseInt(choice) - 1);
-            DisplayOrder.getInstance().displayOrderDetails(selectedOrder);
+            DisplayOrder.getInstance().displayOrderDetails(selectedOrder, null);
 
             System.out.println(PROMPT + "\nPress any key to continue..." + RESET);
             scan.nextLine();
@@ -306,18 +314,24 @@ public class SupportMainPage {
     }
 
     private List<Order> getMainOrders() {
-        return DataBase.getOrderList().stream()
-                .filter(order -> order.getProduct() == null)
-                .collect(Collectors.toList());
+        List<Order> mainOrders = new ArrayList<>();
+        for (Order order : DataBase.getOrderList()) {
+            if (order.getProduct() == null) {
+                mainOrders.add(order);
+            }
+        }
+        return mainOrders;
     }
 
     private Seller findSellerByAgencyCode(String agencyCode) {
-        return DataBase.getPersonList().stream()
-                .filter(p -> p instanceof Seller)
-                .map(p -> (Seller) p)
-                .filter(s -> s.getAgencyCode().equals(agencyCode))
-                .findFirst()
-                .orElse(null);
+        for (Person p : DataBase.getPersonList()) {
+            if (p instanceof Seller seller) {
+                if (seller.getAgencyCode().equals(agencyCode)) {
+                    return seller;
+                }
+            }
+        }
+        return null;
     }
 
     private int getSelectedIndex(int maxIndex) {

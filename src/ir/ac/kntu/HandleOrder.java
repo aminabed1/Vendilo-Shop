@@ -1,16 +1,18 @@
 package ir.ac.kntu;
 
+import java.io.Serializable;
 import java.time.Instant;
 import java.util.*;
 
-public class HandleOrder {
+public class HandleOrder implements Serializable {
+    static double totalPrice = 0;
     private final static Scanner scan = new Scanner(System.in);
     private static final double basePrice = 15;
     private static double finalPrice;
     private static double postPrice;
-    private static List<Product> products;
     private static List<String> sellersAgencyCode;
     private static Address selectedAddress;
+    private HashMap<Product, Integer> productMap;
 
     public static final String WARNING = "\u001B[33m";
     private static final String RESET = "\u001B[0m";
@@ -31,7 +33,7 @@ public class HandleOrder {
         clearScreen();
         finalPrice = 0;
         postPrice = 0;
-        products = new ArrayList<>();
+        productMap = new HashMap<>();
         selectedAddress = null;
 
         if (person instanceof Customer) {
@@ -46,7 +48,9 @@ public class HandleOrder {
 
     public void customerOrder(Person person) {
         Cart cart = ((Customer) person).getCart();
-        if (!checkProductsStock(cart)) return;
+        if (!checkProductsStock(cart)) {
+            return;
+        }
 
         selectedAddress = addressSelection((Customer) person);
         if (selectedAddress == null) {
@@ -63,8 +67,8 @@ public class HandleOrder {
     }
 
     public boolean checkProductsStock(Cart cart) {
-        for (Product product : cart.getProductList()) {
-            if (product.getStock() == 0) {
+        for (Product product : cart.getProductMap().keySet()) {
+            if (product.getStock() < cart.getProductMap().get(product)) {
                 displayOutOfStock(product);
                 pause(2000);
                 return false;
@@ -74,8 +78,8 @@ public class HandleOrder {
     }
 
     public double calcPostingPrice(String province, Cart cart) {
-        products = cart.getProductList();
-        for (Product product : products) {
+        productMap = cart.getProductMap();
+        for (Product product : productMap.keySet()) {
             String sellerProvince = getSellerProvince(product.getSellerAgencyCode());
             if (!province.equals(sellerProvince)) {
                 return calculatePostingCost(cart, false);
@@ -107,10 +111,13 @@ public class HandleOrder {
     }
 
     public double getFinalPrice(Cart cart, double postingPrice) {
-        return cart.getProductList().stream()
-                .mapToDouble(p -> Double.parseDouble(p.getPrice()))
-                .sum() + postingPrice;
+        double total = 0.0;
+        for (Product product : cart.getProductMap().keySet()) {
+            total += Double.parseDouble(product.getPrice());
+        }
+        return total + postingPrice;
     }
+
 
     public void displayCartSummary(Cart cart) {
         clearScreen();
@@ -118,9 +125,9 @@ public class HandleOrder {
 
         displayOrderSummaryHeader();
 
-        for (Product product : cart.getProductList()) {
+        for (Product product : cart.getProductMap().keySet()) {
             displayProductSummary(product);
-            totalPrice += Double.parseDouble(product.getPrice());
+            totalPrice += Double.parseDouble(product.getPrice()) * cart.getProductMap().get(product);
         }
 
         displayPrices(totalPrice, postPrice);
@@ -156,7 +163,7 @@ public class HandleOrder {
 
     public void setSellersCodeList() {
         sellersAgencyCode = new ArrayList<>();
-        for (Product product : products) {
+        for (Product product : productMap.keySet()) {
             sellersAgencyCode.add(product.getSellerAgencyCode());
         }
     }
@@ -164,7 +171,7 @@ public class HandleOrder {
     public void finalizeOrder(Person person) {
         setSellersCodeList();
         Customer customer = (Customer) person;
-        Order newOrder = new Order(products, Instant.now(), sellersAgencyCode, customer.getEmail(), selectedAddress, finalPrice, postPrice);
+        Order newOrder = new Order(productMap, Instant.now(), sellersAgencyCode, customer.getEmail(), selectedAddress, finalPrice, postPrice);
         DataBase.addOrder(newOrder);
         customer.addOrder(newOrder);
         double newBalance = customer.getWallet().getWalletBalance() - finalPrice;
@@ -172,21 +179,20 @@ public class HandleOrder {
         customer.setCart(new Cart());
 
         displayOrderCompleted(newBalance);
-        chargeSellersWallet(person, products);
+        chargeSellersWallet(person, productMap);
         reduceProductsStock();
         createSellerOrder(selectedAddress, person.getEmail());
         pause(3000);
     }
 
-    //TODO complete for more than  one stock
     public void reduceProductsStock() {
-        for (Product product : products) {
-            product.setStock(product.getStock() - 1);
+        for (Product product : productMap.keySet()) {
+            product.setStock(product.getStock() - productMap.get(product));
         }
     }
 
-    public void chargeSellersWallet(Person person, List<Product> products) {
-        for (Product product : products) {
+    public void chargeSellersWallet(Person person, HashMap<Product, Integer> productMap) {
+        for (Product product : productMap.keySet()) {
             String agencyCode = product.getSellerAgencyCode();
             Seller seller = findSellerByAgencyCode(agencyCode);
             if (seller != null) {
@@ -202,13 +208,12 @@ public class HandleOrder {
 
                 seller.getWallet().setWalletBalance(currentBalance + sellerShare, sellerOrder);
 
-//                product.setStock(product.getStock() - 1);
             }
         }
     }
 
     public void createSellerOrder(Address deliveryAddress, String customerEmail) {
-        for (Product product : products) {
+        for (Product product : productMap.keySet()) {
             Order newOrder = new Order(product, Instant.now(), Double.parseDouble(product.getPrice()), deliveryAddress, customerEmail);//seller order
             Seller seller = findSellerByAgencyCode(product.getSellerAgencyCode());
             seller.addOrder(newOrder);
@@ -318,7 +323,7 @@ public class HandleOrder {
         System.out.println("║                                     ║");
         System.out.println("╚═════════════════════════════════════╝");
         System.out.printf("  Current: %.2f $\n", current);
-        System.out.printf("  Needed: %.2f $ \n", finalPrice);
+        System.out.printf("  Needed: %.2f $ \n", totalPrice);
         System.out.println("═══════════════════════════════════════" + RESET);
     }
 
@@ -347,11 +352,13 @@ public class HandleOrder {
     }
 
     public Seller findSellerByAgencyCode(String agencyCode) {
-        return DataBase.getPersonList().stream()
-                .filter(p -> p instanceof Seller)
-                .map(p -> (Seller) p)
-                .filter(s -> s.getAgencyCode().equals(agencyCode))
-                .findFirst()
-                .orElse(null);
+        for (Person p : DataBase.getPersonList()) {
+            if (p instanceof Seller seller) {
+                if (seller.getAgencyCode().equals(agencyCode)) {
+                    return seller;
+                }
+            }
+        }
+        return null;
     }
 }

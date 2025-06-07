@@ -1,8 +1,9 @@
 package ir.ac.kntu;
 
+import java.io.Serializable;
 import java.time.Instant;
 
-public class CustomerRequest extends Request {
+public class CustomerRequest extends Request implements Serializable {
     final private String requestTitle;
     final private String serialNumber;
     final private String customerPhone;

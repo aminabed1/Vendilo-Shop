@@ -1,12 +1,17 @@
 package ir.ac.kntu;
 
 import ir.ac.kntu.util.Calendar;
+
+import java.io.Serializable;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.time.ZoneId;
 
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 
-public class Wallet {
+public class Wallet implements Serializable {
 
     private static final String RESET = "\u001B[0m";
     private static final String TITLE = "\u001B[38;5;45m";
@@ -262,99 +267,144 @@ public class Wallet {
     }
 
     public void displayTransactions(Customer customer) {
+        Instant filterStart = null;
+        Instant filterEnd = null;
+
         while (true) {
             clearScreen();
+            List<Transaction> allTransactions = this.getTransactionList();
+            List<Transaction> list = getFilteredTransactionList(allTransactions, filterStart, filterEnd);
+
             System.out.println(TITLE + "╔═════════════════════════════════════╗");
             System.out.println("║" + BOLD + HIGHLIGHT + "          TRANSACTION HISTORY        " + RESET + TITLE + "║");
             System.out.println("╚═════════════════════════════════════╝" + RESET);
 
-            List<Transaction> list = this.getTransactionList();
             if (list.isEmpty()) {
                 System.out.println(ERROR + "No transactions found." + RESET);
                 pause(1500);
                 return;
             }
 
-            int counter = 1;
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
-                    .withZone(ZoneId.systemDefault());
+            displayTransactionMenu(list);
 
-            for (Transaction t : list) {
-                String formattedTime = formatter.format(t.getTimestamp());
-                double amount = t.getAmount();
-                String color = amount > 0 ? SUCCESS : ERROR;
+            System.out.println(TITLE + "\n╔═════════════════════════════════════╗");
+            System.out.println("║" + OPTION + " Select a transaction by index       " + TITLE + "║");
+            System.out.println("║" + OPTION + " Type 'FILTER' to filter by date     " + TITLE + "║");
+            System.out.println("║" + OPTION + " Type 'CLEAR' to clear filters       " + TITLE + "║");
+            System.out.println("║" + OPTION + " Type 'BACK' to return               " + TITLE + "║");
+            System.out.println("╚═════════════════════════════════════╝" + RESET);
+            System.out.print(PROMPT + "Your choice: " + RESET);
 
-                System.out.println(BOLD + "\n[" + counter++ + "]" + RESET);
-                System.out.println(OPTION + "• Time: " + HIGHLIGHT + formattedTime + RESET);
-                System.out.println(OPTION + "• Amount: " + color +
-                        String.format("%.2f $", amount) + RESET);
-                if (t.getOrder() != null) {
-                    System.out.println(OPTION + "• Type: " + HIGHLIGHT + "• Pay Order Price " + RESET);
-                } else {
-                    System.out.println(OPTION + "• Type: " + HIGHLIGHT + "• Wallet Charge " + RESET);
-                }
-            }
-
-            System.out.print(PROMPT + "\nSelect a transaction by index (or type BACK): " + RESET);
             String choice = scan.nextLine().trim();
 
-            if (choice.equalsIgnoreCase("BACK")) {
-                return;
-            }
-
-            if (!choice.matches("\\d+")) {
-                showError("⚠ Enter a valid index number!");
-                continue;
-            }
-
-            int selectedTransaction = Integer.parseInt(choice);
-
-            if (selectedTransaction <= 0 || selectedTransaction > this.getTransactionList().size()) {
-                showError("⚠ Selected index out of range!");
-                continue;
-            }
-
-            Transaction transaction = list.get(selectedTransaction - 1);
-            if (transaction.getOrder() == null) {
-                System.out.println(ERROR + "\n No additional data for this transaction." + RESET);
-                System.out.println(OPTION + "• Type: " + HIGHLIGHT + "Wallet Charge" + RESET);
-                System.out.println(PROMPT + "\nPress anything to continue..." + RESET);
-                scan.nextLine();
-                continue;
-            }
-
-            Order order = transaction.getOrder();
-            System.out.println(OPTION + "\n• Linked Order: " + HIGHLIGHT + "(Shown Below)" + RESET);
-            DisplayOrder.getInstance().display(customer);
-
-            while (true) {
-                System.out.println(TITLE + "\n╔═════════════════════════════════════╗");
-                System.out.println("║" + BOLD + HIGHLIGHT + "       TRANSACTION OPTIONS           " + RESET + TITLE + "║");
-                System.out.println("╠═════════════════════════════════════╣");
-                System.out.println("║" + OPTION + " 1. Display Order Details            " + TITLE + "║");
-                System.out.println("║" + OPTION + " 2. Back to Transaction List         " + TITLE + "║");
-                System.out.println("║" + OPTION + " 0. Return to Wallet Menu            " + TITLE + "║");
-                System.out.println("╚═════════════════════════════════════╝" + RESET);
-                System.out.print(PROMPT + "Your choice: " + RESET);
-
-                choice = scan.nextLine().trim();
-
-                if (!choice.matches("[0-2]")) {
-                    showError("⚠ Please enter 0, 1, or 2.");
-                    continue;
+            switch (choice.toUpperCase()) {
+                case "BACK" -> { return; }
+                case "FILTER" -> {
+                    filterStart = getValidDate("Enter start date (yyyy-MM-dd): ");
+                    filterEnd = getValidDate("Enter end date (yyyy-MM-dd): ");
                 }
-
-                switch (choice) {
-                    case "1" -> DisplayOrder.getInstance().display(customer);
-                    case "2" -> {}
-                    case "0" -> {
-                        return;
+                case "CLEAR" -> {
+                    filterStart = null;
+                    filterEnd = null;
+                    System.out.println(SUCCESS + "Filter cleared." + RESET);
+                    pause(1000);
+                }
+                default -> {
+                    if (!choice.matches("\\d+")) {
+                        showError("⚠ Enter a valid index number!");
+                        continue;
                     }
+
+                    int index = Integer.parseInt(choice);
+                    if (index <= 0 || index > list.size()) {
+                        showError("⚠ Selected index out of range!");
+                        continue;
+                    }
+
+                    handleTransactionSelection(list.get(index - 1), customer);
                 }
-                break;
             }
         }
     }
+
+    private Instant getValidDate(String prompt) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        while (true) {
+            System.out.print(PROMPT + prompt + RESET);
+            String input = scan.nextLine().trim();
+
+            try {
+                LocalDate date = LocalDate.parse(input, formatter);
+                return date.atStartOfDay(ZoneId.systemDefault()).toInstant();
+            } catch (DateTimeParseException e) {
+                showError("⚠ Invalid date format! Use yyyy-MM-dd (e.g., 2025-06-03)");
+            }
+        }
+    }
+
+    private void displayTransactionMenu(List<Transaction> list) {
+        int counter = 1;
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+                .withZone(ZoneId.systemDefault());
+
+        for (Transaction t : list) {
+            String formattedTime = formatter.format(t.getTimestamp());
+            double amount = t.getAmount();
+            String color = amount > 0 ? SUCCESS : ERROR;
+
+            System.out.println(BOLD + "\n[" + counter++ + "]" + RESET);
+            System.out.println(OPTION + "• Time: " + HIGHLIGHT + formattedTime + RESET);
+            System.out.println(OPTION + "• Amount: " + color +
+                    String.format("%.2f $", amount) + RESET);
+            System.out.println(OPTION + "• Type: " + HIGHLIGHT +
+                    (t.getOrder() != null ? "Pay Order Price" : "Wallet Charge") + RESET);
+        }
+    }
+
+    private List<Transaction> getFilteredTransactionList(List<Transaction> all, Instant start, Instant end) {
+        if (start == null || end == null) return all;
+        return all.stream()
+                .filter(t -> !t.getTimestamp().isBefore(start) && !t.getTimestamp().isAfter(end))
+                .toList();
+    }
+    private void handleTransactionSelection(Transaction transaction, Customer customer) {
+        if (transaction.getOrder() == null) {
+            System.out.println(ERROR + "\n No additional data for this transaction." + RESET);
+            System.out.println(OPTION + "• Type: " + HIGHLIGHT + "Wallet Charge" + RESET);
+            System.out.println(PROMPT + "\nPress anything to continue..." + RESET);
+            scan.nextLine();
+            return;
+        }
+
+        Order order = transaction.getOrder();
+        System.out.println(OPTION + "\n• Linked Order: " + HIGHLIGHT + "(Shown Below)" + RESET);
+        DisplayOrder.getInstance().display(customer);
+
+        while (true) {
+            System.out.println(TITLE + "\n╔═════════════════════════════════════╗");
+            System.out.println("║" + BOLD + HIGHLIGHT + "       TRANSACTION OPTIONS           " + RESET + TITLE + "║");
+            System.out.println("╠═════════════════════════════════════╣");
+            System.out.println("║" + OPTION + " 1. Display Order Details            " + TITLE + "║");
+            System.out.println("║" + OPTION + " 2. Back to Transaction List         " + TITLE + "║");
+            System.out.println("║" + OPTION + " 0. Return to Wallet Menu            " + TITLE + "║");
+            System.out.println("╚═════════════════════════════════════╝" + RESET);
+            System.out.print(PROMPT + "Your choice: " + RESET);
+
+            String choice = scan.nextLine().trim();
+            if (!choice.matches("[0-2]")) {
+                showError("⚠ Please enter 0, 1, or 2.");
+                continue;
+            }
+
+            switch (choice) {
+                case "1" -> DisplayOrder.getInstance().display(customer);
+                case "2" -> {}
+                case "0" -> { return; }
+            }
+            break;
+        }
+    }
+
 
     private void showError(String message) {
         System.out.println(ERROR + "\n " + message + RESET);

@@ -1,6 +1,8 @@
 package ir.ac.kntu;
 
-public class LopTop extends DigitalProduct {
+import java.io.Serializable;
+
+public class LopTop extends DigitalProduct implements Serializable {
     private String GPUChipset;
     private boolean supportBluetooth;
     private boolean hasWebCam;

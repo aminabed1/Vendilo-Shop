@@ -1,8 +1,9 @@
 package ir.ac.kntu;
 
+import java.io.Serializable;
 import java.util.*;
 
-public class LoginPage {
+public class LoginPage implements Serializable {
     private static final Scanner scan = new Scanner(System.in);
 
     private static final String RESET = "\u001B[0m";
@@ -79,7 +80,6 @@ public class LoginPage {
                 } else {
                     SupportMainPage.getInstance().mainPage(person);
                 }
-//                break;
             } else {
                 showError("Invalid credentials. Please try again.");
             }
@@ -125,29 +125,35 @@ public class LoginPage {
     }
 
     private Person authenticateUser(String authText, String password, String role) {
-        if (role.equals("Customer")) {
-            return DataBase.getPersonList().stream()
-                    .filter(p -> p.getRole().equals(role) &&
-                            (p.getEmail().equals(authText) ||
-                                    p.getPhoneNumber().equals(authText)) &&
-                            p.getPassword().equals(password))
-                    .findFirst()
-                    .orElse(null);
-        } else if (role.equals("Seller")) {
-            return DataBase.getPersonList().stream()
-                    .filter(p -> p.getRole().equals(role) &&
-                            (((Seller) p).getAgencyCode().equals(authText)) &&
-                            p.getPassword().equals(password))
-                    .findFirst()
-                    .orElse(null);
-        } else {
-            return DataBase.getPersonList().stream()
-                    .filter(p -> p.getRole().equals(role) &&
-                            (p.getUsername().equals(authText)) &&
-                                    p.getPassword().equals(password))
-                    .findFirst()
-                    .orElse(null);
+        for (Person p : DataBase.getPersonList()) {
+            if (!p.getRole().equals(role)) {
+                continue;
+            }
+
+            if (role.equals("Customer")) {
+                boolean isMatch = (p.getEmail().equals(authText) || p.getPhoneNumber().equals(authText))
+                        && p.getPassword().equals(password);
+                if (isMatch) {
+                    return p;
+                }
+            } else if (role.equals("Seller")) {
+                if (p instanceof Seller seller) {
+                    boolean isMatch = seller.getAgencyCode().equals(authText)
+                            && seller.getPassword().equals(password);
+                    if (isMatch) {
+                        return seller;
+                    }
+                }
+            } else {
+                boolean isMatch = p.getUsername().equals(authText)
+                        && p.getPassword().equals(password);
+                if (isMatch) {
+                    return p;
+                }
+            }
         }
+
+        return null;
     }
 
     private void clearScreen() {

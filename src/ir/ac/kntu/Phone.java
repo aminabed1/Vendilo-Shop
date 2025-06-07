@@ -1,6 +1,8 @@
 package ir.ac.kntu;
 
-public class Phone extends DigitalProduct{
+import java.io.Serializable;
+
+public class Phone extends DigitalProduct implements Serializable {
     private final String mainCamResolution;
     private final String frontCamResolution;
     private final String networkInfo;

@@ -1,9 +1,11 @@
 package ir.ac.kntu;
 
+import java.io.Serializable;
 import java.util.*;
 
-public class Cart {
-    private List<Product> productList;
+public class Cart implements Serializable {
+    private HashMap<Product, Integer> productMap;
+
     private static final String RESET = "\u001B[0m";
     private static final String TITLE = "\u001B[38;5;45m";
     private static final String MENU = "\u001B[38;5;39m";
@@ -13,33 +15,39 @@ public class Cart {
     private static final String ERROR = "\u001B[38;5;203m";
     private static final String HIGHLIGHT = "\u001B[38;5;231m";
     private static final String BOLD = "\u001B[1m";
-//    private static final Scanner input = new Scanner(System.in);
 
     public Cart() {
-        productList = new ArrayList<>();
+        productMap = new HashMap<>();
+    }
+    public HashMap<Product, Integer> getProductMap() {
+        return productMap;
     }
 
-//    public Cart getInstance() {
-//        return new Cart();
+    public void addProductToMap(Product product) {
+        int quantity = 0;
+        if (productMap.containsKey(product)) {
+            quantity = productMap.get(product);
+        }
+        productMap.put(product, quantity + 1);
+    }
+
+//    public void addProduct(Product product) {
+//        productList.add(product);
 //    }
-
-    public void addProduct(Product product) {
-        productList.add(product);
-    }
-
-    public void removeProduct(Product product) {
-        productList.remove(product);
-    }
-
-    public List<Product> getProductList() {
-        return productList;
-    }
+//
+//    public void removeProduct(Product product) {
+//        productList.remove(product);
+//    }
+//
+//    public List<Product> getProductList() {
+//        return productList;
+//    }
 
     public void displayCart(Customer person) {
         Cart cart = person.getCart();
-        List<Product> productList = cart.getProductList();
+        HashMap<Product, Integer> productMap = cart.getProductMap();
 
-        if (productList.isEmpty()) {
+        if (productMap.isEmpty()) {
             System.out.println(TITLE + "\n╔═════════════════════════════════════╗");
             System.out.println("║                                     ║");
             System.out.println("║" + OPTION + "       YOUR CART IS EMPTY            " + TITLE + "║");
@@ -55,35 +63,60 @@ public class Cart {
             clearScreen();
             double totalPrice = 0;
 
-            int maxNameLength = productList.stream()
-                    .mapToInt(p -> p.getFullName().length())
-                    .max().orElse(20);
-            int maxPriceLength = productList.stream()
-                    .mapToInt(p -> String.format("%.2f", Double.parseDouble(p.getPrice())).length())
-                    .max().orElse(6);
+            int maxNameLength = 0;
+            for (Product p : productMap.keySet()) {
+                int length = p.getFullName().length();
+                if (length > maxNameLength) {
+                    maxNameLength = length;
+                }
+            }
+            if (maxNameLength == 0) {
+                maxNameLength = 20;
+            }
+
+            int maxPriceLength = 0;
+            for (Product p : productMap.keySet()) {
+                String formatted = String.format("%.2f", Double.parseDouble(p.getPrice()));
+                int length = formatted.length();
+                if (length > maxPriceLength) {
+                    maxPriceLength = length;
+                }
+            }
+            if (maxPriceLength == 0) {
+                maxPriceLength = 6;
+            }
+
             int boxWidth = Math.max(50, maxNameLength + maxPriceLength + 15);
 
             System.out.println(TITLE + "╔" + "═".repeat(boxWidth) + "╗");
             System.out.println("║" + BOLD + HIGHLIGHT + centerText("YOUR CART", boxWidth) + RESET + TITLE + "║");
             System.out.println("╠" + "═".repeat(boxWidth) + "╣" + RESET);
 
+            List<Product> productList = new ArrayList<>(productMap.keySet());
+
             for (int i = 0; i < productList.size(); i++) {
                 Product product = productList.get(i);
+                int quantity = productMap.get(product);
                 String formattedPrice = String.format("%.2f $", Double.parseDouble(product.getPrice()));
-                System.out.println(OPTION + "  " + (i+1) + ". " + MENU + "╔" + "═".repeat(boxWidth) + "╗");
+                double totalProductPrice = Double.parseDouble(product.getPrice()) * quantity;
+
+                System.out.println(OPTION + "  " + (i + 1) + ". " + MENU + "╔" + "═".repeat(boxWidth) + "╗");
                 System.out.println(OPTION + "     " + BOLD + "     Name: " + RESET + HIGHLIGHT +
                         String.format("%-" + maxNameLength + "s", product.getFullName()));
                 System.out.println(OPTION + "     " + BOLD + "     Price: " + RESET + HIGHLIGHT +
                         String.format("%" + maxPriceLength + "s ", formattedPrice));
+                System.out.println(OPTION + "     " + BOLD + "     Quantity: " + RESET + HIGHLIGHT + quantity);
                 System.out.println(OPTION + "     " + BOLD + "     Category: " + RESET + HIGHLIGHT +
                         product.getCategory());
                 System.out.println(MENU + "     ╚" + "═".repeat(boxWidth) + "╝\n" + RESET);
-                totalPrice += Double.parseDouble(product.getPrice());
+
+                totalPrice += totalProductPrice;
             }
+
 
             String totalLine = "TOTAL:  " + String.format("%.2f $      ", totalPrice);
             System.out.println(TITLE + "╔" + "═".repeat(boxWidth) + "╗");
-            System.out.println("║" + PROMPT + String.format("%-" + (boxWidth-1) + "s", totalLine) + TITLE + " ║");
+            System.out.println("║" + PROMPT + String.format("%-" + (boxWidth - 1) + "s", totalLine) + TITLE + " ║");
             System.out.println("╠" + "═".repeat(boxWidth) + "╣");
             System.out.println("║" + OPTION + "  Select product by number  " +
                     " ".repeat(boxWidth - 28) + TITLE + "║");
@@ -133,7 +166,7 @@ public class Cart {
                     DisplayProduct.getInstance().display(selectedProduct, null);
                     break;
                 case "2":
-                    cart.getProductList().remove(selectedProduct);
+                    cart.getProductMap().remove(selectedProduct);
                     System.out.println("Product removed from cart.");
                     pause(1500);
                     break;

@@ -1,6 +1,8 @@
 package ir.ac.kntu;
 
-public class Address {
+import java.io.Serializable;
+
+public class Address implements Serializable {
     private String province;
     private String street;
     private String city;

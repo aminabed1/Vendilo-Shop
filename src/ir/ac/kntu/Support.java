@@ -1,10 +1,11 @@
 package ir.ac.kntu;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class Support extends Person {
+public class Support extends Person implements Serializable {
 
     public Support(String name, String surname, String username, String password) {
         //TODO fix here for null phone number and email

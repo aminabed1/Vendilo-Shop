@@ -1,8 +1,10 @@
 package ir.ac.kntu;
 
+import java.io.Serializable;
+import java.util.Map;
 import java.util.Scanner;
 
-public class DisplayProduct {
+public class DisplayProduct implements Serializable {
     private static final String ANSI_RESET = "\u001B[0m";
     private static final String ANSI_RED = "\u001B[31m";
     private static final String ANSI_GREEN = "\u001B[32m";
@@ -22,15 +24,17 @@ public class DisplayProduct {
         displayField("Price", product.getPrice());
         displayField("Stock", String.valueOf(product.getStock()));
         displayField("Description", product.getDescription());
+        displayField("Serial Number", product.getSerialNumber());
 
-        if (product instanceof Book) {
-            displayBookDetails((Book) product);
-        } else if (product instanceof Phone) {
-            displayPhoneDetails((Phone) product);
-        } else if (product instanceof LopTop) {
-            displayLaptopDetails((LopTop) product);
-        } else if (product instanceof DigitalProduct) {
-            displayDigitalProductDetails((DigitalProduct) product);
+        displayAverageRating(product);
+
+        switch (product) {
+            case Book book -> displayBookDetails(book);
+            case Phone phone -> displayPhoneDetails(phone);
+            case LopTop lopTop -> displayLaptopDetails(lopTop);
+            case DigitalProduct digitalProduct -> displayDigitalProductDetails(digitalProduct);
+            default -> {
+            }
         }
 
         if (product.getErrorList() != null && !product.getErrorList().isEmpty()) {
@@ -45,16 +49,34 @@ public class DisplayProduct {
         showActionMenu(product, customer);
     }
 
+    private void displayAverageRating(Product product) {
+        Map<Person, Double> ratingMap = product.getRatingMap();
+
+        if (ratingMap == null || ratingMap.isEmpty()) {
+            System.out.println(ANSI_YELLOW + "⭐ Average Rating: " + ANSI_RED +  "No ratings yet" + ANSI_RESET);
+            return;
+        }
+
+        double sum = 0;
+        for (double rating : ratingMap.values()) {
+            sum += rating;
+        }
+        double average = sum / ratingMap.size();
+
+        System.out.printf(ANSI_YELLOW + "⭐ Average Rating: " + ANSI_GREEN + "%.2f/5 (%d ratings)%s\n" + ANSI_RESET,
+                average, ratingMap.size(), average < 2 ? " 😞" : average < 4 ? " 🙂" : " 😃");
+    }
+
     private void showActionMenu(Product product, Customer customer) {
         Scanner scanner = new Scanner(System.in);
 
         System.out.println("\n" + ANSI_PURPLE + "╔════════════════════════════════════╗");
-        System.out.println("║          ACTIONS MENU           ║");
+        System.out.println("║          ACTIONS MENU              ║");
         System.out.println("╠════════════════════════════════════╣");
         System.out.println("║ " + ANSI_BLUE + "1. Add to Cart" + ANSI_PURPLE +
-                "                   ║");
+                "                     ║");
         System.out.println("║ " + ANSI_BLUE + "2. Back to List" + ANSI_PURPLE +
-                "                  ║");
+                "                    ║");
         System.out.println("╚════════════════════════════════════╝" + ANSI_RESET);
 
         System.out.print(ANSI_GREEN + "Enter your choice: " + ANSI_RESET);
@@ -63,14 +85,13 @@ public class DisplayProduct {
         switch (choice) {
             case "1":
                 if (product.getStock() > 0) {
-                    customer.getCart().addProduct(product);
+                    customer.getCart().addProductToMap(product);
                     System.out.println(ANSI_GREEN + "\nProduct added to cart successfully!" + ANSI_RESET);
                 } else {
                     System.out.println(ANSI_RED + "\nProduct is out of stock!" + ANSI_RESET);
                 }
                 break;
             case "2":
-
                 break;
             default:
                 System.out.println(ANSI_RED + "Invalid choice!" + ANSI_RESET);

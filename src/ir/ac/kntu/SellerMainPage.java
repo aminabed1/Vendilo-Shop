@@ -1,12 +1,13 @@
 package ir.ac.kntu;
 
+import java.io.Serializable;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class SellerMainPage {
+public class SellerMainPage implements Serializable {
 
     private static final String RESET = "\u001B[0m";
     private static final String TITLE = "\u001B[38;5;45m";
@@ -130,13 +131,19 @@ public class SellerMainPage {
 
             for (int i = 0; i < sellerOrders.size(); i++) {
                 Order order = sellerOrders.get(i);
-                String productName = order.getProductList().getLast().getFullName();
+                Map<Product, Integer> productMap = order.getProductMap();
+                List<Product> productList = new ArrayList<>(productMap.keySet());
+
+                Product lastProduct = productList.getLast();
+                String productName = lastProduct.getFullName();
+
                 String date = formatter.format(order.getOrderDate());
                 String amount = String.format("%.2f $", order.getProductPrice() * 0.9);
 
                 System.out.println(OPTION + String.format("%-5d %-20s %-15s %-12s",
                         i+1, productName, date, SUCCESS + amount + RESET) + RESET);
             }
+
 
             System.out.print(PROMPT + "\nSelect an order (or 0 to back): " + RESET);
             String input = scan.nextLine().trim();
@@ -172,7 +179,7 @@ public class SellerMainPage {
                 order.getDeliveryAddress().toString() + RESET);
 
         System.out.println(MENU + "\n════════════════ PRODUCTS ════════════════" + RESET);
-        for (Product product : order.getProductList()) {
+        for (Product product : order.getProductMap().keySet()) {
             System.out.println(OPTION + "- " + product.getFullName() + " (" + product.getCategory() + ")");
             System.out.println("  Price: " + HIGHLIGHT + product.getPrice() + " $" + RESET);
         }
@@ -319,9 +326,15 @@ public class SellerMainPage {
     }
 
     public void displayRequest(Seller seller) {
-        currentSellerRequests = DataBase.getRequestList().stream()
-                .filter(req -> ((SellerRequest) req).getSellerAgencyCode().equals(seller.getAgencyCode()))
-                .collect(Collectors.toList());
+        currentSellerRequests = new ArrayList<>();
+        for (Request req : DataBase.getRequestList()) {
+            if (req instanceof SellerRequest) {
+                SellerRequest sReq = (SellerRequest) req;
+                if (sReq.getSellerAgencyCode().equals(seller.getAgencyCode())) {
+                    currentSellerRequests.add(req);
+                }
+            }
+        }
 
         if (currentSellerRequests.isEmpty()) {
             System.out.println(WARNING + "You don't have any requests yet." + RESET);
@@ -371,18 +384,24 @@ public class SellerMainPage {
     }
 
     public Seller findSellerByAgencyCode(String agencyCode) {
-        return DataBase.getPersonList().stream()
-                .filter(p -> p instanceof Seller)
-                .map(p -> (Seller) p)
-                .filter(s -> s.getAgencyCode().equals(agencyCode))
-                .findFirst()
-                .orElse(null);
+        for (Person p : DataBase.getPersonList()) {
+            if (p instanceof Seller s) {
+                if (s.getAgencyCode().equals(agencyCode)) {
+                    return s;
+                }
+            }
+        }
+        return null;
     }
 
     public List<Product> getSellerProducts(String agencyCode) {
-        return DataBase.getProductList().stream()
-                .filter(p -> p.getSellerAgencyCode().equals(agencyCode))
-                .collect(Collectors.toList());
+        List<Product> result = new ArrayList<>();
+        for (Product p : DataBase.getProductList()) {
+            if (p.getSellerAgencyCode().equals(agencyCode)) {
+                result.add(p);
+            }
+        }
+        return result;
     }
 
     public void pause(int milliseconds) {
@@ -420,10 +439,13 @@ public class SellerMainPage {
     }
 
     private double calculateTotalSales(Seller seller) {
-        return seller.getWallet().getTransactionList().stream()
-                .filter(t -> t.getAmount() > 0)
-                .mapToDouble(Transaction::getAmount)
-                .sum();
+        double total = 0.0;
+        for (Transaction t : seller.getWallet().getTransactionList()) {
+            if (t.getAmount() > 0) {
+                total += t.getAmount();
+            }
+        }
+        return total;
     }
 
     public void clearScreen() {
