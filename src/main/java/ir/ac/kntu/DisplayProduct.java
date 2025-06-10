@@ -28,14 +28,17 @@ public class DisplayProduct implements Serializable {
 
         displayAverageRating(product);
 
-        switch (product) {
-            case Book book -> displayBookDetails(book);
-            case Phone phone -> displayPhoneDetails(phone);
-            case LopTop lopTop -> displayLaptopDetails(lopTop);
-            case DigitalProduct digitalProduct -> displayDigitalProductDetails(digitalProduct);
-            default -> {
-            }
+        if (product instanceof Book) {
+            displayBookDetails((Book) product);
+        } else if (product instanceof LopTop) {
+            displayLaptopDetails((LopTop) product);
+        } else if (product instanceof Phone) {
+            displayPhoneDetails((Phone) product);
+        } else {
+            System.out.println("Unknown product type");
         }
+
+
 
         if (product.getErrorList() != null && !product.getErrorList().isEmpty()) {
             System.out.println(ANSI_RED + "\n⚠️ Validation Errors:" + ANSI_RESET);

@@ -5,7 +5,7 @@ import java.time.Instant;
 import java.util.*;
 
 public class HandleOrder implements Serializable {
-    static double totalPrice = 0;
+    private static double totalPrice = 0;
     private final static Scanner scan = new Scanner(System.in);
     private static final double basePrice = 15;
     private static double finalPrice;

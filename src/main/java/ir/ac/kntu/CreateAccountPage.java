@@ -23,8 +23,12 @@ public class CreateAccountPage implements Serializable {
 
         while (true) {
             String role = selectRole();
-            if (role == null) continue;
-            if (role.equals("BACK")) break;
+            if (role == null) {
+                continue;
+            }
+            if (role.equals("BACK")) {
+                break;
+            }
 
             Person newUser = collectUserInfo(role);
             if (newUser != null) {
@@ -97,7 +101,7 @@ public class CreateAccountPage implements Serializable {
             }
 
             if (confirmationGiven) {
-                if (validateUserInfoCompletion(userInfo, role)) {
+                if (!userInfo.isAnyFieldEmpty(role.equals("Seller"))) {
                     break;
                 } else {
                     showError("Please fill all required fields");
@@ -108,16 +112,134 @@ public class CreateAccountPage implements Serializable {
         return validateAndCreateUser(role, userInfo);
     }
 
-    private class UserInfo {
-        String name = "";
-        String surname = "";
-        String phone = "";
-        String email = "";
-        String username = "";
-        String password = "";
-        String shopName = "";
-        String province = "";
-        String sellerID = "";
+    private static class UserInfo {
+        private String name = "";
+        private String surname = "";
+        private String phone = "";
+        private String email = "";
+        private String username = "";
+        private String password = "";
+        private String shopName = "";
+        private String province = "";
+        private String sellerID = "";
+
+        // Getters
+        public String getName() {
+            return name;
+        }
+
+        public String getSurname() {
+            return surname;
+        }
+
+        public String getPhone() {
+            return phone;
+        }
+
+        public String getEmail() {
+            return email;
+        }
+
+        public String getUsername() {
+            return username;
+        }
+
+        public String getPassword() {
+            return password;
+        }
+
+        public String getShopName() {
+            return shopName;
+        }
+
+        public String getProvince() {
+            return province;
+        }
+
+        public String getSellerID() {
+            return sellerID;
+        }
+
+        // Setters with basic validation
+        public void setName(String name) {
+            if (name != null) {
+                this.name = name.trim();
+            }
+        }
+
+        public void setSurname(String surname) {
+            if (surname != null) {
+                this.surname = surname.trim();
+            }
+        }
+
+        public void setPhone(String phone) {
+            if (phone != null) {
+                this.phone = phone.trim();
+            }
+        }
+
+        public void setEmail(String email) {
+            if (email != null) {
+                this.email = email.trim();
+            }
+        }
+
+        public void setUsername(String username) {
+            if (username != null) {
+                this.username = username.trim();
+            }
+        }
+
+        public void setPassword(String password) {
+            if (password != null) {
+                this.password = password;
+            }
+        }
+
+        public void setShopName(String shopName) {
+            if (shopName != null) {
+                this.shopName = shopName.trim();
+            }
+        }
+
+        public void setProvince(String province) {
+            if (province != null) {
+                this.province = province.trim();
+            }
+        }
+
+        public void setSellerID(String sellerID) {
+            if (sellerID != null) {
+                this.sellerID = sellerID.trim();
+            }
+        }
+
+        // Validation methods
+        public boolean isAnyFieldEmpty(boolean isSeller) {
+            if (name.isEmpty() || surname.isEmpty() || phone.isEmpty() ||
+                    email.isEmpty() || username.isEmpty() || password.isEmpty()) {
+                return true;
+            }
+            if (isSeller) {
+                return shopName.isEmpty() || province.isEmpty() || sellerID.isEmpty();
+            }
+            return false;
+        }
+
+        public Map<String, String> toMap() {
+            Map<String, String> infoMap = new LinkedHashMap<>();
+            infoMap.put("Name", name);
+            infoMap.put("Surname", surname);
+            infoMap.put("Phone", phone);
+            infoMap.put("Email", email);
+            infoMap.put("Username", username);
+            infoMap.put("Password", password.isEmpty() ? "" : "******");
+            infoMap.put("Shop Name", shopName);
+            infoMap.put("Province", province);
+            infoMap.put("Seller ID", sellerID);
+            return infoMap;
+        }
     }
 
     private void printUserInfoMenu(UserInfo info, String role) {
@@ -128,17 +250,19 @@ public class CreateAccountPage implements Serializable {
         System.out.println("║" + BOLD + "                ENTER YOUR INFORMATION            " + RESET + MENU + "    ║");
         System.out.println("╠══════════════════════════════════════════════════════╣");
 
-        printInfoLine("1. Name", info.name, maxLabelLength, maxValueLength);
-        printInfoLine("2. Surname", info.surname, maxLabelLength, maxValueLength);
-        printInfoLine("3. Phone", info.phone, maxLabelLength, maxValueLength);
-        printInfoLine("4. Email", info.email, maxLabelLength, maxValueLength);
-        printInfoLine("5. Username", info.username, maxLabelLength, maxValueLength);
-        printInfoLine("6. Password", info.password.isEmpty() ? "Empty" : "******", maxLabelLength, maxValueLength);
+        Map<String, String> infoMap = info.toMap();
+
+        printInfoLine("1. Name", infoMap.get("Name"), maxLabelLength, maxValueLength);
+        printInfoLine("2. Surname", infoMap.get("Surname"), maxLabelLength, maxValueLength);
+        printInfoLine("3. Phone", infoMap.get("Phone"), maxLabelLength, maxValueLength);
+        printInfoLine("4. Email", infoMap.get("Email"), maxLabelLength, maxValueLength);
+        printInfoLine("5. Username", infoMap.get("Username"), maxLabelLength, maxValueLength);
+        printInfoLine("6. Password", infoMap.get("Password"), maxLabelLength, maxValueLength);
 
         if (role.equals("Seller")) {
-            printInfoLine("9. Shop Name", info.shopName, maxLabelLength, maxValueLength);
-            printInfoLine("10. Province", info.province, maxLabelLength, maxValueLength);
-            printInfoLine("11. SellerID", info.sellerID, maxLabelLength, maxValueLength);
+            printInfoLine("9. Shop Name", infoMap.get("Shop Name"), maxLabelLength, maxValueLength);
+            printInfoLine("10. Province", infoMap.get("Province"), maxLabelLength, maxValueLength);
+            printInfoLine("11. SellerID", infoMap.get("Seller ID"), maxLabelLength, maxValueLength);
         }
 
         System.out.println("╠══════════════════════════════════════════════════════╣");
@@ -148,7 +272,7 @@ public class CreateAccountPage implements Serializable {
     }
 
     private void printInfoLine(String label, String value, int labelWidth, int valueWidth) {
-        String displayValue = value.isEmpty() ? "Empty" : value;
+        String displayValue = value == null || value.isEmpty() ? "Empty" : value;
         System.out.printf("║ " + OPTION + "%-" + labelWidth + "s: " + HIGHLIGHT + "%-" + valueWidth + "s" + MENU + "      ║\n",
                 label, displayValue.length() > valueWidth ? displayValue.substring(0, valueWidth-3) + "..." : displayValue);
     }
@@ -157,44 +281,44 @@ public class CreateAccountPage implements Serializable {
         switch (choice) {
             case "1":
                 System.out.print(PROMPT + "Enter name: " + RESET + HIGHLIGHT);
-                info.name = scan.nextLine().trim();
+                info.setName(scan.nextLine());
                 break;
             case "2":
                 System.out.print(PROMPT + "Enter surname: " + RESET + HIGHLIGHT);
-                info.surname = scan.nextLine().trim();
+                info.setSurname(scan.nextLine());
                 break;
             case "3":
                 System.out.print(PROMPT + "Enter phone: " + RESET + HIGHLIGHT);
-                info.phone = scan.nextLine().trim();
+                info.setPhone(scan.nextLine());
                 break;
             case "4":
                 System.out.print(PROMPT + "Enter email: " + RESET + HIGHLIGHT);
-                info.email = scan.nextLine().trim();
+                info.setEmail(scan.nextLine());
                 break;
             case "5":
                 System.out.print(PROMPT + "Enter username: " + RESET + HIGHLIGHT);
-                info.username = scan.nextLine().trim();
+                info.setUsername(scan.nextLine());
                 break;
             case "6":
                 System.out.print(PROMPT + "Enter password: " + RESET);
-                info.password = new String(System.console().readPassword());
+                info.setPassword(new String(System.console().readPassword()));
                 break;
             case "9":
                 if (role.equals("Seller")) {
                     System.out.print(PROMPT + "Enter shop name: " + RESET + HIGHLIGHT);
-                    info.shopName = scan.nextLine().trim();
+                    info.setShopName(scan.nextLine());
                 }
                 break;
             case "10":
                 if (role.equals("Seller")) {
                     System.out.print(PROMPT + "Enter province: " + RESET + HIGHLIGHT);
-                    info.province = scan.nextLine().trim();
+                    info.setProvince(scan.nextLine());
                 }
                 break;
             case "11":
                 if (role.equals("Seller")) {
                     System.out.print(PROMPT + "Enter sellerID: " + RESET);
-                    info.sellerID = scan.nextLine().trim();
+                    info.setSellerID(scan.nextLine());
                 }
                 break;
             default:
@@ -203,42 +327,34 @@ public class CreateAccountPage implements Serializable {
         System.out.print(RESET);
     }
 
-    private boolean validateUserInfoCompletion(UserInfo info, String role) {
-        return !(info.name.isEmpty() || info.surname.isEmpty() || info.phone.isEmpty() ||
-                info.email.isEmpty() || info.username.isEmpty() || info.password.isEmpty());
-
-
-//        return (!role.equals("Seller") || (!info.shopName.isEmpty() && !info.province.isEmpty())) && !info.sellerID.isEmpty();
-    }
-
     private Person validateAndCreateUser(String role, UserInfo info) {
         if (role.equals("Seller")) {
-            if (isExistingSeller(info.email, info.phone, info.username, info.sellerID)) {
+            if (isExistingSeller(info.getEmail(), info.getPhone(), info.getUsername(), info.getSellerID())) {
                 showError("Email, phone, username or sellerID already in use!");
                 return null;
             }
         }
 
-        if (isExistingCustomer(info.email, info.phone, info.username)) {
+        if (isExistingCustomer(info.getEmail(), info.getPhone(), info.getUsername())) {
             showError("Email, phone or username already in use");
             return null;
         }
 
         List<String> errors = new ArrayList<>();
         InfoValidator validator = new InfoValidator();
-        if (!validator.isPersonInfoValid(info.name, info.surname, info.phone,
-                info.email, info.username, info.password, errors)) {
+        if (!validator.isPersonInfoValidP1(info.getName(), info.getSurname(), info.getPhone(), errors)
+            || validator.isPersonInfoValidP2(info.getName(), info.getSurname(), info.getPhone(), errors)) {
             displayErrors(errors);
             return null;
         }
 
         if (role.equals("Customer")) {
-            return new Customer(info.name, info.surname, info.phone,
-                    info.email, info.username, info.password);
+            return new Customer(info.getName(), info.getSurname(), info.getPhone(),
+                    info.getEmail(), info.getUsername(), info.getPassword());
         } else {
-            return new Seller(info.name, info.surname, info.phone,
-                    info.email, info.username, info.password,
-                    info.shopName, info.sellerID, info.province, generateAgencyCode());
+            return new Seller(info.getName(), info.getSurname(), info.getPhone(),
+                    info.getEmail(), info.getUsername(), info.getPassword(),
+                    info.getShopName(), info.getSellerID(), info.getProvince(), generateAgencyCode());
         }
     }
 
@@ -283,7 +399,6 @@ public class CreateAccountPage implements Serializable {
         return false;
     }
 
-
     public void displayErrors(List<String> errors) {
         System.out.println(ERROR + "\nAccount creation failed due to the following errors:" + RESET);
         errors.forEach(error -> System.out.println(ERROR + " - " + error + RESET));
@@ -324,7 +439,6 @@ public class CreateAccountPage implements Serializable {
             code.append(generateRandomNumber());
             code.append(generateCharacter());
         }
-
         return code.toString();
     }
 

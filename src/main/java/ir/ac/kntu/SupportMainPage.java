@@ -38,7 +38,9 @@ public class SupportMainPage implements Serializable {
                 case "1" -> handleSellerAuthenticationRequests();
                 case "2" -> handleCustomerRequests();
                 case "3" -> handleOrderManagement();
-                case "0" -> { return; }
+                case "0" -> {
+                    return;
+                }
                 default -> showInvalidOptionError(3);
             }
         }
@@ -68,7 +70,9 @@ public class SupportMainPage implements Serializable {
             displaySellerRequestsList(sellersRequests);
 
             int selectedIndex = getSelectedIndex(sellersRequests.size());
-            if (selectedIndex == -1) return;
+            if (selectedIndex == -1) {
+                return;
+            }
 
             SellerRequest selectedRequest = sellersRequests.get(selectedIndex);
             handleSellerRequestDetails(selectedRequest);
@@ -127,7 +131,9 @@ public class SupportMainPage implements Serializable {
             String choice = scan.nextLine().trim();
 
             switch (choice) {
-                case "0" -> { return; }
+                case "0" -> {
+                    return;
+                }
                 case "1" -> {
                     toggleSellerStatus(seller);
                     return;
@@ -174,7 +180,9 @@ public class SupportMainPage implements Serializable {
             displayCustomerRequestsList(customerRequests);
 
             int selectedIndex = getSelectedIndex(customerRequests.size());
-            if (selectedIndex == -1) return;
+            if (selectedIndex == -1) {
+                return;
+            }
 
             CustomerRequest selectedRequest = customerRequests.get(selectedIndex);
             handleCustomerRequestDetails(selectedRequest);
@@ -240,7 +248,9 @@ public class SupportMainPage implements Serializable {
             String choice = scan.nextLine().trim();
 
             switch (choice) {
-                case "0" -> { return; }
+                case "0" -> {
+                    return;
+                }
                 case "1" -> {
                     addResponseToRequest(request);
                     return;

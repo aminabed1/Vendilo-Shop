@@ -29,7 +29,9 @@ public class DisplayOrder implements Serializable {
             System.out.println("\u001B[34m🔍 Select an order to view details (press 0 to go back):\u001B[0m");
             int choice = getValidatedChoice(orderList.size());
 
-            if (choice == 0) return;
+            if (choice == 0) {
+                return;
+            }
 
             Order selectedOrder = orderList.get(choice - 1);
             displayOrderDetails(selectedOrder, person);
@@ -121,7 +123,9 @@ public class DisplayOrder implements Serializable {
     private void rateProduct(List<Product> productList, Person person) {
         System.out.println("\u001B[34mEnter the number of the product you want to rate (0 to cancel):\u001B[0m");
         int choice = getValidatedChoice(productList.size());
-        if (choice == 0) return;
+        if (choice == 0) {
+            return;
+        }
 
         Product productToRate = productList.get(choice - 1);
         Person currentUser = person;

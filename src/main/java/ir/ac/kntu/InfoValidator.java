@@ -1,18 +1,16 @@
 package ir.ac.kntu;
 
-import java.io.Serializable;
 import java.util.*;
-import java.util.regex.*;
 
-public class InfoValidator implements Serializable {
+public class InfoValidator {
     private static final String ALL_NUMERIC_REGEX = "^09[0-9]{9}$";
     private static final String EMAIL_REGEX = "^[A-Za-z0-9+_.-]+@(.+)$";
     private static final String USERNAME_REGEX = "^[a-zA-Z0-9._-]{6,}$";
     private static final String PASSWORD_REGEX = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,}$";
     private static final String ALL_CHAR_REGEX = "^[A-Za-z\\s]{3,}$";
 
-    static List<Person> personList ;
-    static List<Product> productList ;
+    private static List<Person> personList;
+    private static List<Product> productList;
 
     public boolean emailUniquementCheck(String email, List<String> errorList) {
         for (Person person : personList) {
@@ -136,17 +134,23 @@ public class InfoValidator implements Serializable {
         return result;
     }
 
-    public boolean isPersonInfoValid(String name, String surname, String phoneNumber, String email,
-                                     String username, String password, List<String> errorList) {
+    public boolean isPersonInfoValidP1(String name, String surname, String phoneNumber, List<String> errorList) {
         personList = DataBase.getPersonList();
-        boolean isUnique = emailUniquementCheck(email, errorList) &&
-                phoneNumberUniquementCheck(phoneNumber, errorList) &&
-                usernameUniquementCheck(username, errorList);
+        boolean isUnique = phoneNumberUniquementCheck(phoneNumber, errorList);
 
         boolean isValid = nameValidation(name, errorList) &&
                 nameValidation(surname, errorList) &&
-                phoneNumberValidation(phoneNumber, errorList) &&
-                emailValidation(email, errorList) &&
+                phoneNumberValidation(phoneNumber, errorList);
+
+        return isValid && isUnique;
+    }
+
+    public boolean isPersonInfoValidP2(String email, String username, String password, List<String> errorList) {
+        personList = DataBase.getPersonList();
+        boolean isUnique = emailUniquementCheck(email, errorList) &&
+                usernameUniquementCheck(username, errorList);
+
+        boolean isValid = emailValidation(email, errorList) &&
                 usernameValidation(username, errorList) &&
                 passwordValidation(password, errorList);
 

@@ -26,7 +26,9 @@ public class Search implements Serializable {
                 case "1" -> searchByName();
                 case "2" -> searchByCategory();
                 case "3" -> combinedSearch();
-                case "4" -> {return;}
+                case "4" -> {
+                    return;
+                }
                 default -> {
                     System.out.println("Please enter a valid choice!");
                     continue;
@@ -123,7 +125,6 @@ public class Search implements Serializable {
         while (true) {
             System.out.print("Do you want to filter by category? (y/n): ");
             String choice = scan.nextLine().trim().toLowerCase();
-
             if (choice.equals("y")) {
                 filteredProducts = filterByCategory(filteredProducts);
                 break;

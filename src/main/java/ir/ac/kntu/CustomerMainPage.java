@@ -78,39 +78,48 @@ public class CustomerMainPage implements Serializable {
                 continue;
             }
 
-            switch (choice) {
-                case "1":
-                    PersonAccount personInfo = new PersonAccount();
-                    personInfo.infoView(customer);
-                    break;
-                case "2":
-                    customer.displayCart();
-                    break;
-                case "3":
-                    DisplayOrder.getInstance().display(customer);
-                    break;
-                case "4":
-                    customer.getWallet().walletOptionHandler(customer);
-                    break;
-                case "5":
-                    backButtonPressed = true;
-                    break;
-                case "6":
-                    displayProductsList(customer);
-                    break;
-                case "7":
-                    Search.getInstance().handleSearch(customer);
-                    break;
-                case "8":
-                    displaySupportOptions(customer);
-                    break;
-            }
+            handleCustomerChoice(choice, customer);
             break;
+        }
+    }
+
+    private void handleCustomerChoice(String choice, Customer customer) {
+        switch (choice) {
+            case "1":
+                new PersonAccount().infoView(customer);
+                break;
+            case "2":
+                customer.displayCart();
+                break;
+            case "3":
+                DisplayOrder.getInstance().display(customer);
+                break;
+            case "4":
+                customer.getWallet().walletOptionHandler(customer);
+                break;
+            case "5":
+                backButtonPressed = true;
+                break;
+            case "6":
+                displayProductsList(customer);
+                break;
+            case "7":
+                Search.getInstance().handleSearch(customer);
+                break;
+            case "8":
+                displaySupportOptions(customer);
+                break;
+            default:
         }
     }
 
     public void displaySupportOptions(Customer customer) {
         clearScreen();
+        printSupportMenu();
+        handleSupportChoice(customer);
+    }
+
+    private void printSupportMenu() {
         System.out.println(TITLE + "╔═══════════ SUPPORT OPTIONS ════════════╗");
         System.out.println(        "║                                        ║");
         System.out.println("║ " + OPTION + "1. Requests       " + TITLE + "                     ║");
@@ -119,7 +128,9 @@ public class CustomerMainPage implements Serializable {
         System.out.println("║                                        ║");
         System.out.println("╚════════════════════════════════════════╝" + RESET);
         System.out.println();
+    }
 
+    private void handleSupportChoice(Customer customer) {
         while (true) {
             System.out.print(PROMPT + "Choose an option (1-3): " + RESET + HIGHLIGHT);
             String choice = scan.nextLine().trim();
@@ -141,78 +152,99 @@ public class CustomerMainPage implements Serializable {
     }
 
     public void addNewRequest(Customer customer) {
-       while (true) {
-           System.out.println("1. Product quality report");
-           System.out.println("2. Inconsistency in the sent order");
-           System.out.println("3. Receive order problems");
-           System.out.println("4. Back ");
-           System.out.println("Select an option ");
-           String choice = scan.nextLine().trim();
-           if (!choice.matches("[1-4]")) {
-               System.out.println(ERROR + "Please enter a valid choice (1-4) or BACK" + RESET);
-               continue;
-           }
+        while (true) {
+            displayRequestTypes();
+            String choice = scan.nextLine().trim();
 
-           if (choice.equals("4")) {
-               return;
-           }
+            if (choice.equals("4")) {
+                return;
+            }
 
-           String title = switch (choice) {
-               case "1" -> "Product quality report";
-               case "2" -> "Inconsistency in the sent order";
-               case "3" -> "Receive order problems";
-               default -> null;
-           };
+            if (!choice.matches("[1-4]")) {
+                System.out.println(ERROR + "Please enter a valid choice (1-4)" + RESET);
+                continue;
+            }
 
-           System.out.println("Enter product serial number");
+            String title = getRequestTitle(choice);
+            if (title == null) {
+                continue;
+            }
 
-           String serialNumber = scan.nextLine().trim();
+            processRequestCreation(customer, title);
+        }
+    }
 
-           if (!findProductBySerialNumber(serialNumber)) {
-               System.out.println(ERROR + "Invalid serial number!" + RESET);
-               continue;
-           }
+    private void displayRequestTypes() {
+        System.out.println("1. Product quality report");
+        System.out.println("2. Inconsistency in the sent order");
+        System.out.println("3. Receive order problems");
+        System.out.println("4. Back");
+        System.out.println("Select an option:");
+    }
 
-           Request request = new CustomerRequest(title, "unchecked", Instant.now(),
-                   "empty", serialNumber, customer.getPhoneNumber());
-           DataBase.addRequest(request);
-           System.out.println(ERROR + "Customer Request successfully added!" + RESET);
-       }
+    private String getRequestTitle(String choice) {
+        return switch (choice) {
+            case "1" -> "Product quality report";
+            case "2" -> "Inconsistency in the sent order";
+            case "3" -> "Receive order problems";
+            default -> null;
+        };
+    }
+
+    private void processRequestCreation(Customer customer, String title) {
+        System.out.println("Enter product serial number:");
+        String serialNumber = scan.nextLine().trim();
+
+        if (!findProductBySerialNumber(serialNumber)) {
+            System.out.println(ERROR + "Invalid serial number!" + RESET);
+            return;
+        }
+
+        Request request = new CustomerRequest(title, "unchecked", Instant.now(),
+                "empty", serialNumber, customer.getPhoneNumber());
+        DataBase.addRequest(request);
+        System.out.println(SUCCESS + "Customer Request successfully added!" + RESET);
     }
 
     public boolean findProductBySerialNumber(String serialNumber) {
-        List<Product> productList = DataBase.getProductList();
-        for (Product product : productList) {
-            if (product.getSerialNumber().equals(serialNumber)) {
-                return true;
-            }
-        }
-        return false;
+        return DataBase.getProductList().stream()
+                .anyMatch(p -> p.getSerialNumber().equals(serialNumber));
     }
 
     public void displayRequest(Customer customer) {
         clearScreen();
-        List<Request> allRequests = DataBase.getRequestList();
-        List<CustomerRequest> customerRequests = new ArrayList<>();
-
-        for (Request request : allRequests) {
-            if (request instanceof CustomerRequest cr) {
-                if (cr.getCustomerPhone().equals(customer.getPhoneNumber())) {
-                    customerRequests.add(cr);
-                }
-            }
-        }
+        List<CustomerRequest> customerRequests = getCustomerRequests(customer);
 
         if (customerRequests.isEmpty()) {
-            System.out.println(ERROR + "You don't have any requests yet." + RESET);
-            System.out.println(PROMPT + "\nPress Enter to return..." + RESET);
-            scan.nextLine();
+            showNoRequestsMessage();
             return;
         }
 
+        displayRequestsList(customerRequests);
+        handleRequestSelection(customerRequests);
+    }
+
+    private List<CustomerRequest> getCustomerRequests(Customer customer) {
+        List<CustomerRequest> customerRequests = new ArrayList<>();
+        for (Request request : DataBase.getRequestList()) {
+            if (request instanceof CustomerRequest cr &&
+                    cr.getCustomerPhone().equals(customer.getPhoneNumber())) {
+                customerRequests.add(cr);
+            }
+        }
+        return customerRequests;
+    }
+
+    private void showNoRequestsMessage() {
+        System.out.println(ERROR + "You don't have any requests yet." + RESET);
+        System.out.println(PROMPT + "\nPress Enter to return..." + RESET);
+        scan.nextLine();
+    }
+
+    private void displayRequestsList(List<CustomerRequest> requests) {
         System.out.println(TITLE + "════════════ YOUR REQUESTS ════════════" + RESET);
-        for (int i = 0; i < customerRequests.size(); i++) {
-            CustomerRequest request = customerRequests.get(i);
+        for (int i = 0; i < requests.size(); i++) {
+            CustomerRequest request = requests.get(i);
             String statusColor = request.getStatus().equals("unchecked") ? ERROR : SUCCESS;
             System.out.printf(OPTION + "%2d. " + RESET + "%-20s " + statusColor + "%-10s" + RESET +
                             " %-15s %s\n",
@@ -222,7 +254,9 @@ public class CustomerMainPage implements Serializable {
                     request.getTimestamp().toString(),
                     request.getSerialNumber());
         }
+    }
 
+    private void handleRequestSelection(List<CustomerRequest> requests) {
         System.out.println("\n" + PROMPT + "Enter request number to view details or 'BACK' to return: " + RESET);
         while (true) {
             String input = scan.nextLine().trim();
@@ -232,12 +266,12 @@ public class CustomerMainPage implements Serializable {
 
             try {
                 int selectedIndex = Integer.parseInt(input) - 1;
-                if (selectedIndex >= 0 && selectedIndex < customerRequests.size()) {
-                    displaySingleRequestDetails(customerRequests.get(selectedIndex));
+                if (selectedIndex >= 0 && selectedIndex < requests.size()) {
+                    displaySingleRequestDetails(requests.get(selectedIndex));
                     break;
                 } else {
                     System.out.println(ERROR + "Invalid number! Please enter a number between 1 and " +
-                            customerRequests.size() + " or 'BACK'" + RESET);
+                            requests.size() + " or 'BACK'" + RESET);
                 }
             } catch (NumberFormatException e) {
                 System.out.println(ERROR + "Please enter a valid number or 'BACK'" + RESET);
@@ -264,94 +298,105 @@ public class CustomerMainPage implements Serializable {
     }
 
     public void displayProductsList(Person person) {
-        Scanner scan = new Scanner(System.in);
-
         while (true) {
             clearScreen();
-            System.out.println("Select product category to display:");
-            System.out.println("1. Books");
-            System.out.println("2. Phones");
-            System.out.println("3. Laptops");
-            System.out.println("0. Back to previous menu");
-            System.out.print("Enter choice (0-3): ");
-
-            String categoryChoice = scan.nextLine().trim();
-
-            if ("0".equals(categoryChoice)) {
+            String selectedCategory = selectProductCategory();
+            if (selectedCategory == null) {
                 return;
             }
 
-            String selectedCategory = null;
-            switch (categoryChoice) {
-                case "1":
-                    selectedCategory = "Book";
-                    break;
-                case "2":
-                    selectedCategory = "Phone";
-                    break;
-                case "3":
-                    selectedCategory = "Laptop";
-                    break;
-                default:
-                    System.out.println("Invalid choice! Please try again.");
-                    pauseForUser();
-                    continue;
-            }
-
-            List<Product> products = new ArrayList<>();
-            for (Product p : DataBase.getProductList()) {
-                if (p.getCategory().equalsIgnoreCase(selectedCategory)) {
-                    products.add(p);
-                }
-            }
-
+            List<Product> products = filterProductsByCategory(selectedCategory);
             if (products.isEmpty()) {
                 System.out.println("No products found in this category.");
                 pauseForUser();
                 continue;
             }
 
-            while (true) {
-                clearScreen();
-                System.out.println("╔══════════════ PRODUCTS LIST ══════════════╗");
-                System.out.println("║ 0. Back to category selection              ║");
-
-                for (int i = 0; i < products.size(); i++) {
-                    Product p = products.get(i);
-                    System.out.printf("║ %d. %s | Price: %s | Type: %s%n",
-                            i + 1,
-                            p.getFullName(),
-                            p.getPrice(),
-                            p.getCategory()
-                    );
-                }
-                System.out.println("╚═══════════════════════════════════════════╝");
-                System.out.println();
-
-                System.out.print("Choose product index to see details or 0 to go back: ");
-                String input = scan.nextLine().trim();
-
-                if ("0".equals(input)) {
-                    break;
-                }
-
-                try {
-                    int index = Integer.parseInt(input);
-                    if (index >= 1 && index <= products.size()) {
-                        Product selectedProduct = products.get(index - 1);
-                        DisplayProduct.getInstance().display(selectedProduct, (Customer)person);
-                    } else {
-                        System.out.println("Invalid index! Try again.");
-                        pauseForUser();
-                    }
-                } catch (NumberFormatException e) {
-                    System.out.println("Please enter a valid number!");
-                    pauseForUser();
-                }
-            }
+            browseProducts(products, (Customer)person);
         }
     }
 
+    private String selectProductCategory() {
+        System.out.println("Select product category to display:");
+        System.out.println("1. Books");
+        System.out.println("2. Phones");
+        System.out.println("3. Laptops");
+        System.out.println("0. Back to previous menu");
+        System.out.print("Enter choice (0-3): ");
+
+        String categoryChoice = scan.nextLine().trim();
+
+        return switch (categoryChoice) {
+            case "1" -> "Book";
+            case "2" -> "Phone";
+            case "3" -> "Laptop";
+            case "0" -> null;
+            default -> {
+                System.out.println("Invalid choice! Please try again.");
+                pauseForUser();
+                yield "";
+            }
+        };
+    }
+
+    private List<Product> filterProductsByCategory(String category) {
+        List<Product> products = new ArrayList<>();
+        for (Product p : DataBase.getProductList()) {
+            if (p.getCategory().equalsIgnoreCase(category)) {
+                products.add(p);
+            }
+        }
+        return products;
+    }
+
+    private void browseProducts(List<Product> products, Customer customer) {
+        while (true) {
+            clearScreen();
+            printProductsList(products);
+
+            System.out.print("Choose product index to see details or 0 to go back: ");
+            String input = scan.nextLine().trim();
+
+            if ("0".equals(input)) {
+                break;
+            }
+
+            handleProductSelection(input, products, customer);
+        }
+    }
+
+    private void printProductsList(List<Product> products) {
+        System.out.println("╔══════════════ PRODUCTS LIST ══════════════╗");
+        System.out.println("║ 0. Back to category selection              ║");
+
+        for (int i = 0; i < products.size(); i++) {
+            Product p = products.get(i);
+            System.out.printf("║ %d. %s | Price: %s | Type: %s%n",
+                    i + 1,
+                    p.getFullName(),
+                    p.getPrice(),
+                    p.getCategory()
+            );
+        }
+        System.out.println("╚═══════════════════════════════════════════╝");
+        System.out.println();
+    }
+
+    private void handleProductSelection(String input, List<Product> products, Customer customer) {
+        try {
+            int index = Integer.parseInt(input);
+            if (index >= 1 && index <= products.size()) {
+                Product selectedProduct = products.get(index - 1);
+                DisplayProduct.getInstance().display(selectedProduct, customer);
+            } else {
+                System.out.println("Invalid index! Try again.");
+                pauseForUser();
+            }
+        } catch (NumberFormatException e) {
+            System.out.println("Please enter a valid number!");
+            pauseForUser();
+        }
+    }
 
     private void pauseForUser() {
         System.out.println("Press Enter to continue...");

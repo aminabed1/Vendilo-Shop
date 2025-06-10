@@ -89,8 +89,9 @@ public class PersonInfoEdit implements Serializable {
         currentPerson.setEmail("");
         currentPerson.setPhoneNumber("");
         InfoValidator validator = new InfoValidator();
-        boolean isValid = validator.isPersonInfoValid(
-                nameTemp, surNameTemp, phoneTemp, emailTemp, usernameTemp, passwordTemp, errorList);
+        boolean isValid = validator.isPersonInfoValidP1(
+                nameTemp, surNameTemp, phoneTemp, errorList) &&
+                validator.isPersonInfoValidP2(emailTemp, usernameTemp, passwordTemp, errorList);
 
         currentPerson.setUsername(oldUsername);
         currentPerson.setEmail(oldEmail);

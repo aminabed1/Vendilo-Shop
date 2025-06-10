@@ -66,7 +66,9 @@ public class SellerMainPage implements Serializable {
             switch (option) {
                 case "1" -> sendNewRequest(seller);
                 case "2" -> displayRequest(seller);
-                case "3" -> { return; }
+                case "3" -> {
+                    return;
+                }
                 default -> System.out.println(ERROR + "Invalid option. Please try again." + RESET);
             }
         }
@@ -110,22 +112,17 @@ public class SellerMainPage implements Serializable {
 
     private void displaySellerOrders(Seller seller) {
         List<Order> sellerOrders = seller.getOrders();
-
-
         if (sellerOrders.isEmpty()) {
             System.out.println(WARNING + "You don't have any orders yet." + RESET);
             pause(1500);
             return;
         }
-
         while (true) {
             clearScreen();
             displayMenuHeader("MY ORDERS");
-
             System.out.println(MENU + String.format("%-5s %-20s %-15s %-12s",
                     "No.", "Product", "Date", "Amount") + RESET);
             System.out.println(MENU + "----------------------------------------------------" + RESET);
-
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
                     .withZone(ZoneId.systemDefault());
 
@@ -133,17 +130,13 @@ public class SellerMainPage implements Serializable {
                 Order order = sellerOrders.get(i);
                 Map<Product, Integer> productMap = order.getProductMap();
                 List<Product> productList = new ArrayList<>(productMap.keySet());
-
                 Product lastProduct = productList.getLast();
                 String productName = lastProduct.getFullName();
-
                 String date = formatter.format(order.getOrderDate());
                 String amount = String.format("%.2f $", order.getProductPrice() * 0.9);
-
                 System.out.println(OPTION + String.format("%-5d %-20s %-15s %-12s",
                         i+1, productName, date, SUCCESS + amount + RESET) + RESET);
             }
-
 
             System.out.print(PROMPT + "\nSelect an order (or 0 to back): " + RESET);
             String input = scan.nextLine().trim();
@@ -158,7 +151,6 @@ public class SellerMainPage implements Serializable {
                     showError("Invalid selection!");
                     continue;
                 }
-
                 displayOrderDetails(sellerOrders.get(selected - 1));
             } catch (NumberFormatException e) {
                 showError("Please enter a valid number");
@@ -207,7 +199,9 @@ public class SellerMainPage implements Serializable {
             switch (choice) {
                 case "1" -> manageMyProducts(seller);
                 case "2" -> addNewProduct(seller);
-                case "3" -> { return; }
+                case "3" -> {
+                    return;
+                }
                 default -> System.out.println(ERROR + "Please enter a valid choice (1-3)" + RESET);
             }
         }
@@ -255,7 +249,9 @@ public class SellerMainPage implements Serializable {
             switch (choice) {
                 case "1" -> DisplayProduct.getInstance().display(product, null);
                 case "2" -> changeProductStock(product);
-                case "3" -> { return; }
+                case "3" -> {
+                    return;
+                }
                 default -> System.out.println(ERROR + "Invalid choice. Please try again." + RESET);
             }
         }

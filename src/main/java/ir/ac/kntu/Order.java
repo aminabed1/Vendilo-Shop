@@ -30,7 +30,7 @@ public class Order implements Serializable {
         this.productMap = productMap;
     }
 
-    public Order (Instant orderDate, double price, String description) {
+    public Order(Instant orderDate, double price, String description) {
         this.orderDate = orderDate;
 //        this.totalPrice = totalPrice;
         this.productPrice = price;
@@ -135,6 +135,7 @@ public class Order implements Serializable {
     public void setProduct(Product product) {
         this.product = product;
     }
+
     public HashMap<Product, Integer> getProductMap() {
         return productMap;
     }

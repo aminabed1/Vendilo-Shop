@@ -34,19 +34,16 @@ public class LoginPage implements Serializable {
     private void readLoginInfo() {
         while (true) {
             displayLoginMenu();
-
             String choice = scan.nextLine().trim();
 
             if (choice.equalsIgnoreCase("4")) {
                 break;
             }
-
             if (choice.equals("0")) {
                 CreateAccountPage createAccountPage = new CreateAccountPage();
                 createAccountPage.createAccount();
                 continue;
             }
-
             if (!choice.matches("[0-3]")) {
                 showError("Please enter a valid option (0-4)");
                 continue;
@@ -65,11 +62,9 @@ public class LoginPage implements Serializable {
 
             String authenticationField = scan.nextLine().trim();
             System.out.print(RESET);
-
             System.out.print(PROMPT + "Enter Password: " + RESET + HIGHLIGHT);
             String passwordField = scan.nextLine().trim();
             System.out.print(RESET);
-
             Person person = authenticateUser(authenticationField, passwordField, roleName);
             if (person != null) {
                 showLoginSuccess(person);

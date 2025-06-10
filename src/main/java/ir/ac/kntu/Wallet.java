@@ -88,7 +88,9 @@ public class Wallet implements Serializable {
                         withdrawBalance(seller);
                     }
                 }
-                case "0" -> { return; }
+                case "0" -> {
+                    return;
+                }
                 default -> showError("Invalid option. Please try again!");
             }
         }
@@ -229,36 +231,29 @@ public class Wallet implements Serializable {
 
     public void addBalance(Customer customer) {
         clearScreen();
-
         System.out.println(TITLE + "╔═════════════════════════════════════╗");
         System.out.println("║" + BOLD + HIGHLIGHT + "           ADD TO BALANCE            " + RESET + TITLE + "║");
         System.out.println("╚═════════════════════════════════════╝" + RESET);
         System.out.println(OPTION + "  Current Balance: " + HIGHLIGHT +
                 String.format("%.2f $", this.getWalletBalance()) + RESET);
         System.out.print(OPTION + "  Enter amount (or type CANCEL): " + RESET + HIGHLIGHT);
-
         String input = scan.nextLine().trim();
         System.out.print(RESET);
-
         if (input.equalsIgnoreCase("CANCEL")) {
             return;
         }
-
         if (!input.matches("\\d+(\\.\\d+)?")) {
             showError("Invalid amount! Example: 50 or 12.5");
             addBalance(customer);
             return;
         }
-
         double amount = Double.parseDouble(input);
         if (amount <= 0) {
             showError("Amount must be greater than 0.");
             addBalance(customer);
             return;
         }
-
         setWalletBalance(this.getWalletBalance() + amount, null);
-
         System.out.println(SUCCESS + "\n═══════════════════════════════════════");
         System.out.println("  🎉 " + BOLD + "BALANCE UPDATED SUCCESSFULLY!    " + RESET + SUCCESS);
         System.out.printf("  New Balance: %.2f $%23s %n", this.getWalletBalance(), "");
@@ -267,26 +262,19 @@ public class Wallet implements Serializable {
     }
 
     public void displayTransactions(Customer customer) {
-        Instant filterStart = null;
-        Instant filterEnd = null;
-
+        Instant filterStart = null, filterEnd = null;
         while (true) {
-            clearScreen();
             List<Transaction> allTransactions = this.getTransactionList();
             List<Transaction> list = getFilteredTransactionList(allTransactions, filterStart, filterEnd);
-
             System.out.println(TITLE + "╔═════════════════════════════════════╗");
             System.out.println("║" + BOLD + HIGHLIGHT + "          TRANSACTION HISTORY        " + RESET + TITLE + "║");
             System.out.println("╚═════════════════════════════════════╝" + RESET);
-
             if (list.isEmpty()) {
                 System.out.println(ERROR + "No transactions found." + RESET);
                 pause(1500);
                 return;
             }
-
             displayTransactionMenu(list);
-
             System.out.println(TITLE + "\n╔═════════════════════════════════════╗");
             System.out.println("║" + OPTION + " Select a transaction by index       " + TITLE + "║");
             System.out.println("║" + OPTION + " Type 'FILTER' to filter by date     " + TITLE + "║");
@@ -294,35 +282,32 @@ public class Wallet implements Serializable {
             System.out.println("║" + OPTION + " Type 'BACK' to return               " + TITLE + "║");
             System.out.println("╚═════════════════════════════════════╝" + RESET);
             System.out.print(PROMPT + "Your choice: " + RESET);
-
             String choice = scan.nextLine().trim();
-
             switch (choice.toUpperCase()) {
-                case "BACK" -> { return; }
-                case "FILTER" -> {
+                case "BACK":
+                    return;
+                case "FILTER":
                     filterStart = getValidDate("Enter start date (yyyy-MM-dd): ");
                     filterEnd = getValidDate("Enter end date (yyyy-MM-dd): ");
-                }
-                case "CLEAR" -> {
+                    break;
+                case "CLEAR":
                     filterStart = null;
                     filterEnd = null;
                     System.out.println(SUCCESS + "Filter cleared." + RESET);
                     pause(1000);
-                }
-                default -> {
+                    break;
+                default:
                     if (!choice.matches("\\d+")) {
                         showError("⚠ Enter a valid index number!");
                         continue;
                     }
-
                     int index = Integer.parseInt(choice);
                     if (index <= 0 || index > list.size()) {
                         showError("⚠ Selected index out of range!");
                         continue;
                     }
-
                     handleTransactionSelection(list.get(index - 1), customer);
-                }
+                    break;
             }
         }
     }
@@ -362,11 +347,14 @@ public class Wallet implements Serializable {
     }
 
     private List<Transaction> getFilteredTransactionList(List<Transaction> all, Instant start, Instant end) {
-        if (start == null || end == null) return all;
+        if (start == null || end == null) {
+            return all;
+        }
         return all.stream()
                 .filter(t -> !t.getTimestamp().isBefore(start) && !t.getTimestamp().isAfter(end))
                 .toList();
     }
+
     private void handleTransactionSelection(Transaction transaction, Customer customer) {
         if (transaction.getOrder() == null) {
             System.out.println(ERROR + "\n No additional data for this transaction." + RESET);
@@ -398,8 +386,10 @@ public class Wallet implements Serializable {
 
             switch (choice) {
                 case "1" -> DisplayOrder.getInstance().display(customer);
-                case "2" -> {}
-                case "0" -> { return; }
+                case "0" -> {
+                    return;
+                }
+                default -> {}
             }
             break;
         }

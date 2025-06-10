@@ -69,6 +69,7 @@ public class DataBase implements Serializable {
         }
     }
 
+    @SuppressWarnings("unchecked")
     public static void loadData() {
         File file = new File(DATA_FILE);
         if (!file.exists()) {
