@@ -18,7 +18,6 @@ public class CreateAccountPage implements Serializable {
     private static final String BOLD = "\u001B[1m";
 
     public void createAccount() {
-        clearScreen();
         displayCreateAccountHeader();
 
         while (true) {
@@ -36,11 +35,6 @@ public class CreateAccountPage implements Serializable {
                 break;
             }
         }
-    }
-
-    private void clearScreen() {
-        System.out.print("\033[H\033[2J");
-        System.out.flush();
     }
 
     public void displayCreateAccountHeader() {
@@ -123,7 +117,6 @@ public class CreateAccountPage implements Serializable {
         private String province = "";
         private String sellerID = "";
 
-        // Getters
         public String getName() {
             return name;
         }
@@ -160,7 +153,6 @@ public class CreateAccountPage implements Serializable {
             return sellerID;
         }
 
-        // Setters with basic validation
         public void setName(String name) {
             if (name != null) {
                 this.name = name.trim();
@@ -214,8 +206,7 @@ public class CreateAccountPage implements Serializable {
                 this.sellerID = sellerID.trim();
             }
         }
-
-        // Validation methods
+        
         public boolean isAnyFieldEmpty(boolean isSeller) {
             if (name.isEmpty() || surname.isEmpty() || phone.isEmpty() ||
                     email.isEmpty() || username.isEmpty() || password.isEmpty()) {
@@ -378,8 +369,7 @@ public class CreateAccountPage implements Serializable {
                     || c.getUsername().equals(username)) {
                 return true;
             }
-            if (c instanceof Seller) {
-                Seller seller = (Seller) c;
+            if (c instanceof Seller seller) {
                 if (seller.getSellerID().equals(sellerID)) {
                     return true;
                 }
@@ -422,12 +412,7 @@ public class CreateAccountPage implements Serializable {
         System.out.println(SUCCESS + "\n╔═══════════════════════════════════════╗");
         System.out.println("║                                       ║");
         System.out.println("║" + BOLD + "      ACCOUNT CREATED SUCCESSFULLY     " + RESET + SUCCESS + "║");
-        System.out.printf("║ Role: %-31s ║\n", user.getRole());
-        if (user instanceof Seller seller) {
-            System.out.printf("║ Shop: %-31s ║\n", seller.getShopName());
-            System.out.printf("║ Province: %-27s ║\n", seller.getProvince());
-            System.out.printf("║ sellerID: %-27s ║\n", seller.getSellerID());
-        }
+        System.out.println("  Role:  " +  user.getRole());
         System.out.println("║                                       ║");
         System.out.println("╚═══════════════════════════════════════╝" + RESET);
         pause(2000);

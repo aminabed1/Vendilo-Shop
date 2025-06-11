@@ -5,9 +5,7 @@ import java.time.Instant;
 import java.util.*;
 
 public class HandleOrder implements Serializable {
-    private static double totalPrice = 0;
     private final static Scanner scan = new Scanner(System.in);
-    private static final double basePrice = 15;
     private static double finalPrice;
     private static double postPrice;
     private static List<String> sellersAgencyCode;
@@ -30,20 +28,11 @@ public class HandleOrder implements Serializable {
     }
 
     public void handleOrder(Person person) {
-        clearScreen();
-        finalPrice = 0;
-        postPrice = 0;
         productMap = new HashMap<>();
-        selectedAddress = null;
-
+//        selectedAddress = null;
         if (person instanceof Customer) {
             customerOrder(person);
         }
-    }
-
-    private void clearScreen() {
-        System.out.print("\033[H\033[2J");
-        System.out.flush();
     }
 
     public void customerOrder(Person person) {
@@ -57,11 +46,8 @@ public class HandleOrder implements Serializable {
             return;
         }
 
-        double postingPrice = calcPostingPrice(selectedAddress.getProvince(), cart);
-        postPrice = postingPrice;
-
-
-        finalPrice = getFinalPrice(cart, postingPrice);
+        postPrice = calculatePostingPrice(selectedAddress.getProvince(), cart);;
+        finalPrice = getFinalPrice(cart, postPrice);
         displayCartSummary(cart);
         displayFinalizeOption(person);
     }
@@ -77,7 +63,7 @@ public class HandleOrder implements Serializable {
         return true;
     }
 
-    public double calcPostingPrice(String province, Cart cart) {
+    public double calculatePostingPrice(String province, Cart cart) {
         productMap = cart.getProductMap();
         for (Product product : productMap.keySet()) {
             String sellerProvince = getSellerProvince(product.getSellerAgencyCode());
@@ -111,26 +97,23 @@ public class HandleOrder implements Serializable {
     }
 
     public double getFinalPrice(Cart cart, double postingPrice) {
-        double total = 0.0;
+        double finalPrice = 0.0;
+        int productQuantity = 0;
         for (Product product : cart.getProductMap().keySet()) {
-            total += Double.parseDouble(product.getPrice());
+            productQuantity = cart.getProductMap().get(product);
+            finalPrice += Double.parseDouble(product.getPrice()) * productQuantity;
         }
-        return total + postingPrice;
+        return finalPrice + postingPrice;
     }
 
-
     public void displayCartSummary(Cart cart) {
-        clearScreen();
-        double totalPrice = 0;
-
         displayOrderSummaryHeader();
 
         for (Product product : cart.getProductMap().keySet()) {
             displayProductSummary(product);
-            totalPrice += Double.parseDouble(product.getPrice()) * cart.getProductMap().get(product);
         }
 
-        displayPrices(totalPrice, postPrice);
+        displayPrices();
     }
 
     public void displayFinalizeOption(Person person) {
@@ -168,20 +151,31 @@ public class HandleOrder implements Serializable {
         }
     }
 
+    public Map<Product, Integer> fillSellerOrderProductMap(String sellerAgencyCode) {
+        Map<Product, Integer> sellerProductMap = new HashMap<>();
+        for (Product product : productMap.keySet()) {
+            if (sellerAgencyCode.equals(product.getSellerAgencyCode())) {
+                sellerProductMap.put(product, productMap.get(product));
+            }
+        }
+        return sellerProductMap;
+    }
+
     public void finalizeOrder(Person person) {
         setSellersCodeList();
         Customer customer = (Customer) person;
-        Order newOrder = new Order(productMap, Instant.now(), sellersAgencyCode, customer.getEmail(), selectedAddress, finalPrice, postPrice);
+        CustomerOrder newOrder = new CustomerOrder(Instant.now(), sellersAgencyCode, customer.getEmail(), selectedAddress, postPrice, finalPrice, productMap);
+        //TODO enhance here and prevent duplicate heap memory usage
         DataBase.addOrder(newOrder);
         customer.addOrder(newOrder);
+        //TODO till here
         double newBalance = customer.getWallet().getWalletBalance() - finalPrice;
         customer.getWallet().setWalletBalance(newBalance, newOrder);
         customer.setCart(new Cart());
 
         displayOrderCompleted(newBalance);
-        chargeSellersWallet(person, productMap);
+        handleSellerOrder(person, productMap);
         reduceProductsStock();
-        createSellerOrder(selectedAddress, person.getEmail());
         pause(3000);
     }
 
@@ -191,32 +185,23 @@ public class HandleOrder implements Serializable {
         }
     }
 
-    public void chargeSellersWallet(Person person, HashMap<Product, Integer> productMap) {
+    public void handleSellerOrder(Person customer, HashMap<Product, Integer> productMap) {
         for (Product product : productMap.keySet()) {
             String agencyCode = product.getSellerAgencyCode();
             Seller seller = findSellerByAgencyCode(agencyCode);
-            if (seller != null) {
-                double productPrice = Double.parseDouble(product.getPrice());
-                double sellerShare = productPrice * 0.9;
-                double currentBalance = seller.getWallet().getWalletBalance();
+            Map<Product, Integer> sellerOrderProductMap = fillSellerOrderProductMap(agencyCode);
 
-                Order sellerOrder = new Order(
-                        Instant.now(),
-                        sellerShare,
-                        "Sale of product: " + product.getFullName()
-                );
+            double productPrice = Double.parseDouble(product.getPrice()) * productMap.get(product);
+            double sellerBenefit = productPrice * 0.9;
+            double currentBalance = seller.getWallet().getWalletBalance();
 
-                seller.getWallet().setWalletBalance(currentBalance + sellerShare, sellerOrder);
+            SellerOrder sellerOrder = new SellerOrder(Instant.now(),
+                    sellerBenefit, selectedAddress, customer.getEmail(),
+                    "Sale of product: ", sellerOrderProductMap);
 
-            }
-        }
-    }
-
-    public void createSellerOrder(Address deliveryAddress, String customerEmail) {
-        for (Product product : productMap.keySet()) {
-            Order newOrder = new Order(product, Instant.now(), Double.parseDouble(product.getPrice()), deliveryAddress, customerEmail);//seller order
-            Seller seller = findSellerByAgencyCode(product.getSellerAgencyCode());
-            seller.addOrder(newOrder);
+            seller.getWallet().setWalletBalance(currentBalance + sellerBenefit, sellerOrder);
+            seller.addOrder(sellerOrder);
+            DataBase.addOrder(sellerOrder);
         }
     }
 
@@ -235,7 +220,6 @@ public class HandleOrder implements Serializable {
         PersonAccount personInfo = new PersonAccount();
 
         while (true) {
-            clearScreen();
             displayAddressSelectionHeader();
 
             if (addressList.isEmpty()) {
@@ -293,18 +277,19 @@ public class HandleOrder implements Serializable {
     }
 
     private void displayProductSummary(Product product) {
-        System.out.println(MENU + "╔══════════════════════════════════════════════════════╗");
-        System.out.printf(OPTION + "  %-30s " + HIGHLIGHT + "%10.2f $\n", product.getFullName(), Double.parseDouble(product.getPrice()));
+        System.out.println(MENU   + "╔══════════════════════════════════════════════════════╗");
+        System.out.printf(OPTION  + "  %-30s " + HIGHLIGHT + "%10.2f $\n", product.getFullName(), Double.parseDouble(product.getPrice()));
         System.out.println(OPTION + "  Category: " + HIGHLIGHT + product.getCategory());
+        System.out.println(OPTION + "  Quantity: " + HIGHLIGHT + productMap.get(product));
         System.out.println(OPTION + "  Seller: " + HIGHLIGHT + getShopName(product.getSellerAgencyCode()));
-        System.out.println(MENU + "╚══════════════════════════════════════════════════════╝" + RESET);
+        System.out.println(MENU   + "╚══════════════════════════════════════════════════════╝" + RESET);
     }
 
-    private void displayPrices(double total, double postingPrice) {
+    private void displayPrices() {
         System.out.println(TITLE + "════════════════════════════════════════════════════════");
-        System.out.printf(" " + BOLD + "  POSTING PRICE: " + HIGHLIGHT + "%.2f $" + TITLE + "\n", postingPrice);
-        System.out.printf(" " + BOLD + "  PRODUCTS PRICE: " + HIGHLIGHT + "%.2f $" + TITLE + "\n", total);
-        System.out.printf(" " + BOLD + "  TOTAL PRICE: " + HIGHLIGHT + "%.2f $" + TITLE + "\n", total + postingPrice);
+        System.out.printf(" " + BOLD + "  POSTING PRICE: " + HIGHLIGHT + "%.2f $" + TITLE + "\n", postPrice);
+        System.out.printf(" " + BOLD + "  PRODUCTS PRICE: " + HIGHLIGHT + "%.2f $" + TITLE + "\n", finalPrice - postPrice);
+        System.out.printf(" " + BOLD + "  TOTAL PRICE: " + HIGHLIGHT + "%.2f $" + TITLE + "\n", finalPrice);
         System.out.println("════════════════════════════════════════════════════════" + RESET);
     }
 
@@ -323,7 +308,7 @@ public class HandleOrder implements Serializable {
         System.out.println("║                                     ║");
         System.out.println("╚═════════════════════════════════════╝");
         System.out.printf("  Current: %.2f $\n", current);
-        System.out.printf("  Needed: %.2f $ \n", totalPrice);
+        System.out.printf("  Needed: %.2f $ \n", finalPrice);
         System.out.println("═══════════════════════════════════════" + RESET);
     }
 

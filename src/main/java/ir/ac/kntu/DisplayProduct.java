@@ -38,8 +38,6 @@ public class DisplayProduct implements Serializable {
             System.out.println("Unknown product type");
         }
 
-
-
         if (product.getErrorList() != null && !product.getErrorList().isEmpty()) {
             System.out.println(ANSI_RED + "\n⚠️ Validation Errors:" + ANSI_RESET);
             for (String error : product.getErrorList()) {
@@ -48,7 +46,6 @@ public class DisplayProduct implements Serializable {
         }
 
         System.out.println(ANSI_CYAN + "==================================================" + ANSI_RESET);
-
         showActionMenu(product, customer);
     }
 
@@ -99,12 +96,7 @@ public class DisplayProduct implements Serializable {
             default:
                 System.out.println(ANSI_RED + "Invalid choice!" + ANSI_RESET);
         }
-
-        try {
-            Thread.sleep(1500);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
+        pause(1500);
     }
 
     public void displayField(String label, String value) {
@@ -150,5 +142,13 @@ public class DisplayProduct implements Serializable {
         displayField("OS", digitalProduct.getOS());
         displayField("Battery", digitalProduct.getBatteryCapacity());
         displayField("Chipset", digitalProduct.getChipset());
+    }
+
+    public void pause(int milliseconds) {
+        try {
+            Thread.sleep(milliseconds);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 }

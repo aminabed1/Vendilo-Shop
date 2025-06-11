@@ -4,16 +4,16 @@ import java.io.Serializable;
 import java.util.*;
 
 public class AddProduct implements Serializable {
-    private static final String RESET = "\u001B[0m";
-    private static final String TITLE = "\u001B[38;5;45m";
-    private static final String MENU = "\u001B[38;5;39m";
-    private static final String OPTION = "\u001B[38;5;159m";
-    private static final String PROMPT = "\u001B[38;5;228m";
-    private static final String SUCCESS = "\u001B[38;5;46m";
-    private static final String ERROR = "\u001B[38;5;203m";
-    private static final String HIGHLIGHT = "\u001B[38;5;231m";
-    private static final String BOLD = "\u001B[1m";
-    private final static Scanner scan = new Scanner(System.in);
+    public static final String RESET = "\u001B[0m";
+    public static final String TITLE = "\u001B[38;5;45m";
+    public static final String MENU = "\u001B[38;5;39m";
+    public static final String OPTION = "\u001B[38;5;159m";
+    public static final String PROMPT = "\u001B[38;5;228m";
+    public static final String SUCCESS = "\u001B[38;5;46m";
+    public static final String ERROR = "\u001B[38;5;203m";
+    public static final String HIGHLIGHT = "\u001B[38;5;231m";
+    public static final String BOLD = "\u001B[1m";
+    public final static Scanner scan = new Scanner(System.in);
 
     public static AddProduct getInstance() {
         return new AddProduct();
@@ -64,8 +64,7 @@ public class AddProduct implements Serializable {
 
     private String selectDigitalProductType() {
         while (true) {
-            printMenu("Select a DigitalProduct",
-                    new String[]{"1. Laptop", "2. Phone", "3. Back"});
+            printMenu("Select a DigitalProduct", new String[]{"1. Laptop", "2. Phone", "3. Back"});
 
             String digitalChoice = scan.nextLine().trim();
             switch (digitalChoice) {
@@ -97,12 +96,7 @@ public class AddProduct implements Serializable {
             int choice = getMenuChoice(builder.getFieldCount() + 2);
 
             if (choice == builder.getFieldCount() + 1) {
-                try {
-                    return builder.build(seller);
-                } catch (IllegalStateException e) {
-                    showError(e.getMessage());
-                    pause(2000);
-                }
+                return builder.build(seller);
             } else if (choice == builder.getFieldCount() + 2) {
                 return null;
             } else {
@@ -111,18 +105,21 @@ public class AddProduct implements Serializable {
         }
     }
 
-    private int getMenuChoice(int maxOption) {
+
+    private int getMenuChoice(int maxOptionNumber) {
         while (true) {
             System.out.print(PROMPT + "Enter your choice: " + RESET + HIGHLIGHT);
-            try {
-                int choice = Integer.parseInt(scan.nextLine().trim());
-                if (choice >= 1 && choice <= maxOption) {
+            String input = scan.nextLine().trim();
+            if (!input.matches("\\d+")) {
+                showError("Please enter a valid number!");
+            } else {
+                int choice = Integer.parseInt(input);
+                if (choice >= 1 && choice <= maxOptionNumber) {
                     System.out.print(RESET);
                     return choice;
+                } else {
+                    showError("Please enter a number between 1 and " + maxOptionNumber);
                 }
-                showError("Please enter a number between 1 and " + maxOption);
-            } catch (NumberFormatException e) {
-                showError("Please enter a valid number!");
             }
         }
     }
@@ -131,15 +128,10 @@ public class AddProduct implements Serializable {
         String fieldName = builder.getFieldName(fieldIndex);
         System.out.print(PROMPT + fieldName + ": " + RESET + HIGHLIGHT);
         String value = scan.nextLine().trim();
-        try {
-            builder.setField(fieldIndex, value);
-        } catch (IllegalArgumentException e) {
-            showError(e.getMessage());
-            pause(1500);
-        }
+        builder.setField(fieldIndex, value);
         System.out.print(RESET);
     }
-
+    
     private void printMenu(String title, String[] options) {
         System.out.println(TITLE + "\n=== " + title + " ===" + RESET);
         for (String option : options) {
@@ -174,16 +166,12 @@ interface ProductBuilder {
 
 class ProductBuilderFactory {
     public static ProductBuilder createBuilder(String productType) {
-        switch (productType) {
-            case "Book":
-                return new BookBuilder();
-            case "LopTop":
-                return new LaptopBuilder();
-            case "Phone":
-                return new PhoneBuilder();
-            default:
-                return null;
-        }
+        return switch (productType) {
+            case "Book" -> new BookBuilder();
+            case "LopTop" -> new LaptopBuilder();
+            case "Phone" -> new PhoneBuilder();
+            default -> null;
+        };
     }
 }
 
@@ -194,78 +182,47 @@ abstract class BaseProductBuilder implements ProductBuilder {
     static final String HIGHLIGHT = "\u001B[38;5;231m";
     static final String BOLD = "\u001B[1m";
 
-    private final List<String> fields = new ArrayList<>();
     private final List<String> fieldNames = new ArrayList<>();
     private final List<String> fieldValues = new ArrayList<>();
 
-    // Getters and Setters
-    protected List<String> getFields() {
-        return new ArrayList<>(fields);
-    }
-
-    protected List<String> getFieldNames() {
-        return new ArrayList<>(fieldNames);
-    }
-
-    protected List<String> getFieldValues() {
-        return new ArrayList<>(fieldValues);
-    }
-
-    protected void setFieldValue(int index, String value) {
+    public void setFieldValue(int index, String value) {
         if (index >= 0 && index < fieldValues.size()) {
             fieldValues.set(index, value);
         }
     }
 
-    protected String getFieldValue(int index) {
+    public String getFieldValue(int index) {
         if (index >= 0 && index < fieldValues.size()) {
             return fieldValues.get(index);
         }
         return "";
     }
 
-    protected void addFieldName(String name) {
+    public void addFieldName(String name) {
         fieldNames.add(name);
         fieldValues.add("");
     }
 
-    protected void initializeFieldValues(int size) {
-        fieldValues.clear();
-        fieldValues.addAll(Collections.nCopies(size, ""));
-    }
-
     @Override
     public void displayCurrentState() {
-        final int BOX_WIDTH = 60;
-        final int LABEL_WIDTH = 25;
-        final int VALUE_WIDTH = 30;
-
-        System.out.println(MENU + "╔" + "═".repeat(BOX_WIDTH - 2) + "╗");
-        System.out.println("║ " + BOLD + centerText(getProductTitle()) + RESET + MENU + " ║");
-        System.out.println("╠" + "═".repeat(BOX_WIDTH - 2) + "╣");
-
+        System.out.println();
+        System.out.println(MENU + "╔══════════════════════════════════════════════╗");
+        System.out.println("║ " + BOLD + centerText(getProductTitle()) + RESET + MENU);
+        System.out.println("╠══════════════════════════════════════════════╣");
         for (int i = 0; i < fieldNames.size(); i++) {
             String label = fieldNames.get(i);
             String value = fieldValues.get(i).isEmpty() ? "Empty" : fieldValues.get(i);
-
-            if (value.length() > VALUE_WIDTH) {
-                value = value.substring(0, VALUE_WIDTH - 3) + "...";
+            if (value.length() > 30) {
+                value = value.substring(0, 27) + "...";
             }
-
-            System.out.printf("║ " + OPTION + "%-" + LABEL_WIDTH + "s: " +
-                    HIGHLIGHT + "%-" + VALUE_WIDTH + "s" +
-                    MENU + "║\n", label, value);
+            System.out.println("║ " + OPTION + label + ": " + HIGHLIGHT + value);
         }
-
-        System.out.println("╠" + "═".repeat(BOX_WIDTH - 2) + "╣");
-        System.out.printf("║ " + OPTION + "%d. Confirm Information" +
-                        MENU + "%" + (BOX_WIDTH - 24 - String.valueOf(fieldNames.size() + 1).length()) + "s║\n",
-                fieldNames.size() + 1, "");
-        System.out.printf("║ " + OPTION + "%d. Back" +
-                        MENU + "%" + (BOX_WIDTH - 9 - String.valueOf(fieldNames.size() + 2).length()) + "s║\n",
-                fieldNames.size() + 2, "");
-        System.out.println("╚" + "═".repeat(BOX_WIDTH - 2) + "╝" + RESET);
+        System.out.println("╠══════════════════════════════════════════════╣");
+        System.out.println("║ " + OPTION + (fieldNames.size() + 1) + ". Confirm Information");
+        System.out.println("║ " + OPTION + (fieldNames.size() + 2) + ". Back");
+        System.out.println("╚══════════════════════════════════════════════╝" + RESET);
     }
+
 
     protected String centerText(String text) {
         if (text.length() >= 56) {
@@ -289,21 +246,31 @@ abstract class BaseProductBuilder implements ProductBuilder {
         return "";
     }
 
-    protected void validateNumericField(String value, String fieldName, boolean isDouble) throws IllegalArgumentException {
-        try {
-            if (isDouble) {
-                double num = Double.parseDouble(value);
-                if (num <= 0) {
-                    throw new IllegalArgumentException(fieldName + " must be positive");
-                }
-            } else {
-                int num = Integer.parseInt(value);
-                if (num < 0) {
-                    throw new IllegalArgumentException(fieldName + " cannot be negative");
-                }
+    public void validateNumericField(String value, String fieldName, boolean isDouble) {
+        if (value == null || value.trim().isEmpty()) {
+            System.out.println(fieldName + " cannot be empty");
+            return;
+        }
+
+        String trimmed = value.trim();
+        if (isDouble) {
+            if (!trimmed.matches("\\d+(\\.\\d+)?")) {
+                System.out.println(fieldName + " must be a valid positive decimal number");
+                return;
             }
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException(fieldName + " must be a valid number");
+            double num = Double.parseDouble(trimmed);
+            if (num <= 0) {
+                System.out.println(fieldName + " must be positive");
+            }
+        } else {
+            if (!trimmed.matches("\\d+")) {
+                System.out.println(fieldName + " must be a valid non-negative integer");
+                return;
+            }
+            int num = Integer.parseInt(trimmed);
+            if (num < 0) {
+                System.out.println(fieldName + " cannot be negative");
+            }
         }
     }
 

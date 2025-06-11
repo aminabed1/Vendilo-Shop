@@ -32,18 +32,14 @@ public class Cart implements Serializable {
             displayEmptyCart();
             return;
         }
-
-        Scanner input = new Scanner(System.in);
+        Scanner scan = new Scanner(System.in);
         while (true) {
-            clearScreen();
             displayCartContents(person);
-
-            String choice = getCustomerChoice(input);
+            String choice = getCustomerChoice(scan);
             if (handleCartNavigation(choice, person)) {
                 return;
             }
-
-            handleProductSelection(choice, input, person);
+            handleProductSelection(choice, scan, person);
         }
     }
 
@@ -58,24 +54,9 @@ public class Cart implements Serializable {
 
     private void displayCartContents(Customer person) {
         double totalPrice = calculateTotalPrice();
-        int[] columnWidths = calculateColumnWidths();
-        int boxWidth = Math.max(50, columnWidths[0] + columnWidths[1] + 15);
-
-        printCartHeader(boxWidth);
-        printProductList(boxWidth, columnWidths);
-        printCartFooter(boxWidth, totalPrice);
-    }
-
-    private int[] calculateColumnWidths() {
-        int maxNameLength = productMap.keySet().stream()
-                .mapToInt(p -> p.getFullName().length())
-                .max().orElse(20);
-
-        int maxPriceLength = productMap.keySet().stream()
-                .mapToInt(p -> String.format("%.2f", Double.parseDouble(p.getPrice())).length())
-                .max().orElse(6);
-
-        return new int[]{maxNameLength, maxPriceLength};
+        printCartHeader();
+        printProductList();
+        printCartFooter(totalPrice);
     }
 
     private double calculateTotalPrice() {
@@ -84,46 +65,39 @@ public class Cart implements Serializable {
                 .sum();
     }
 
-    private void printCartHeader(int boxWidth) {
-        System.out.println(TITLE + "╔" + "═".repeat(boxWidth) + "╗");
-        System.out.println("║" + BOLD + HIGHLIGHT + centerText("YOUR CART", boxWidth) + RESET + TITLE + "║");
-        System.out.println("╠" + "═".repeat(boxWidth) + "╣" + RESET);
+    private void printCartHeader() {
+        System.out.println(MENU + "╔══════════════════════════════════════════════╗");
+        System.out.println(       "║" + BOLD + "                 YOUR CART                    " + RESET + TITLE + "║");
+        System.out.println(MENU + "╚══════════════════════════════════════════════╝");
     }
 
-    private void printProductList(int boxWidth, int[] columnWidths) {
+    private void printProductList() {
         List<Product> productList = new ArrayList<>(productMap.keySet());
         for (int i = 0; i < productList.size(); i++) {
-            printProductItem(i, productList.get(i), boxWidth, columnWidths);
+            printProductItem(i, productList.get(i));
         }
     }
 
-    private void printProductItem(int index, Product product, int boxWidth, int[] columnWidths) {
-        int quantity = productMap.get(product);
-        String formattedPrice = String.format("%.2f $", Double.parseDouble(product.getPrice()));
-
-        System.out.println(OPTION + "  " + (index + 1) + ". " + MENU + "╔" + "═".repeat(boxWidth) + "╗");
-        System.out.println(OPTION + "     " + BOLD + "     Name: " + RESET + HIGHLIGHT +
-                String.format("%-" + columnWidths[0] + "s", product.getFullName()));
-        System.out.println(OPTION + "     " + BOLD + "     Price: " + RESET + HIGHLIGHT +
-                String.format("%" + columnWidths[1] + "s ", formattedPrice));
-        System.out.println(OPTION + "     " + BOLD + "     Quantity: " + RESET + HIGHLIGHT + quantity);
-        System.out.println(OPTION + "     " + BOLD + "     Category: " + RESET + HIGHLIGHT +
-                product.getCategory());
-        System.out.println(MENU + "     ╚" + "═".repeat(boxWidth) + "╝\n" + RESET);
+    private void printProductItem(int i, Product product) {
+        System.out.println();
+        System.out.println(MENU   + "╔══════════════════════════════════════════════╗");
+        System.out.println(i + 1);
+        System.out.printf(OPTION  + "  %-30s " + HIGHLIGHT + "%10.2f $\n", product.getFullName(), Double.parseDouble(product.getPrice()));
+        System.out.println(OPTION + "  Category: " + HIGHLIGHT + product.getCategory());
+        System.out.println(OPTION + "  Quantity: " + HIGHLIGHT + productMap.get(product));
+        System.out.println(OPTION + "  Seller: " + HIGHLIGHT + getShopName(product.getSellerAgencyCode()));
+        System.out.println(MENU   + "╚══════════════════════════════════════════════╝" + RESET);
     }
 
-    private void printCartFooter(int boxWidth, double totalPrice) {
-        String totalLine = "TOTAL:  " + String.format("%.2f $      ", totalPrice);
-        System.out.println(TITLE + "╔" + "═".repeat(boxWidth) + "╗");
-        System.out.println("║" + PROMPT + String.format("%-" + (boxWidth - 1) + "s", totalLine) + TITLE + " ║");
-        System.out.println("╠" + "═".repeat(boxWidth) + "╣");
-        System.out.println("║" + OPTION + "  Select product by number  " +
-                " ".repeat(boxWidth - 28) + TITLE + "║");
-        System.out.println("║" + OPTION + "  Type " + BOLD + "DONE" + RESET + OPTION + " to checkout     " +
-                " ".repeat(boxWidth - 28) + TITLE + "║");
-        System.out.println("║" + OPTION + "  Type " + BOLD + "BACK" + RESET + OPTION + " to return     " +
-                " ".repeat(boxWidth - 26) + TITLE + "║");
-        System.out.println("╚" + "═".repeat(boxWidth) + "╝" + RESET);
+    private void printCartFooter(double totalPrice) {
+        System.out.println();
+        System.out.println(MENU   + "════════════════════════════════════════════════");
+        System.out.println(MENU   + "  TOTAL PRICE: " + HIGHLIGHT + totalPrice);
+        System.out.println(MENU   + "════════════════════════════════════════════════");
+        System.out.println(OPTION + "  Select product by number or :");
+        System.out.println(OPTION + "  Type DONE to checkout");
+        System.out.println(OPTION + "  Type BACK to return");
+        System.out.println(MENU   + "════════════════════════════════════════════════" + RESET);
     }
 
     private String getCustomerChoice(Scanner input) {
@@ -159,16 +133,20 @@ public class Cart implements Serializable {
             showError("Invalid product number");
             return;
         }
-
         processSelectedProduct(input, productList.get(index));
     }
 
     private void processSelectedProduct(Scanner input, Product product) {
-        System.out.println("\nProduct selected: " + product.getFullName());
-        System.out.println("1. Display product details");
-        System.out.println("2. Remove product from cart");
-        System.out.println("3. Deselect product");
         System.out.print("Enter action: ");
+        System.out.println(MENU   + "════════════════════════════════════════════════════════");
+        System.out.println(MENU   + "  Product selected: " + HIGHLIGHT + product.getFullName());
+        System.out.println(MENU   + "════════════════════════════════════════════════════════");
+        System.out.println(OPTION + "  1. Display product details");
+        System.out.println(OPTION + "  2. Remove product from cart");
+        System.out.println(OPTION + "  3. Deselect product");
+        System.out.println(MENU   + "════════════════════════════════════════════════════════" + RESET);
+        System.out.print("Enter action: ");
+
         String action = input.nextLine().trim();
 
         switch (action) {
@@ -187,12 +165,13 @@ public class Cart implements Serializable {
         }
     }
 
-    public String centerText(String text, int width) {
-        if (text.length() >= width) {
-            return text;
+    public String getShopName(String agencyCode) {
+        for (Person person : DataBase.getPersonList()) {
+            if (person instanceof Seller && agencyCode.equals(((Seller) person).getAgencyCode())) {
+                return ((Seller) person).getShopName();
+            }
         }
-        int padding = (width - text.length()) / 2;
-        return " ".repeat(padding) + text + " ".repeat(width - text.length() - padding);
+        return null;
     }
 
     public void showError(String message) {
@@ -206,10 +185,5 @@ public class Cart implements Serializable {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
-    }
-
-    public void clearScreen() {
-        System.out.print("\033[H\033[2J");
-        System.out.flush();
     }
 }

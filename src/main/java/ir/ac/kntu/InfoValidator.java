@@ -10,9 +10,8 @@ public class InfoValidator {
     private static final String ALL_CHAR_REGEX = "^[A-Za-z\\s]{3,}$";
 
     private static List<Person> personList;
-    private static List<Product> productList;
 
-    public boolean emailUniquementCheck(String email, List<String> errorList) {
+    public boolean emailUniqueCheck(String email, List<String> errorList) {
         for (Person person : personList) {
             if (person.getEmail().equals(email)) {
                 errorList.add("Email already in use");
@@ -23,7 +22,7 @@ public class InfoValidator {
         return true;
     }
 
-    public boolean phoneNumberUniquementCheck(String phoneNumber, List<String> errorList) {
+    public boolean phoneNumberUniqueCheck(String phoneNumber, List<String> errorList) {
         for (Person person : personList) {
             if (person instanceof Support)  {
                 continue;
@@ -38,7 +37,7 @@ public class InfoValidator {
         return true;
     }
 
-    public boolean usernameUniquementCheck(String username, List<String> errorList) {
+    public boolean usernameUniqueCheck(String username, List<String> errorList) {
         for (Person person : personList) {
             if (person.getUsername().equals(username)) {
                 errorList.add("Username already in use");
@@ -136,7 +135,7 @@ public class InfoValidator {
 
     public boolean isPersonInfoValidP1(String name, String surname, String phoneNumber, List<String> errorList) {
         personList = DataBase.getPersonList();
-        boolean isUnique = phoneNumberUniquementCheck(phoneNumber, errorList);
+        boolean isUnique = phoneNumberUniqueCheck(phoneNumber, errorList);
 
         boolean isValid = nameValidation(name, errorList) &&
                 nameValidation(surname, errorList) &&
@@ -147,8 +146,8 @@ public class InfoValidator {
 
     public boolean isPersonInfoValidP2(String email, String username, String password, List<String> errorList) {
         personList = DataBase.getPersonList();
-        boolean isUnique = emailUniquementCheck(email, errorList) &&
-                usernameUniquementCheck(username, errorList);
+        boolean isUnique = emailUniqueCheck(email, errorList) &&
+                usernameUniqueCheck(username, errorList);
 
         boolean isValid = emailValidation(email, errorList) &&
                 usernameValidation(username, errorList) &&

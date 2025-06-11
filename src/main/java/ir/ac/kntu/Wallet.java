@@ -125,11 +125,18 @@ public class Wallet implements Serializable {
             System.out.println(MENU + "------------------------------------------------------------" + RESET);
 
             int counter = 1;
-            for (Transaction t : transactions) {
-                String date = formatter.format(t.getTimestamp());
-                String amount = String.format("%.2f $", t.getAmount());
-                String description = t.getOrder() != null ?
-                        t.getOrder().getTransactionDescription() : "Wallet Transaction";
+            for (Transaction transaction : transactions) {
+                String date = formatter.format(transaction.getTimestamp());
+                String amount = String.format("%.2f $", transaction.getAmount());
+
+                String description;
+                Order order = transaction.getOrder();
+
+                if (order instanceof SellerOrder sellerOrder) {
+                    description = sellerOrder.getTransactionDescription();
+                } else {
+                    description = "Wallet Transaction";
+                }
 
                 System.out.println(OPTION + String.format("%-5d %-20s %-12s %-30s",
                         counter++, date, SUCCESS + amount + RESET, description) + RESET);
@@ -394,7 +401,6 @@ public class Wallet implements Serializable {
             break;
         }
     }
-
 
     private void showError(String message) {
         System.out.println(ERROR + "\n " + message + RESET);

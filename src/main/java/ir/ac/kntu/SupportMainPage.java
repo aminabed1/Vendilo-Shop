@@ -295,11 +295,15 @@ public class SupportMainPage implements Serializable {
 
             for (int i = 0; i < mainOrders.size(); i++) {
                 Order order = mainOrders.get(i);
-                System.out.printf("%2d. Customer email: %-30s | Total Price: %-10.2f | Order Date: %s\n",
-                        i + 1,
-                        order.getCustomerEmail(),
-                        order.getTotalPrice(),
-                        order.getOrderDate());
+                if (order instanceof CustomerOrder customerOrder) {
+                    System.out.printf("%2d. Customer email: %-30s | Total Price: %-10.2f | Order Date: %s\n",
+                            i + 1,
+                            customerOrder.getCustomerEmail(),
+                            customerOrder.getTotalPrice(),
+                            customerOrder.getOrderDate());
+                } else {
+                    System.out.printf("%2d. [UNKNOWN ORDER TYPE]\n", i + 1);
+                }
             }
 
             System.out.print(PROMPT + "\nEnter choice (0 to back): " + RESET);
@@ -326,7 +330,7 @@ public class SupportMainPage implements Serializable {
     private List<Order> getMainOrders() {
         List<Order> mainOrders = new ArrayList<>();
         for (Order order : DataBase.getOrderList()) {
-            if (order.getProduct() == null) {
+            if (order instanceof CustomerOrder) {
                 mainOrders.add(order);
             }
         }

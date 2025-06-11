@@ -3,12 +3,12 @@ package ir.ac.kntu;
 import java.io.Serializable;
 
 public class DigitalProduct extends Product implements Serializable {
-    private String Brand;
-    private String internalStorage;
-    private String RAM;
-    private String OS;
-    private String batteryCapacity;
-    private String chipset;
+    private final String Brand;
+    private final String internalStorage;
+    private final String RAM;
+    private final String OS;
+    private final String batteryCapacity;
+    private final String chipset;
 
     public DigitalProduct(String brand, String price, String internalStorage, String RAM, String OS, String batteryCapacity, String chipset, int stock, String sellerAgencyCode) {
         super("Digital Product", sellerAgencyCode);
@@ -27,47 +27,23 @@ public class DigitalProduct extends Product implements Serializable {
         return Brand;
     }
 
-    public void setBrand(String brand) {
-        Brand = brand;
-    }
-
     public String getInternalStorage() {
         return internalStorage;
-    }
-
-    public void setInternalStorage(String internalStorage) {
-        this.internalStorage = internalStorage;
     }
 
     public String getRAM() {
         return RAM;
     }
 
-    public void setRAM(String RAM) {
-        this.RAM = RAM;
-    }
-
     public String getOS() {
         return OS;
-    }
-
-    public void setOS(String OS) {
-        this.OS = OS;
     }
 
     public String getBatteryCapacity() {
         return batteryCapacity;
     }
 
-    public void setBatteryCapacity(String batteryCapacity) {
-        this.batteryCapacity = batteryCapacity;
-    }
-
     public String getChipset() {
         return chipset;
-    }
-
-    public void setChipset(String chipset) {
-        this.chipset = chipset;
     }
 }

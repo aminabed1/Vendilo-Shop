@@ -43,16 +43,16 @@ public class DisplayOrder implements Serializable {
 
         System.out.println("🗓️  \u001B[36mOrder Date:\u001B[0m " + formatInstant(order.getOrderDate()));
 
-        List<String> agencyCodes = order.getSellersAgencyCode();
+        List<String> agencyCodes = ((CustomerOrder) order).getSellersAgencyCode();
         if (agencyCodes != null && !agencyCodes.isEmpty()) {
             System.out.println("🏢 \u001B[36mSeller Agency Code(s):\u001B[0m " + String.join(", ", agencyCodes));
         } else {
             System.out.println("🏢 \u001B[33mNo agency code found.\u001B[0m");
         }
 
-        System.out.printf("💰 \u001B[36mTotal Price:\u001B[0m \u001B[32m%.2f\u001B[0m\n", order.getTotalPrice());
+        System.out.printf("💰 \u001B[36mTotal Price:\u001B[0m \u001B[32m%.2f\u001B[0m\n", ((CustomerOrder) order).getTotalPrice());
 
-        System.out.println("🛍️  \u001B[36mNumber of Products:\u001B[0m " + order.getProductMap().size());
+        System.out.println("🛍️  \u001B[36mNumber of Products:\u001B[0m " +((CustomerOrder) order).getProductMap().size());
 
         Address addr = order.getDeliveryAddress();
         if (addr != null) {
@@ -70,9 +70,8 @@ public class DisplayOrder implements Serializable {
         System.out.println("--------------------------------------------------\n");
     }
 
-
     public void displayOrderDetails(Order order, Person person) {
-        HashMap<Product, Integer> productMap = order.getProductMap();
+        HashMap<Product, Integer> productMap = ((CustomerOrder) order).getProductMap();
         List<Product> productList = new ArrayList<>(productMap.keySet());
 
         while (true) {
@@ -128,9 +127,7 @@ public class DisplayOrder implements Serializable {
         }
 
         Product productToRate = productList.get(choice - 1);
-        Person currentUser = person;
-
-        if (productToRate.getRatingMap().containsKey(currentUser)) {
+        if (productToRate.getRatingMap().containsKey(person)) {
             System.out.println("\u001B[31mYou have already rated this product.\u001B[0m");
             return;
         }
@@ -139,19 +136,20 @@ public class DisplayOrder implements Serializable {
         double rating;
         while (true) {
             String ratingInput = scan.nextLine().trim();
-            try {
-                rating = Double.parseDouble(ratingInput);
-                if (rating < 1 || rating > 5) {
-                    System.out.println("\u001B[31mRating must be between 1 and 5. Try again:\u001B[0m");
-                } else {
-                    break;
-                }
-            } catch (NumberFormatException e) {
+            if (!ratingInput.matches("\\d+(\\.\\d+)?")) {
                 System.out.println("\u001B[31mInvalid rating. Please enter a number between 1 and 5.\u001B[0m");
+                continue;
+            }
+            rating = Double.parseDouble(ratingInput);
+
+            if (rating < 1 || rating > 5) {
+                System.out.println("\u001B[31mRating must be between 1 and 5. Try again:\u001B[0m");
+            } else {
+                break;
             }
         }
 
-        boolean added = productToRate.addRating(currentUser, rating);
+        boolean added = productToRate.addRating(person, rating);
         if (added) {
             System.out.println("\u001B[32mThank you! Your rating has been recorded.\u001B[0m");
         } else {
@@ -166,18 +164,18 @@ public class DisplayOrder implements Serializable {
     }
 
     private int getValidatedChoice(int max) {
-        int choice;
         while (true) {
             String input = scan.nextLine().trim();
-            try {
-                choice = Integer.parseInt(input);
-                if (choice < 0 || choice > max) {
-                    System.out.println("\u001B[31m Invalid index. Please enter a number from 0 to " + max + ".\u001B[0m");
-                } else {
-                    return choice;
-                }
-            } catch (NumberFormatException e) {
+            if (!input.matches("\\d+")) {
                 System.out.println("\u001B[31m Invalid input. Please enter a valid number.\u001B[0m");
+                continue;
+            }
+            int choice = Integer.parseInt(input);
+
+            if (choice < 0 || choice > max) {
+                System.out.println("\u001B[31m Invalid index. Please enter a number from 0 to " + max + ".\u001B[0m");
+            } else {
+                return choice;
             }
         }
     }

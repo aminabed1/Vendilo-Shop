@@ -8,7 +8,8 @@ public class Main {
         Book book = new Book("Hezar o yek Shab", "121", "--", "me", "121", "druma", "1231", "", "2", 2, "AA2S3D4");
         Book book2 = new Book("Boof koor", "122", "--", "me", "121", "druma", "123333", "", "1", 87, "AA2S3D4");
 
-
+        DiscountCode dc = new PercentDiscount("ABCD", true, 10, 10);
+        customer.addToDiscountCodeList(dc);
         DataBase.addPerson(customer);
         DataBase.addPerson(seller);
         DataBase.addPerson(support);

@@ -9,6 +9,7 @@ public class Customer extends Person implements Serializable {
     private Wallet wallet;
     private Cart cart;
     private List<Order> orderList;
+    private List<DiscountCode> discountCodeList;
 
     public Customer(String name, String surname, String phoneNumber, String email, String username,
                     String password) {
@@ -18,19 +19,12 @@ public class Customer extends Person implements Serializable {
         ratedProductsList = new ArrayList<>();
         cart = new Cart();
         wallet = new Wallet();
+        discountCodeList = new ArrayList<>();
         this.setRole("Customer");
     }
 
     public List<Address> getAddressList() {
         return addressList;
-    }
-
-    public List<String> getRatedProductsList() {
-        return ratedProductsList;
-    }
-
-    public void setRatedProductsList(List<String> ratedProductsList) {
-        this.ratedProductsList = ratedProductsList;
     }
 
     public Cart getCart() {
@@ -53,10 +47,6 @@ public class Customer extends Person implements Serializable {
         return wallet;
     }
 
-    public void setWallet(Wallet wallet) {
-        this.wallet = wallet;
-    }
-
     public void addProduct(Product product) {
         Cart newCart = this.getCart();
         newCart.addProductToMap(product);
@@ -66,6 +56,14 @@ public class Customer extends Person implements Serializable {
     public void displayCart() {
         Cart newCart = this.getCart();
         newCart.displayCart(this);
+    }
+
+    public List<DiscountCode> getDiscountCodeList() {
+        return discountCodeList;
+    }
+
+    public void addToDiscountCodeList(DiscountCode discountCode) {
+        discountCodeList.add(discountCode);
     }
 
     @Override

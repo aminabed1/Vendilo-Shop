@@ -1,6 +1,5 @@
 package ir.ac.kntu;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.time.Instant;
 import java.util.*;
@@ -16,8 +15,6 @@ public class CustomerMainPage implements Serializable {
     private static final String SUCCESS = "\u001B[38;5;46m";
     private static final String ERROR = "\u001B[38;5;203m";
     private static final String HIGHLIGHT = "\u001B[38;5;231m";
-    private static final String BOLD = "\u001B[1m";
-
     private static final CustomerMainPage customerMainPage = new CustomerMainPage();
 
     public static CustomerMainPage getInstance() {
@@ -27,34 +24,32 @@ public class CustomerMainPage implements Serializable {
     public void mainPage(Person person) {
         backButtonPressed = false;
         while (!backButtonPressed) {
-            clearScreen();
             System.out.printf(PROMPT + "Welcome, %s! (Customer)\n\n" + RESET, person.getName());
             customerMenu((Customer)person);
         }
     }
 
     public void customerMenu(Customer customer) {
-        displayMenuHeader("CUSTOMER DASHBOARD");
-        displayCustomerDashboard(customer);
+        displayMenuHeader();
+        displayCustomerDashboard();
         customerHandleChoice(customer);
     }
 
-    public void displayMenuHeader(String title) {
+    public void displayMenuHeader() {
         System.out.println(TITLE + "=========================================");
         System.out.println("|                                       |");
-        System.out.printf("|%s%-39s%s|\n", BOLD + HIGHLIGHT,
-                "   " + title, RESET + TITLE);
+        System.out.println("|          CUSTOMER DASHBOARD           |");
         System.out.println("|                                       |");
         System.out.println("=========================================" + RESET);
         System.out.println();
     }
 
-    public void displayCustomerDashboard(Customer customer) {
+    public void displayCustomerDashboard() {
         System.out.println(MENU + "╔══════════════════════╦════════════════════╦════════════════════╦════════════════════╗");
         System.out.println("║      ACCOUNT         ║     CATEGORIES     ║       SEARCH       ║      SUPPORT       ║");
         System.out.println("╠══════════════════════╬════════════════════╬════════════════════╬════════════════════╣");
         System.out.println("║ 1. Account Info      ║ 6. Browse          ║ 7. Search          ║ 8. Support         ║");
-        System.out.println("║ 2. Cart              ║    Categories      ║                    ║                    ║");
+        System.out.println("║ 2. Cart              ║    Categories      ║                    ║ 9. Discount Codes  ║");
         System.out.println("║ 3. Orders            ║                    ║                    ║                    ║");
         System.out.println("║ 4. My Wallet         ║                    ║                    ║                    ║");
         System.out.println("║ 5. Logout            ║                    ║                    ║                    ║");
@@ -73,7 +68,7 @@ public class CustomerMainPage implements Serializable {
                 break;
             }
 
-            if (!choice.matches("[1-8]")) {
+            if (!choice.matches("[1-9]")) {
                 System.out.println(ERROR + "Please enter a valid choice (1-8) or BACK" + RESET);
                 continue;
             }
@@ -109,12 +104,46 @@ public class CustomerMainPage implements Serializable {
             case "8":
                 displaySupportOptions(customer);
                 break;
+            case "9":
+                handleDiscountPanel(customer);
             default:
         }
     }
 
+    public void handleDiscountPanel(Customer customer) {
+        List<DiscountCode> discountCodeList = customer.getDiscountCodeList();
+        if (discountCodeList.isEmpty()) {
+            System.out.println(ERROR + "No discount codes found\n");
+            return;
+        }
+        int counter = 1;
+        for (DiscountCode discountCode : discountCodeList) {
+            String codeCategory = discountCode.getClass().getSimpleName();
+            System.out.println(counter + ". " + "Code : " + discountCode.getCode() + " Category : " +codeCategory);
+        }
+        handleDiscountMenuSelection(discountCodeList);
+    }
+
+    public void handleDiscountMenuSelection(List<DiscountCode> discountCodeList) {
+        System.out.println();
+        System.out.println("Select discount code by index");
+        Scanner scan = new Scanner(System.in);
+        String choice = scan.nextLine().trim();
+        if (!choice.matches("\\d+")) {
+            System.out.println(ERROR + "Please enter a valid index");
+            return;
+        }
+        int selectedIndex = Integer.parseInt(choice);
+        if (selectedIndex <= 0 || selectedIndex > discountCodeList.size()) {
+            System.out.println(ERROR + "Please enter a valid index");
+            return;
+        }
+        System.out.println(discountCodeList.get(selectedIndex - 1));
+        System.out.println("press enter to back");
+        scan.nextLine();
+    }
+
     public void displaySupportOptions(Customer customer) {
-        clearScreen();
         printSupportMenu();
         handleSupportChoice(customer);
     }
@@ -155,21 +184,16 @@ public class CustomerMainPage implements Serializable {
         while (true) {
             displayRequestTypes();
             String choice = scan.nextLine().trim();
-
             if (choice.equals("4")) {
                 return;
-            }
-
-            if (!choice.matches("[1-4]")) {
+            } else if (!choice.matches("[1-4]")) {
                 System.out.println(ERROR + "Please enter a valid choice (1-4)" + RESET);
                 continue;
             }
-
             String title = getRequestTitle(choice);
             if (title == null) {
                 continue;
             }
-
             processRequestCreation(customer, title);
         }
     }
@@ -212,7 +236,6 @@ public class CustomerMainPage implements Serializable {
     }
 
     public void displayRequest(Customer customer) {
-        clearScreen();
         List<CustomerRequest> customerRequests = getCustomerRequests(customer);
 
         if (customerRequests.isEmpty()) {
@@ -264,23 +287,23 @@ public class CustomerMainPage implements Serializable {
                 return;
             }
 
-            try {
-                int selectedIndex = Integer.parseInt(input) - 1;
-                if (selectedIndex >= 0 && selectedIndex < requests.size()) {
-                    displaySingleRequestDetails(requests.get(selectedIndex));
-                    break;
-                } else {
-                    System.out.println(ERROR + "Invalid number! Please enter a number between 1 and " +
-                            requests.size() + " or 'BACK'" + RESET);
-                }
-            } catch (NumberFormatException e) {
+            if (!input.matches("\\d+")) {
                 System.out.println(ERROR + "Please enter a valid number or 'BACK'" + RESET);
+                continue;
+            }
+
+            int selectedIndex = Integer.parseInt(input) - 1;
+            if (selectedIndex >= 0 && selectedIndex < requests.size()) {
+                displaySingleRequestDetails(requests.get(selectedIndex));
+                break;
+            } else {
+                System.out.println(ERROR + "Invalid number! Please enter a number between 1 and " +
+                        requests.size() + " or 'BACK'" + RESET);
             }
         }
     }
 
     private void displaySingleRequestDetails(CustomerRequest request) {
-        clearScreen();
         System.out.println(TITLE + "════════════ REQUEST DETAILS ════════════" + RESET);
         System.out.println();
 
@@ -299,7 +322,6 @@ public class CustomerMainPage implements Serializable {
 
     public void displayProductsList(Person person) {
         while (true) {
-            clearScreen();
             String selectedCategory = selectProductCategory();
             if (selectedCategory == null) {
                 return;
@@ -308,7 +330,6 @@ public class CustomerMainPage implements Serializable {
             List<Product> products = filterProductsByCategory(selectedCategory);
             if (products.isEmpty()) {
                 System.out.println("No products found in this category.");
-                pauseForUser();
                 continue;
             }
 
@@ -333,7 +354,6 @@ public class CustomerMainPage implements Serializable {
             case "0" -> null;
             default -> {
                 System.out.println("Invalid choice! Please try again.");
-                pauseForUser();
                 yield "";
             }
         };
@@ -351,7 +371,6 @@ public class CustomerMainPage implements Serializable {
 
     private void browseProducts(List<Product> products, Customer customer) {
         while (true) {
-            clearScreen();
             printProductsList(products);
 
             System.out.print("Choose product index to see details or 0 to go back: ");
@@ -383,30 +402,17 @@ public class CustomerMainPage implements Serializable {
     }
 
     private void handleProductSelection(String input, List<Product> products, Customer customer) {
-        try {
-            int index = Integer.parseInt(input);
-            if (index >= 1 && index <= products.size()) {
-                Product selectedProduct = products.get(index - 1);
-                DisplayProduct.getInstance().display(selectedProduct, customer);
-            } else {
-                System.out.println("Invalid index! Try again.");
-                pauseForUser();
-            }
-        } catch (NumberFormatException e) {
+        if (input == null || !input.matches("\\d+")) {
             System.out.println("Please enter a valid number!");
-            pauseForUser();
+            return;
         }
-    }
 
-    private void pauseForUser() {
-        System.out.println("Press Enter to continue...");
-        try {
-            System.in.read();
-        } catch (IOException ignored) {}
-    }
-
-    public void clearScreen() {
-        System.out.print("\033[H\033[2J");
-        System.out.flush();
+        int index = Integer.parseInt(input);
+        if (index >= 1 && index <= products.size()) {
+            Product selectedProduct = products.get(index - 1);
+            DisplayProduct.getInstance().display(selectedProduct, customer);
+        } else {
+            System.out.println("Invalid index! Try again.");
+        }
     }
 }
