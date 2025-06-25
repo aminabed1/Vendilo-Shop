@@ -3,6 +3,9 @@ package ir.ac.kntu;
 import java.io.Serializable;
 
 public class Phone extends DigitalProduct implements Serializable {
+    private static final String ANSI_RESET = "\u001B[0m";
+    private static final String ANSI_CYAN = "\u001B[36m";
+
     private final String mainCamResolution;
     private final String frontCamResolution;
     private final String networkInfo;
@@ -16,7 +19,7 @@ public class Phone extends DigitalProduct implements Serializable {
         this.networkInfo = networkInfo;
         this.supportSDCard = supportSDCard;
     }
-
+    
     public String getMainCamResolution() {
         return mainCamResolution;
     }
@@ -31,5 +34,20 @@ public class Phone extends DigitalProduct implements Serializable {
 
     public boolean isSupportSDCard() {
         return supportSDCard;
+    }
+
+    @Override
+    public String displayField(String key, String value) {
+        return super.displayField(key, value);
+    }
+
+    @Override
+    public String toString() {
+        return super.toString() + "\n" + ANSI_CYAN + "── Phone Specifications ──" + ANSI_RESET +
+                displayField("Main Camera", mainCamResolution) +
+                displayField("Front Camera", frontCamResolution) +
+                displayField("Network", networkInfo) +
+                displayField("SD Card Support", isSupportSDCard() ? "Yes" : "No") +
+                ANSI_CYAN + "==================================================" + ANSI_RESET;
     }
 }

@@ -6,8 +6,10 @@ import java.util.*;
 
 public class HandleOrder implements Serializable {
     private final static Scanner scan = new Scanner(System.in);
-    private static double finalPrice;
+    private static double totalPrice;
     private static double postPrice;
+    private static double finalPrice;
+    private static double discountedPrice;
     private static List<String> sellersAgencyCode;
     private static Address selectedAddress;
     private HashMap<Product, Integer> productMap;
@@ -29,7 +31,6 @@ public class HandleOrder implements Serializable {
 
     public void handleOrder(Person person) {
         productMap = new HashMap<>();
-//        selectedAddress = null;
         if (person instanceof Customer) {
             customerOrder(person);
         }
@@ -46,9 +47,19 @@ public class HandleOrder implements Serializable {
             return;
         }
 
-        postPrice = calculatePostingPrice(selectedAddress.getProvince(), cart);;
-        finalPrice = getFinalPrice(cart, postPrice);
-        displayCartSummary(cart);
+        postPrice = calculatePostingPrice(selectedAddress.getProvince(), cart);
+        totalPrice = cart.getTotalPrice();
+        finalPrice = calculateFinalPrice();
+
+        boolean discountCodeChanged = false;
+        while (true) {
+            displayCartSummary(cart, person);
+            discountCodeChanged = discountCodeHandle(cart, person);
+            if (discountCodeChanged) {
+                continue;
+            }
+            break;
+        }
         displayFinalizeOption(person);
     }
 
@@ -96,17 +107,11 @@ public class HandleOrder implements Serializable {
         return null;
     }
 
-    public double getFinalPrice(Cart cart, double postingPrice) {
-        double finalPrice = 0.0;
-        int productQuantity = 0;
-        for (Product product : cart.getProductMap().keySet()) {
-            productQuantity = cart.getProductMap().get(product);
-            finalPrice += Double.parseDouble(product.getPrice()) * productQuantity;
-        }
-        return finalPrice + postingPrice;
+    public double calculateFinalPrice() {
+        return postPrice + totalPrice;
     }
 
-    public void displayCartSummary(Cart cart) {
+    public void displayCartSummary(Cart cart, Person person) {
         displayOrderSummaryHeader();
 
         for (Product product : cart.getProductMap().keySet()) {
@@ -114,13 +119,60 @@ public class HandleOrder implements Serializable {
         }
 
         displayPrices();
+//        discountCodeHandle(cart, person);
+    }
+
+    public boolean discountCodeHandle(Cart cart, Person person) {
+        boolean isDiscountCodeEntered = cart.getDiscountCode() != null;
+        totalPrice = cart.getTotalPrice();
+        System.out.println("Do you want to " + (isDiscountCodeEntered ? "remove" : "add") + " discount code ? (y/n)");
+        String choice = scan.nextLine();
+        if (!(choice.equalsIgnoreCase("y") || choice.equalsIgnoreCase("n"))) {
+            System.out.println("Please enter valid choice");
+            return false;
+        }
+
+        if (choice.equalsIgnoreCase("n")) {
+            return false;
+        }
+
+        String operation;
+        DiscountCode dc = null;
+        if (!isDiscountCodeEntered) {
+            System.out.println("Please enter a discount code");
+            String discountCode = scan.nextLine();
+            operation = "Add Discount Code";
+
+            dc = isDiscountCodeForPerson(discountCode, person);
+            if (dc == null) {
+                System.out.println("Invalid discount code");
+                return true;
+            }
+        } else {
+           operation = "Remove Discount Code";
+        }
+
+        cart.discountCodeHandle(dc, operation);
+        totalPrice = cart.getTotalPrice();
+
+        return true;
+    }
+
+    public DiscountCode isDiscountCodeForPerson(String discountCode, Person person) {
+        List<DiscountCode> discountCodeList =((Customer) person).getDiscountCodeList();
+        for (DiscountCode DC : discountCodeList) {
+            if (DC.getCode().equals(discountCode)) {
+                return DC;
+            }
+        }
+
+        return null;
     }
 
     public void displayFinalizeOption(Person person) {
         while (true) {
             displayFinalizePrompt();
             String choice = scan.nextLine().trim();
-
             if (choice.equalsIgnoreCase("Y")) {
                 if (checkEnoughBalance(person)) {
                     finalizeOrder(person);
@@ -288,8 +340,8 @@ public class HandleOrder implements Serializable {
     private void displayPrices() {
         System.out.println(TITLE + "════════════════════════════════════════════════════════");
         System.out.printf(" " + BOLD + "  POSTING PRICE: " + HIGHLIGHT + "%.2f $" + TITLE + "\n", postPrice);
-        System.out.printf(" " + BOLD + "  PRODUCTS PRICE: " + HIGHLIGHT + "%.2f $" + TITLE + "\n", finalPrice - postPrice);
-        System.out.printf(" " + BOLD + "  TOTAL PRICE: " + HIGHLIGHT + "%.2f $" + TITLE + "\n", finalPrice);
+        System.out.printf(" " + BOLD + "  PRODUCTS PRICE: " + HIGHLIGHT + "%.2f $" + TITLE + "\n", totalPrice);
+        System.out.printf(" " + BOLD + "  FINAL PRICE: " + HIGHLIGHT + "%.2f $" + TITLE + "\n", finalPrice);
         System.out.println("════════════════════════════════════════════════════════" + RESET);
     }
 

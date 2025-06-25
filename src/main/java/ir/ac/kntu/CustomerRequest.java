@@ -4,6 +4,12 @@ import java.io.Serializable;
 import java.time.Instant;
 
 public class CustomerRequest extends Request implements Serializable {
+    private static final String RESET = "\u001B[0m";
+    private static final String TITLE = "\u001B[38;5;45m";
+    private static final String OPTION = "\u001B[38;5;159m";
+    private static final String ERROR = "\u001B[38;5;203m";
+    private static final String SUCCESS = "\u001B[38;5;46m";
+
     final private String requestTitle;
     final private String serialNumber;
     final private String customerPhone;
@@ -35,5 +41,16 @@ public class CustomerRequest extends Request implements Serializable {
 
     public String getCustomerPhone() {
         return customerPhone;
+    }
+    
+    @Override
+    public String toString() {
+        return  TITLE + "════════════ REQUEST DETAILS ════════════" + RESET + "\n" + 
+            OPTION + "Title: " + RESET + requestTitle + "\n" + 
+            OPTION + "Status: " + RESET + (getStatus().equals("unchecked") ? ERROR : SUCCESS) + status + RESET + "\n" + 
+            OPTION + "Date: " + RESET + getTimestamp().toString() + "\n" +
+            OPTION + "Serial Number: " + RESET + serialNumber + "\n" + 
+            OPTION + "Your Phone: " + RESET + customerPhone + "\n" +
+            OPTION + "Description: " + RESET + "\n" + getDescription();
     }
 }

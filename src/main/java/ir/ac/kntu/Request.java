@@ -25,7 +25,6 @@ public abstract class Request implements Serializable {
         return timestamp;
     }
 
-
     public boolean getIsChecked() {
         return isChecked;
     }
@@ -33,5 +32,4 @@ public abstract class Request implements Serializable {
     public void setIsChecked(boolean isChecked) {
         this.isChecked = isChecked;
     }
-
 }

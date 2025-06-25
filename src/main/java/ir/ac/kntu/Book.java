@@ -4,6 +4,9 @@ package ir.ac.kntu;
 import java.io.Serializable;
 
 public class Book extends Product implements Serializable {
+    private static final String ANSI_RESET = "\u001B[0m";
+    private static final String ANSI_CYAN = "\u001B[36m";
+
     final private String author;
     final private String numberOfPage;
     final private String genre;
@@ -56,4 +59,20 @@ public class Book extends Product implements Serializable {
         this.weight = weight;
     }
 
+    @Override
+    public String displayField(String key, String value) {
+        return super.displayField(key, value);
+    }
+
+    public String toString() {
+        return super.toString() +
+                "\n" + ANSI_CYAN + "        ── Book Details ──" + ANSI_RESET +
+                "\n\n" +
+                displayField("Author", author) +
+                displayField("Pages", numberOfPage) +
+                displayField("Genre", genre) +
+                displayField("ISBN", ISBN) +
+                displayField("Publish Date", publishDate) +
+                displayField("Weight", weight);
+    }
 }

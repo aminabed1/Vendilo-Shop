@@ -4,11 +4,13 @@ import java.io.Serializable;
 import java.util.*;
 
 public class Customer extends Person implements Serializable {
+    private Cart cart;
+    private Wallet wallet;
+    private List<Order> orderList;
+    private boolean isPremiumAccount;
     private List<Address> addressList;
     private List<String> ratedProductsList;
-    private Wallet wallet;
-    private Cart cart;
-    private List<Order> orderList;
+    private List<Notification> notifications;
     private List<DiscountCode> discountCodeList;
 
     public Customer(String name, String surname, String phoneNumber, String email, String username,
@@ -17,9 +19,10 @@ public class Customer extends Person implements Serializable {
         orderList = new ArrayList<>();
         addressList = new ArrayList<>();
         ratedProductsList = new ArrayList<>();
+        discountCodeList = new ArrayList<>();
+        notifications = new ArrayList<>();
         cart = new Cart();
         wallet = new Wallet();
-        discountCodeList = new ArrayList<>();
         this.setRole("Customer");
     }
 
@@ -64,6 +67,26 @@ public class Customer extends Person implements Serializable {
 
     public void addToDiscountCodeList(DiscountCode discountCode) {
         discountCodeList.add(discountCode);
+    }
+
+    public List<Notification> getNotifications() {
+        return notifications;
+    }
+
+    public void addNotification(Notification notification) {
+        notifications.add(notification);
+    }
+
+    public boolean getIspremium() {
+        return isPremiumAccount;
+    }
+
+    public void activePremiumAccount() {
+        isPremiumAccount = true;
+    }
+
+    public void deactivePremiumAccount() {
+        isPremiumAccount = false;
     }
 
     @Override

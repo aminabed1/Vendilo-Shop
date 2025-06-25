@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.*;
 
 public class Cart implements Serializable {
-    private HashMap<Product, Integer> productMap;
+
     private static final String RESET = "\u001B[0m";
     private static final String TITLE = "\u001B[38;5;45m";
     private static final String MENU = "\u001B[38;5;39m";
@@ -15,8 +15,15 @@ public class Cart implements Serializable {
     private static final String HIGHLIGHT = "\u001B[38;5;231m";
     private static final String BOLD = "\u001B[1m";
 
+    private HashMap<Product, Integer> productMap;
+    private DiscountCode discountCode;
+    private double totalPrice;
+
     public Cart() {
+        discountCode = null;
         productMap = new HashMap<>();
+//        DiscountCode dc = new PercentDiscount("ABCD", true, 10, 10);
+//        this.setDiscountCode(dc);
     }
 
     public HashMap<Product, Integer> getProductMap() {
@@ -25,6 +32,27 @@ public class Cart implements Serializable {
 
     public void addProductToMap(Product product) {
         productMap.merge(product, 1, Integer::sum);
+    }
+
+    public DiscountCode getDiscountCode() {
+        return discountCode;
+    }
+
+    public void setDiscountCode(DiscountCode discountCode) {
+        this.discountCode = discountCode;
+    }
+
+    public double getTotalPrice() {
+        if (discountCode != null) {
+            applyDiscountCodeToPrice();
+            return totalPrice;
+        } else {
+            return calculateTotalPrice();
+        }
+    }
+
+    public void setTotalPrice(double totalPrice) {
+        this.totalPrice = totalPrice;
     }
 
     public void displayCart(Customer person) {
@@ -185,5 +213,80 @@ public class Cart implements Serializable {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
+    }
+
+    public void discountCodeHandle(DiscountCode discountCode, String operation) {
+        if (operation.equals("Remove Discount Code")) {
+            removeDiscountCode();
+        } else {
+            if (!isValidDiscountCode(discountCode)) {
+                return;
+            }
+            if (!isUsableDiscountCode(discountCode)) {
+                return;
+            }
+        }
+        this.setDiscountCode(discountCode);
+        System.out.println("Discount Code Applied Successfully.");
+//        applyDiscountCodeToPrice(discountCode);
+    }
+
+    public boolean isValidDiscountCode(DiscountCode discountCode) {
+        if (!discountCode.getIsCodeActive()) {
+            showError("Discount Code is inactive.");
+            return false;
+        }
+
+        if (discountCode.getUsableTimes() <= 0) {
+            showError("Discount Code is out of usage.");
+        }
+
+        return true;
+    }
+
+    public boolean isUsableDiscountCode(DiscountCode discountCode) {
+        if (discountCode instanceof PercentDiscount) {
+            return true;
+        }
+
+        ValueDiscount codeDiscount = (ValueDiscount) discountCode;
+
+        if ((codeDiscount.getValue() * 10) > totalPrice) {
+            return true;
+        } else {
+            showError("Total price is less than required price to allow discounting.");
+            return false;
+        }
+    }
+
+    public void applyDiscountCodeToPrice() {
+        totalPrice = calcTotalPrice();
+        if (this.discountCode == null) {
+            return;
+        } else {
+            if (discountCode instanceof PercentDiscount) {
+                totalPrice *= (100 - ((PercentDiscount) discountCode).getPercent()) / 100;
+            } else {
+                totalPrice -= ((ValueDiscount) discountCode).getValue();
+            }
+            discountCode.setUsableTimes(discountCode.getUsableTimes() - 1);
+        }
+    }
+
+    public void removeDiscountCode() {
+        discountCode.setUsableTimes(discountCode.getUsableTimes() + 1);
+        this.discountCode = null;
+        System.out.println("Discount Code Has Been Removed Successfully.");
+        pause(2000);
+    }
+
+    public double calcTotalPrice() {
+        double totalPrice = 0.0;
+        int productQuantity = 0;
+        for (Product product : this.getProductMap().keySet()) {
+            productQuantity = this.getProductMap().get(product);
+            totalPrice += Double.parseDouble(product.getPrice()) * productQuantity;
+        }
+        return totalPrice;
     }
 }

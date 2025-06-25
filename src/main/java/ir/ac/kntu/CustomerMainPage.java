@@ -7,6 +7,7 @@ import java.util.*;
 public class CustomerMainPage implements Serializable {
     private static final Scanner scan = new Scanner(System.in);
     private static boolean backButtonPressed = false;
+    private static boolean continueState = false;
     private static final String RESET = "\u001B[0m";
     private static final String TITLE = "\u001B[38;5;45m";
     private static final String MENU = "\u001B[38;5;39m";
@@ -48,17 +49,17 @@ public class CustomerMainPage implements Serializable {
         System.out.println(MENU + "╔══════════════════════╦════════════════════╦════════════════════╦════════════════════╗");
         System.out.println("║      ACCOUNT         ║     CATEGORIES     ║       SEARCH       ║      SUPPORT       ║");
         System.out.println("╠══════════════════════╬════════════════════╬════════════════════╬════════════════════╣");
-        System.out.println("║ 1. Account Info      ║ 6. Browse          ║ 7. Search          ║ 8. Support         ║");
-        System.out.println("║ 2. Cart              ║    Categories      ║                    ║ 9. Discount Codes  ║");
-        System.out.println("║ 3. Orders            ║                    ║                    ║                    ║");
-        System.out.println("║ 4. My Wallet         ║                    ║                    ║                    ║");
-        System.out.println("║ 5. Logout            ║                    ║                    ║                    ║");
+        System.out.println("║  1. Account Info     ║  6. Browse         ║  7. Search         ║  8. Support        ║");
+        System.out.println("║  2. Cart             ║    Categories      ║                    ║  9. Discount Codes ║");
+        System.out.println("║  3. Orders           ║                    ║                    ║ 10. Notifications  ║");
+        System.out.println("║  4. My Wallet        ║                    ║                    ║                    ║");
+        System.out.println("║  5. Logout           ║                    ║                    ║                    ║");
         System.out.println("╚══════════════════════╩════════════════════╩════════════════════╩════════════════════╝" + RESET);
         System.out.println();
     }
 
     public void customerHandleChoice(Customer customer) {
-        System.out.print(PROMPT + "Enter Your Choice (1-8) or type 'BACK': " + RESET + HIGHLIGHT);
+        System.out.print(PROMPT + "Enter Your Choice (1-10) or type 'BACK': " + RESET + HIGHLIGHT);
 
         while (true) {
             String choice = scan.nextLine().trim();
@@ -68,8 +69,8 @@ public class CustomerMainPage implements Serializable {
                 break;
             }
 
-            if (!choice.matches("[1-9]")) {
-                System.out.println(ERROR + "Please enter a valid choice (1-8) or BACK" + RESET);
+            if (!choice.matches("[1-9]|(10)")) {
+                System.out.println(ERROR + "Please enter a valid choice (1-10) or BACK" + RESET);
                 continue;
             }
 
@@ -106,8 +107,115 @@ public class CustomerMainPage implements Serializable {
                 break;
             case "9":
                 handleDiscountPanel(customer);
+                break;
+            case "10":
+                notificationTab(customer);
+                break;
             default:
         }
+    }
+
+    public void notificationTab(Customer customer) {
+        continueState = true;
+        while (continueState) { 
+            notifTabHeader();
+            notifTabMenu(customer);
+        }
+    }
+
+    public void notifTabHeader() {
+        System.out.println(TITLE + "=========================================");
+        System.out.println("|                                       |");
+        System.out.println("|             NOTIFICATIONS             |");
+        System.out.println("|                                       |");
+        System.out.println("=========================================" + RESET);    
+        System.out.println();
+    }
+
+    public void notifTabMenu(Customer customer) {
+        int unseenNotifs = 0;
+        List<Notification> notificationListTemp = new ArrayList<>();
+        for (Notification notification : customer.getNotifications()) {
+            //TODO
+            if (notification.getChargedProduct().getStock() > 0 && !notification.getIsVisible()) {
+                notification.setIsVisible(true);
+            }
+            if (!notification.getIsVisible()) {
+                continue;
+            }
+            notificationListTemp.add(notification);
+            if (!notification.isNotificationSeen()) {
+                unseenNotifs++;
+            }
+        }
+        if (unseenNotifs == 0) {
+            System.out.println("You have not any unseen nofication");
+        } else {
+            System.out.printf(" %d new notification%s", unseenNotifs, (unseenNotifs == 1 ? "" : "s"));
+        }
+        System.out.println("1. Display Notification List");
+        System.out.println("0. Back");
+        
+        notifTabChoiceHandle(notificationListTemp);
+    }
+
+    public void notifTabChoiceHandle(List<Notification> notifications) {
+        System.out.println("Enter Your Choice :");
+        String choice = scan.nextLine();
+        if (!choice.matches("\\d+")) {
+            System.out.println("Please Enter Numeric Choice.");
+            return;
+        } 
+        int choiceValue = Integer.parseInt(choice);
+        if (choiceValue != 0 && choiceValue != 1) {
+            System.out.println("Please Enter Valid Choice, (0\1).");
+        } 
+
+        if (choiceValue == 0) {
+            continueState = false;
+            return;
+        } 
+
+        if (notifications.isEmpty()) {
+            System.out.println("You Don't Have Any Notification Yet");
+            return;
+        }
+
+        displayNotifacationList(notifications);
+        System.out.println("Select A Notification (By Index) Or Back (Enter 0)");
+        choice = scan.nextLine();
+        if (!choice.matches("\\d")) {
+            System.out.println("Invalid Entered Value, Returning...");
+            pause(2000);
+            return;
+        }
+
+        choiceValue = Integer.parseInt(choice);
+        if (choiceValue == 0) {
+            return;
+        }
+
+        if (choiceValue <= 0 && choiceValue > notifications.size()) {
+            System.out.println("Invalid Index, Returning...");
+            pause(2000);
+            return;
+        }
+
+        System.out.println(notifications.get(choiceValue - 1));
+        changeNotifStatus(notifications.get(choiceValue - 1));
+        System.out.println("Press Any Key To Continue...");
+        scan.next();
+    }
+
+    public void changeNotifStatus(Notification notification) {
+        notification.setNotificationSeen(true);
+    }
+
+    public void displayNotifacationList(List<Notification> notifications) {
+        int counter = 1;
+        for (Notification nofication : notifications) {
+            System.out.println(counter + ". Title : " + nofication.getTopic().name() + "Status : " + (nofication.isNotificationSeen() ? "seen" : "unseen"));
+        }   
     }
 
     public void handleDiscountPanel(Customer customer) {
@@ -294,30 +402,15 @@ public class CustomerMainPage implements Serializable {
 
             int selectedIndex = Integer.parseInt(input) - 1;
             if (selectedIndex >= 0 && selectedIndex < requests.size()) {
-                displaySingleRequestDetails(requests.get(selectedIndex));
+                System.out.println(requests.get(selectedIndex));
+                System.out.println("\n" + PROMPT + "Press Enter to return..." + RESET);
+                scan.nextLine();
                 break;
             } else {
                 System.out.println(ERROR + "Invalid number! Please enter a number between 1 and " +
                         requests.size() + " or 'BACK'" + RESET);
             }
         }
-    }
-
-    private void displaySingleRequestDetails(CustomerRequest request) {
-        System.out.println(TITLE + "════════════ REQUEST DETAILS ════════════" + RESET);
-        System.out.println();
-
-        System.out.println(OPTION + "Title: " + RESET + request.getRequestTitle());
-        System.out.println(OPTION + "Status: " + RESET +
-                (request.getStatus().equals("unchecked") ? ERROR : SUCCESS) +
-                request.getStatus() + RESET);
-        System.out.println(OPTION + "Date: " + RESET + request.getTimestamp().toString());
-        System.out.println(OPTION + "Serial Number: " + RESET + request.getSerialNumber());
-        System.out.println(OPTION + "Your Phone: " + RESET + request.getCustomerPhone());
-        System.out.println(OPTION + "Description: " + RESET + "\n" + request.getDescription());
-
-        System.out.println("\n" + PROMPT + "Press Enter to return..." + RESET);
-        scan.nextLine();
     }
 
     public void displayProductsList(Person person) {
@@ -379,13 +472,12 @@ public class CustomerMainPage implements Serializable {
             if ("0".equals(input)) {
                 break;
             }
-
             handleProductSelection(input, products, customer);
         }
     }
 
     private void printProductsList(List<Product> products) {
-        System.out.println("╔══════════════ PRODUCTS LIST ══════════════╗");
+        System.out.println("╔══════════════ PRODUCTS LIST ═══════════════╗");
         System.out.println("║ 0. Back to category selection              ║");
 
         for (int i = 0; i < products.size(); i++) {
@@ -397,7 +489,7 @@ public class CustomerMainPage implements Serializable {
                     p.getCategory()
             );
         }
-        System.out.println("╚═══════════════════════════════════════════╝");
+        System.out.println("╚════════════════════════════════════════════╝");
         System.out.println();
     }
 
@@ -413,6 +505,14 @@ public class CustomerMainPage implements Serializable {
             DisplayProduct.getInstance().display(selectedProduct, customer);
         } else {
             System.out.println("Invalid index! Try again.");
+        }
+    }
+
+    private void pause(int milliseconds) {
+        try {
+            Thread.sleep(milliseconds);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
     }
 }

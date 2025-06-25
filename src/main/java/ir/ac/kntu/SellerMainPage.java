@@ -384,7 +384,10 @@ public class SellerMainPage implements Serializable {
             }
 
             Request request = currentSellerRequests.get(Integer.parseInt(input) - 1);
-            printRequest(request);
+
+            System.out.println(request);
+            System.out.print(PROMPT + "\nPress any key to continue..." + RESET);
+            scan.nextLine();
         }
     }
 
@@ -398,15 +401,6 @@ public class SellerMainPage implements Serializable {
             System.out.println(OPTION + String.format("%-5d %s%s", i+1, status, RESET));
         }
         System.out.println();
-    }
-
-    public void printRequest(Request request) {
-        displayMenuHeader("REQUEST DETAILS");
-        System.out.println(MENU + "Status: " +
-                (request.getIsChecked() ? SUCCESS + "Checked" : ERROR + "Unchecked") + RESET);
-        System.out.println(OPTION + "\nDescription:\n" + request.getDescription() + RESET);
-        System.out.print(PROMPT + "\nPress any key to continue..." + RESET);
-        scan.nextLine();
     }
 
     public Seller findSellerByAgencyCode(String agencyCode) {
