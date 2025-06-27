@@ -7,15 +7,17 @@ public class Customer extends Person implements Serializable {
     private Cart cart;
     private Wallet wallet;
     private List<Order> orderList;
-    private boolean isPremiumAccount;
     private List<Address> addressList;
     private List<String> ratedProductsList;
     private List<Notification> notifications;
     private List<DiscountCode> discountCodeList;
+    private VendiloPlusAccount vendiloPlusAccount;
 
     public Customer(String name, String surname, String phoneNumber, String email, String username,
                     String password) {
         super(name, surname, phoneNumber, email, username, password);
+        //TODO Cunstructor
+        vendiloPlusAccount = new VendiloPlusAccount();
         orderList = new ArrayList<>();
         addressList = new ArrayList<>();
         ratedProductsList = new ArrayList<>();
@@ -77,16 +79,12 @@ public class Customer extends Person implements Serializable {
         notifications.add(notification);
     }
 
-    public boolean getIspremium() {
-        return isPremiumAccount;
+    public VendiloPlusAccount getVendiloPlusAccount() {
+        return vendiloPlusAccount;
     }
 
-    public void activePremiumAccount() {
-        isPremiumAccount = true;
-    }
-
-    public void deactivePremiumAccount() {
-        isPremiumAccount = false;
+    public void setVendiloPlusAccount(VendiloPlusAccount vendiloPlusAccount) {
+        this.vendiloPlusAccount = vendiloPlusAccount;
     }
 
     @Override

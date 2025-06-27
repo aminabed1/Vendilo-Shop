@@ -1,8 +1,7 @@
 package ir.ac.kntu;
 
 import java.io.Serializable;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
 
 public class DisplayProduct implements Serializable {
     private static final String ANSI_RESET = "\u001B[0m";
@@ -23,14 +22,13 @@ public class DisplayProduct implements Serializable {
 
     private void showActionMenu(Product product, Customer customer) {
         Scanner scanner = new Scanner(System.in);
-
+        String isAvailable = (product.getStock() == 0) ? "║ " + ANSI_BLUE + "3. Let Me Know If It Is Available" + ANSI_PURPLE + "  ║" : "║                                    ║";
         System.out.println("\n" + ANSI_PURPLE + "╔════════════════════════════════════╗");
-        System.out.println("║          ACTIONS MENU              ║");
-        System.out.println("╠════════════════════════════════════╣");
-        System.out.println("║ " + ANSI_BLUE + "1. Add to Cart" + ANSI_PURPLE +
-                "                     ║");
-        System.out.println("║ " + ANSI_BLUE + "2. Back to List" + ANSI_PURPLE +
-                "                    ║");
+        System.out.println(                     "║          ACTIONS MENU              ║");
+        System.out.println(                     "╠════════════════════════════════════╣");
+        System.out.println("║ " + ANSI_BLUE + "1. Add to Cart" + ANSI_PURPLE + "                     ║");
+        System.out.println("║ " + ANSI_BLUE + "2. Back to List" + ANSI_PURPLE + "                    ║");
+        System.out.println(isAvailable);
         System.out.println("╚════════════════════════════════════╝" + ANSI_RESET);
 
         System.out.print(ANSI_GREEN + "Enter your choice: " + ANSI_RESET);
@@ -47,6 +45,11 @@ public class DisplayProduct implements Serializable {
                 break;
             case "2":
                 break;
+            case "3":
+                if (product.getStock() == 0) {
+                    createProductNotification(product, customer);
+                    break;
+                }
             default:
                 System.out.println(ANSI_RED + "Invalid choice!" + ANSI_RESET);
         }
@@ -59,6 +62,13 @@ public class DisplayProduct implements Serializable {
         } else {
             System.out.printf(ANSI_GREEN + "%-20s: " + ANSI_RESET + "%s\n", key, value);
         }
+    }
+
+    public void createProductNotification(Product product, Customer customer) {
+        Notification notification = new Notification(product);
+        customer.addNotification(notification);
+        System.out.println("You Will Know If Product Is Available" + ANSI_RESET);
+        pause(2000);
     }
 
     public void pause(int milliseconds) {

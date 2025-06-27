@@ -2,6 +2,8 @@ package ir.ac.kntu;
 
 import java.io.Serializable;
 import java.time.Instant;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 public class CustomerMainPage implements Serializable {
@@ -35,7 +37,7 @@ public class CustomerMainPage implements Serializable {
         displayCustomerDashboard();
         customerHandleChoice(customer);
     }
-
+    //TODO pup up notification addition
     public void displayMenuHeader() {
         System.out.println(TITLE + "=========================================");
         System.out.println("|                                       |");
@@ -52,7 +54,7 @@ public class CustomerMainPage implements Serializable {
         System.out.println("║  1. Account Info     ║  6. Browse         ║  7. Search         ║  8. Support        ║");
         System.out.println("║  2. Cart             ║    Categories      ║                    ║  9. Discount Codes ║");
         System.out.println("║  3. Orders           ║                    ║                    ║ 10. Notifications  ║");
-        System.out.println("║  4. My Wallet        ║                    ║                    ║                    ║");
+        System.out.println("║  4. My Wallet        ║                    ║                    ║ 11. Vendilo Plus   ║");
         System.out.println("║  5. Logout           ║                    ║                    ║                    ║");
         System.out.println("╚══════════════════════╩════════════════════╩════════════════════╩════════════════════╝" + RESET);
         System.out.println();
@@ -69,7 +71,7 @@ public class CustomerMainPage implements Serializable {
                 break;
             }
 
-            if (!choice.matches("[1-9]|(10)")) {
+            if (!choice.matches("[1-9]|(10)|(11)")) {
                 System.out.println(ERROR + "Please enter a valid choice (1-10) or BACK" + RESET);
                 continue;
             }
@@ -111,9 +113,100 @@ public class CustomerMainPage implements Serializable {
             case "10":
                 notificationTab(customer);
                 break;
+            case "11":
+                VendiloPlusTab(customer);
+                break;
             default:
         }
     }
+
+    public void VendiloPlusTab(Customer customer) {
+        while (true) { 
+            System.out.println("1. Premium Account Details");
+            System.out.println("2. Buy Premium");
+            System.out.println("3. Back");
+            System.out.println("Your Choice : ");
+            String choice = scan.nextLine();
+            try {
+                Integer.parseInt(choice);
+            } catch (NumberFormatException exeption) {
+                System.out.println("Please Enter Numeric Value");
+                continue;
+            }
+            switch(choice) {
+                case "1":
+                    System.out.println(customer.getVendiloPlusAccount());
+                    System.out.println("Press Any Key To Back");
+                    scan.next();
+                    break;
+                case "2":
+                    getPlusAccount(customer);
+                    break;
+                case "3":
+                    return;
+                default:
+                    System.out.println("Invalid Choice. Try Again");
+                    pause(1500);          
+            }
+        } 
+    }
+
+    public void getPlusAccount(Customer customer) {
+        while (true) {
+            System.out.println("Choose One Subscription :");
+            System.out.println("1.  1-Month");
+            System.out.println("2.  3-Month");
+            System.out.println("3. 12-Month");
+            System.out.println("4. Back");
+            String choice = scan.nextLine();
+
+            try {
+                Integer.parseInt(choice);
+            } catch (NumberFormatException e) {
+                System.out.println("Enter A Numeric Value");
+                continue;
+            }
+
+            double balance = customer.getWallet().getWalletBalance();
+            double subscriptionCost = 0;
+            Instant startDateTemp = Instant.now();
+            Instant endDateTemp = null;
+
+            switch (choice) {
+                case "1":
+                    endDateTemp = ZonedDateTime.now().plus(1, ChronoUnit.MONTHS).toInstant();
+                    subscriptionCost = 10;
+                    break;
+                case "2":
+                    endDateTemp = ZonedDateTime.now().plus(3, ChronoUnit.MONTHS).toInstant();
+                    subscriptionCost = 25;
+                    break;
+                case "3":
+                    endDateTemp = ZonedDateTime.now().plus(12, ChronoUnit.MONTHS).toInstant();
+                    subscriptionCost = 100;
+                    break;
+                case "4":
+                    return;
+                default:
+                    System.out.println("Enter A Valid Choice");
+                    pause(2000);
+            }
+
+            if (subscriptionCost > balance) {
+                System.out.println("Insufficient Balance, Returning...");
+                pause(2000);
+                return;
+            }
+
+            double newBalance = customer.getWallet().getWalletBalance() - subscriptionCost;
+            customer.getWallet().setWalletBalance(newBalance, "Buy Premium Account");
+            customer.getVendiloPlusAccount().setPremiumAccountDate(startDateTemp, endDateTemp);
+            System.out.println("Premium Account Updated Successfully. Now You Can See It's Details.");
+            pause(2000);
+        }
+    }
+
+
 
     public void notificationTab(Customer customer) {
         continueState = true;

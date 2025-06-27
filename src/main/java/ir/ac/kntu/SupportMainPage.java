@@ -253,11 +253,23 @@ public class SupportMainPage implements Serializable {
                 }
                 case "1" -> {
                     addResponseToRequest(request);
+                    Notification notification = new Notification(request);
+                    Customer customer = findCustomerByPhone(request.getCustomerPhone());
+                    customer.addNotification(notification);
                     return;
                 }
                 default -> showInvalidOptionError(1);
             }
         }
+    }
+
+    public Customer findCustomerByPhone(String phone) {
+        for (Person person : DataBase.getPersonList()) {
+            if (person.getPhoneNumber().equals(phone)) {
+                return (Customer) person;
+            }
+        }
+        return null;
     }
 
     private void addResponseToRequest(CustomerRequest request) {

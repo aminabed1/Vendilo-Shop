@@ -1,7 +1,5 @@
 package ir.ac.kntu;
 
-import javax.xml.crypto.Data;
-
 public class Main {
     public static void main(String[] args) {
         Customer customer = new Customer("Amin", "Abed", "09144593348", "amin.m.abdollahi@gmail.com", "amin1amin1","12345678aA@");

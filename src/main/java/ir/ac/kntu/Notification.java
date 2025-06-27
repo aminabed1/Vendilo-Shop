@@ -88,16 +88,16 @@ public class Notification {
 
     @Override
     public String toString() {
-        String printFormat = topic.name() + "\n";
+        StringBuilder sb = new StringBuilder(topic.name() + "\n");
         if (description != null) {
-            printFormat += description;
+            sb.append(description);
         } else if (request != null) {
-            printFormat += request.toString();
+            sb.append(request.toString());
         } else if (chargedProduct != null) {
-            printFormat += chargedProduct.toString();
+            sb.append(chargedProduct.toString());
         } else {
-            printFormat += discountCode.toString();
+            sb.append(discountCode.toString());
         }
-        return printFormat;
+        return sb.toString();
     }
 }

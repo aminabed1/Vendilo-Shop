@@ -40,7 +40,17 @@ public class Wallet implements Serializable {
         double oldBalance = this.balance;
         double amount = balance - oldBalance;
         if (amount != 0) {
-            Transaction transaction = new Transaction(Calendar.now(), amount, order);
+            Transaction transaction = new TransactionWithOrder(Calendar.now(), amount, order);
+            transactionList.add(transaction);
+        }
+        this.balance = balance;
+    }
+
+    public void setWalletBalance(double balance, String description) {
+        double oldBalance = this.balance;
+        double amount = balance - oldBalance;
+        if (amount != 0) {
+            Transaction transaction = new TransactionWithoutOrder(Calendar.now(), amount, description);
             transactionList.add(transaction);
         }
         this.balance = balance;
@@ -52,18 +62,16 @@ public class Wallet implements Serializable {
 
     public void walletOptionHandler(Person person) {
         while (true) {
-            clearScreen();
             System.out.println(TITLE + "╔═════════════════════════════════════╗");
             System.out.println("║" + BOLD + HIGHLIGHT + "           WALLET MENU               " + RESET + TITLE + "║");
             System.out.println("╠═════════════════════════════════════╣");
 
+            System.out.println("║" + OPTION + " 1. Display Wallet                   " + TITLE + "║");
+            System.out.println("║" + OPTION + " 2. Show Transactions                " + TITLE + "║");
+            
             if (person instanceof Customer) {
-                System.out.println("║" + OPTION + " 1. Display Wallet                   " + TITLE + "║");
-                System.out.println("║" + OPTION + " 2. Show Transactions                " + TITLE + "║");
                 System.out.println("║" + OPTION + " 3. Add Balance                      " + TITLE + "║");
             } else if (person instanceof Seller) {
-                System.out.println("║" + OPTION + " 1. Display Wallet                   " + TITLE + "║");
-                System.out.println("║" + OPTION + " 2. Show Transactions                " + TITLE + "║");
                 System.out.println("║" + OPTION + " 3. Withdraw Money                   " + TITLE + "║");
             }
 
@@ -98,7 +106,6 @@ public class Wallet implements Serializable {
 
     public void displaySellerTransactions(Seller seller) {
         while (true) {
-            clearScreen();
             System.out.println(TITLE + "╔═════════════════════════════════════╗");
             System.out.println("║" + BOLD + HIGHLIGHT + "          SALES TRANSACTIONS         " + RESET + TITLE + "║");
             System.out.println("╚═════════════════════════════════════╝" + RESET);
@@ -110,18 +117,13 @@ public class Wallet implements Serializable {
                 return;
             }
 
-            double totalIncome = transactions.stream()
-                    .mapToDouble(Transaction::getAmount)
-                    .sum();
-            System.out.println(OPTION + "  Total Income: " + SUCCESS +
-                    String.format("%.2f $", totalIncome) + RESET);
+            double totalIncome = transactions.stream().mapToDouble(Transaction::getAmount).sum();
+            System.out.println(OPTION + "  Total Income: " + SUCCESS + String.format("%.2f $", totalIncome) + RESET);
             System.out.println(TITLE + "═══════════════════════════════════════" + RESET);
 
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
-                    .withZone(ZoneId.systemDefault());
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm").withZone(ZoneId.systemDefault());
 
-            System.out.println(MENU + String.format("%-5s %-20s %-12s %-30s",
-                    "No.", "Date", "Amount", "Description") + RESET);
+            System.out.println(MENU + String.format("%-5s %-20s %-12s %-30s", "No.", "Date", "Amount", "Description") + RESET);
             System.out.println(MENU + "------------------------------------------------------------" + RESET);
 
             int counter = 1;
@@ -130,16 +132,24 @@ public class Wallet implements Serializable {
                 String amount = String.format("%.2f $", transaction.getAmount());
 
                 String description;
-                Order order = transaction.getOrder();
-
+                Order order = null;
+                if (transaction instanceof TransactionWithOrder transactionWithOrder) {
+                    order = transactionWithOrder.getOrder();
+                    if (order instanceof SellerOrder sellerOrder) {
+                        description = sellerOrder.getTransactionDescription();
+                    } else {
+                        description = "Wallet Transaction";
+                    }
+                } else {
+                    description = "Unknown Transaction";
+                }
                 if (order instanceof SellerOrder sellerOrder) {
                     description = sellerOrder.getTransactionDescription();
                 } else {
                     description = "Wallet Transaction";
                 }
 
-                System.out.println(OPTION + String.format("%-5d %-20s %-12s %-30s",
-                        counter++, date, SUCCESS + amount + RESET, description) + RESET);
+                System.out.println(OPTION + String.format("%-5d %-20s %-12s %-30s", counter++, date, SUCCESS + amount + RESET, description) + RESET);
             }
 
             System.out.print(PROMPT + "\nPress ENTER to return to menu" + RESET);
@@ -149,8 +159,6 @@ public class Wallet implements Serializable {
     }
 
     public void withdrawBalance(Seller seller) {
-        clearScreen();
-
         System.out.println(TITLE + "╔═════════════════════════════════════╗");
         System.out.println("║" + BOLD + HIGHLIGHT + "           WITHDRAW MONEY            " + RESET + TITLE + "║");
         System.out.println("╚═════════════════════════════════════╝" + RESET);
@@ -184,7 +192,7 @@ public class Wallet implements Serializable {
             return;
         }
 
-        setWalletBalance(this.getWalletBalance() - amount, null);
+        setWalletBalance(this.getWalletBalance() - amount, "Withdraw Balance From Wallet");
 
         System.out.println(SUCCESS + "\n═══════════════════════════════════════");
         System.out.println("  🎉 " + BOLD + "WITHDRAWAL SUCCESSFUL!            " + RESET + SUCCESS);
@@ -194,7 +202,6 @@ public class Wallet implements Serializable {
     }
 
     public void displayWallet(Person person) {
-        clearScreen();
         System.out.println();
         System.out.println(TITLE + "╔═════════════════════════════════════╗");
         System.out.println("║" + BOLD + HIGHLIGHT + "             MY WALLET               " + RESET + TITLE + "║");
@@ -237,7 +244,6 @@ public class Wallet implements Serializable {
     }
 
     public void addBalance(Customer customer) {
-        clearScreen();
         System.out.println(TITLE + "╔═════════════════════════════════════╗");
         System.out.println("║" + BOLD + HIGHLIGHT + "           ADD TO BALANCE            " + RESET + TITLE + "║");
         System.out.println("╚═════════════════════════════════════╝" + RESET);
@@ -260,7 +266,7 @@ public class Wallet implements Serializable {
             addBalance(customer);
             return;
         }
-        setWalletBalance(this.getWalletBalance() + amount, null);
+        setWalletBalance(this.getWalletBalance() + amount, "Change Wallet Balance");
         System.out.println(SUCCESS + "\n═══════════════════════════════════════");
         System.out.println("  🎉 " + BOLD + "BALANCE UPDATED SUCCESSFULLY!    " + RESET + SUCCESS);
         System.out.printf("  New Balance: %.2f $%23s %n", this.getWalletBalance(), "");
@@ -336,20 +342,22 @@ public class Wallet implements Serializable {
 
     private void displayTransactionMenu(List<Transaction> list) {
         int counter = 1;
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
-                .withZone(ZoneId.systemDefault());
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.systemDefault());
 
-        for (Transaction t : list) {
-            String formattedTime = formatter.format(t.getTimestamp());
-            double amount = t.getAmount();
+        for (Transaction transaction : list) {
+            String formattedTime = formatter.format(transaction.getTimestamp());
+            double amount = transaction.getAmount();
             String color = amount > 0 ? SUCCESS : ERROR;
-
+            String description = null;
+            if (transaction instanceof TransactionWithOrder transactionWithOrder) {
+                description = "Pay Order Price";
+            } else if (transaction instanceof TransactionWithoutOrder transactionWithoutOrder) {
+                description = transactionWithoutOrder.getDescription();
+            }
             System.out.println(BOLD + "\n[" + counter++ + "]" + RESET);
             System.out.println(OPTION + "• Time: " + HIGHLIGHT + formattedTime + RESET);
-            System.out.println(OPTION + "• Amount: " + color +
-                    String.format("%.2f $", amount) + RESET);
-            System.out.println(OPTION + "• Type: " + HIGHLIGHT +
-                    (t.getOrder() != null ? "Pay Order Price" : "Wallet Charge") + RESET);
+            System.out.println(OPTION + "• Amount: " + color + String.format("%.2f $", amount) + RESET);
+            System.out.println(OPTION + "• Type: " + HIGHLIGHT + description + RESET);
         }
     }
 
@@ -363,15 +371,16 @@ public class Wallet implements Serializable {
     }
 
     private void handleTransactionSelection(Transaction transaction, Customer customer) {
-        if (transaction.getOrder() == null) {
+        if (transaction instanceof TransactionWithoutOrder transactionWithoutOrder) {
+            String description = transactionWithoutOrder.getDescription();
             System.out.println(ERROR + "\n No additional data for this transaction." + RESET);
-            System.out.println(OPTION + "• Type: " + HIGHLIGHT + "Wallet Charge" + RESET);
+            System.out.println(OPTION + "• Type: " + HIGHLIGHT + description + RESET);
             System.out.println(PROMPT + "\nPress anything to continue..." + RESET);
             scan.nextLine();
             return;
         }
-
-        Order order = transaction.getOrder();
+//        TransactionWithOrder transactionWithOrder = (TransactionWithOrder) transaction;
+//        Order order = transactionWithOrder.getOrder();
         System.out.println(OPTION + "\n• Linked Order: " + HIGHLIGHT + "(Shown Below)" + RESET);
         DisplayOrder.getInstance().display(customer);
 
@@ -413,10 +422,5 @@ public class Wallet implements Serializable {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
-    }
-
-    public void clearScreen() {
-        System.out.print("\033[H\033[2J");
-        System.out.flush();
     }
 }

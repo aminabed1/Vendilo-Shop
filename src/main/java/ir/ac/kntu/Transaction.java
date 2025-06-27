@@ -2,28 +2,18 @@ package ir.ac.kntu;
 
 import java.io.Serializable;
 import java.time.Instant;
-import java.util.*;
+
 public class Transaction implements Serializable {
     private final Instant timestamp;
     private double amount;
-    private Order order;
 
-    public Transaction(Instant timestamp, double amount, Order order) {
+    public Transaction(Instant timestamp, double amount) {
         this.timestamp = timestamp;
         this.amount = amount;
-        this.order = order;
     }
 
     public Instant getTimestamp() {
         return timestamp;
-    }
-
-    public Order getOrder() {
-        return order;
-    }
-
-    public void setOrder(Order order) {
-        this.order = order;
     }
 
     public double getAmount() {

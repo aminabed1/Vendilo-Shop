@@ -9,9 +9,7 @@ public class Test {
         this.name = name;
     }
     public static void main(String[] args) {
-
+        
     }
 
-    
-    
 }
