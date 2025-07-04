@@ -358,7 +358,7 @@ public class CreateAccountPage implements Serializable {
             System.out.println("Your agency code is : " + ((Seller) newUser).getAgencyCode());
             DataBase.addRequest(new SellerRequest(((Seller) newUser).getAgencyCode(), description, Instant.now()));
             System.out.println(SUCCESS + "Your seller request has been submitted for Support" + RESET);
-            pause(5000);
+            Pause.pause(5000);
         }
     }
 
@@ -397,15 +397,7 @@ public class CreateAccountPage implements Serializable {
 
     public void showError(String message) {
         System.out.println(ERROR + "\n⚠ " + message + RESET);
-        pause(1000);
-    }
-
-    private void pause(int ms) {
-        try {
-            Thread.sleep(ms);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
+        Pause.pause(1000);
     }
 
     public void showSuccessMessage(Person user) {
@@ -415,7 +407,7 @@ public class CreateAccountPage implements Serializable {
         System.out.println("  Role:  " +  user.getRole());
         System.out.println("║                                       ║");
         System.out.println("╚═══════════════════════════════════════╝" + RESET);
-        pause(2000);
+        Pause.pause(2000);
     }
 
     public String generateAgencyCode() {

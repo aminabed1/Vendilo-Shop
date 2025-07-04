@@ -143,13 +143,6 @@ public class AddProduct implements Serializable {
         System.out.println(ERROR + "Error: " + msg + RESET);
     }
 
-    public void pause(int milliseconds) {
-        try {
-            Thread.sleep(milliseconds);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-    }
 }
 
 interface ProductBuilder {

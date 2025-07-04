@@ -101,7 +101,7 @@ public class SellerMainPage implements Serializable {
                 case "3" -> displaySellerOrders(seller);
                 case "4" -> {
                     System.out.println(SUCCESS + "Exiting seller panel..." + RESET);
-                    pause(1500);
+                    Pause.pause(1500);
                     return;
                 }
                 default -> System.out.println(ERROR + "Please enter a valid choice (1-4)." + RESET);
@@ -113,7 +113,7 @@ public class SellerMainPage implements Serializable {
         List<Order> sellerOrders = seller.getOrders();
         if (sellerOrders.isEmpty()) {
             System.out.println(WARNING + "You don't have any orders yet." + RESET);
-            pause(1500);
+            Pause.pause(1500);
             return;
         }
 
@@ -243,7 +243,7 @@ public class SellerMainPage implements Serializable {
 
         if (myProducts.isEmpty()) {
             System.out.println(WARNING + "You don't have any products yet." + RESET);
-            pause(2000);
+            Pause.pause(2000);
             return;
         }
 
@@ -327,7 +327,7 @@ public class SellerMainPage implements Serializable {
 
             product.setStock(newStock);
             System.out.println(SUCCESS + "Stock updated successfully to: " + newStock + RESET);
-            pause(2000);
+            Pause.pause(2000);
             return;
         }
     }
@@ -335,7 +335,7 @@ public class SellerMainPage implements Serializable {
     public void sendNewRequest(Seller seller) {
         if (!currentSellerRequests.isEmpty() && !currentSellerRequests.get(currentSellerRequests.size() - 1).getIsChecked()) {
             System.out.println(WARNING + "Your last request has not been checked yet. Please wait." + RESET);
-            pause(2000);
+            Pause.pause(2000);
             return;
         }
 
@@ -349,7 +349,7 @@ public class SellerMainPage implements Serializable {
 
         DataBase.addRequest(new SellerRequest(seller.getAgencyCode(), description, Instant.now()));
         System.out.println(SUCCESS + "Request submitted successfully!" + RESET);
-        pause(2000);
+        Pause.pause(2000);
     }
 
     public void displayRequest(Seller seller) {
@@ -364,7 +364,7 @@ public class SellerMainPage implements Serializable {
 
         if (currentSellerRequests.isEmpty()) {
             System.out.println(WARNING + "You don't have any requests yet." + RESET);
-            pause(2000);
+            Pause.pause(2000);
             return;
         }
 
@@ -423,15 +423,7 @@ public class SellerMainPage implements Serializable {
         }
         return result;
     }
-
-    public void pause(int milliseconds) {
-        try {
-            Thread.sleep(milliseconds);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-    }
-
+    
     private boolean isValidChoice(String choice, int max) {
         if (!choice.matches("\\d+")) {
             return true;
@@ -475,6 +467,6 @@ public class SellerMainPage implements Serializable {
 
     private void showError(String message) {
         System.out.println(ERROR + "\n " + message + RESET);
-        pause(1500);
+        Pause.pause(1500);
     }
 }

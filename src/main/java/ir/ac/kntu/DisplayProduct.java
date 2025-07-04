@@ -53,7 +53,7 @@ public class DisplayProduct implements Serializable {
             default:
                 System.out.println(ANSI_RED + "Invalid choice!" + ANSI_RESET);
         }
-        pause(1500);
+        Pause.pause(1500);
     }
 
     public void displayField(String key, String value) {
@@ -68,14 +68,6 @@ public class DisplayProduct implements Serializable {
         Notification notification = new Notification(product);
         customer.addNotification(notification);
         System.out.println("You Will Know If Product Is Available" + ANSI_RESET);
-        pause(2000);
-    }
-
-    public void pause(int milliseconds) {
-        try {
-            Thread.sleep(milliseconds);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
+        Pause.pause(2000);
     }
 }

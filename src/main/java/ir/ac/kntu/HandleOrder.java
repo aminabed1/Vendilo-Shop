@@ -47,7 +47,7 @@ public class HandleOrder implements Serializable {
             return;
         }
 
-        postPrice = calculatePostingPrice(selectedAddress.getProvince(), cart);
+        postPrice = calculatePostingPrice(selectedAddress.getProvince(), cart, ((Customer) person).getVendiloPlusAccount().getIsActive());
         totalPrice = cart.getTotalPrice();
         finalPrice = calculateFinalPrice();
 
@@ -67,26 +67,30 @@ public class HandleOrder implements Serializable {
         for (Product product : cart.getProductMap().keySet()) {
             if (product.getStock() < cart.getProductMap().get(product)) {
                 displayOutOfStock(product);
-                pause(2000);
+                Pause.pause(2000);
                 return false;
             }
         }
         return true;
     }
 
-    public double calculatePostingPrice(String province, Cart cart) {
+    public double calculatePostingPrice(String province, Cart cart, boolean isPremiumAccount) {
         productMap = cart.getProductMap();
         for (Product product : productMap.keySet()) {
             String sellerProvince = getSellerProvince(product.getSellerAgencyCode());
             if (!province.equals(sellerProvince)) {
-                return calculatePostingCost(cart, false);
+                return calculatePostingCost(false, isPremiumAccount);
             }
         }
-        return calculatePostingCost(cart, true);
+        return calculatePostingCost(true, isPremiumAccount);
     }
 
-    private double calculatePostingCost(Cart cart, boolean sameProvince) {
-        return sameProvince ? (double) 5 : 15;
+    private double calculatePostingCost(boolean sameProvince, boolean isPremiumAccount) {
+        if (isPremiumAccount) {
+            return sameProvince ? (double) 0 : 5;
+        } else {
+            return sameProvince ? (double) 5 : 15;
+        }
     }
 
     public String getSellerProvince(String agencyCode) {
@@ -123,8 +127,9 @@ public class HandleOrder implements Serializable {
     }
 
     public boolean discountCodeHandle(Cart cart, Person person) {
+        double premiumAccountPercentage = ((Customer) person).getVendiloPlusAccount().getIsActive() ? 0.95 : 1;
         boolean isDiscountCodeEntered = cart.getDiscountCode() != null;
-        totalPrice = cart.getTotalPrice();
+        totalPrice = cart.getTotalPrice() * premiumAccountPercentage;
         System.out.println("Do you want to " + (isDiscountCodeEntered ? "remove" : "add") + " discount code ? (y/n)");
         String choice = scan.nextLine();
         if (!(choice.equalsIgnoreCase("y") || choice.equalsIgnoreCase("n"))) {
@@ -153,7 +158,7 @@ public class HandleOrder implements Serializable {
         }
 
         cart.discountCodeHandle(dc, operation);
-        totalPrice = cart.getTotalPrice();
+        totalPrice = cart.getTotalPrice() * premiumAccountPercentage;
 
         return true;
     }
@@ -190,7 +195,7 @@ public class HandleOrder implements Serializable {
         double balance = ((Customer) person).getWallet().getWalletBalance();
         if (balance < finalPrice) {
             displayInsufficientBalance(balance);
-            pause(2000);
+            Pause.pause(2000);
             return false;
         }
         return true;
@@ -228,7 +233,7 @@ public class HandleOrder implements Serializable {
         displayOrderCompleted(newBalance);
         handleSellerOrder(person, productMap);
         reduceProductsStock();
-        pause(3000);
+        Pause.pause(3000);
     }
 
     public void reduceProductsStock() {
@@ -377,17 +382,9 @@ public class HandleOrder implements Serializable {
 
     private void showError(String message) {
         System.out.println(ERROR + "\n " + message + RESET);
-        pause(1000);
+        Pause.pause(1000);
     }
-
-    private void pause(int milliseconds) {
-        try {
-            Thread.sleep(milliseconds);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-    }
-
+    
     public Seller findSellerByAgencyCode(String agencyCode) {
         for (Person p : DataBase.getPersonList()) {
             if (p instanceof Seller seller) {

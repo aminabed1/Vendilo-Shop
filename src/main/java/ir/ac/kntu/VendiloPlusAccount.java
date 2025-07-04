@@ -43,10 +43,24 @@ public class VendiloPlusAccount {
         this.endDate = endDate;
     }
 
-    public void setPremiumAccountDate(Instant startDate, Instant endDate) {
+    public void setPremiumAccountDateActive(Instant startDate, Instant endDate) {
         this.startDate = startDate;
         this.endDate = endDate;
         isActive = true;
+    }
+
+    public void setPremiumAccountDateDeActive() {
+        this.startDate = null;
+        this.endDate = null;
+        isActive = false;
+    }
+
+    public void checkPremiumAccountActive() {
+        if (isActive) {
+            if (Instant.now().isAfter(endDate)) {
+                setPremiumAccountDateDeActive();
+            }
+        }
     }
 
     @Override
@@ -67,13 +81,5 @@ public class VendiloPlusAccount {
             sb.append("Remaining Days: ").append(0).append(" days");
         }
         return sb.toString();
-    }
-
-    public void pause(int milliseconds) {
-        try {
-            Thread.sleep(milliseconds);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
     }
 }

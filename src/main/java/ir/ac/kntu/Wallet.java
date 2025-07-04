@@ -113,7 +113,7 @@ public class Wallet implements Serializable {
             List<Transaction> transactions = this.getTransactionList();
             if (transactions.isEmpty()) {
                 System.out.println(WARNING + "No sales transactions found." + RESET);
-                pause(1500);
+                Pause.pause(1500);
                 return;
             }
 
@@ -198,7 +198,7 @@ public class Wallet implements Serializable {
         System.out.println("  🎉 " + BOLD + "WITHDRAWAL SUCCESSFUL!            " + RESET + SUCCESS);
         System.out.printf("  New Balance: %.2f $%23s %n", this.getWalletBalance(), "");
         System.out.println("═══════════════════════════════════════" + RESET);
-        pause(2000);
+        Pause.pause(2000);
     }
 
     public void displayWallet(Person person) {
@@ -271,7 +271,7 @@ public class Wallet implements Serializable {
         System.out.println("  🎉 " + BOLD + "BALANCE UPDATED SUCCESSFULLY!    " + RESET + SUCCESS);
         System.out.printf("  New Balance: %.2f $%23s %n", this.getWalletBalance(), "");
         System.out.println("═══════════════════════════════════════" + RESET);
-        pause(2000);
+        Pause.pause(2000);
     }
 
     public void displayTransactions(Customer customer) {
@@ -284,7 +284,7 @@ public class Wallet implements Serializable {
             System.out.println("╚═════════════════════════════════════╝" + RESET);
             if (list.isEmpty()) {
                 System.out.println(ERROR + "No transactions found." + RESET);
-                pause(1500);
+                Pause.pause(1500);
                 return;
             }
             displayTransactionMenu(list);
@@ -307,7 +307,7 @@ public class Wallet implements Serializable {
                     filterStart = null;
                     filterEnd = null;
                     System.out.println(SUCCESS + "Filter cleared." + RESET);
-                    pause(1000);
+                    Pause.pause(1000);
                     break;
                 default:
                     if (!choice.matches("\\d+")) {
@@ -413,14 +413,6 @@ public class Wallet implements Serializable {
 
     private void showError(String message) {
         System.out.println(ERROR + "\n " + message + RESET);
-        pause(1500);
-    }
-
-    private void pause(int milliseconds) {
-        try {
-            Thread.sleep(milliseconds);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
+        Pause.pause(1500);
     }
 }

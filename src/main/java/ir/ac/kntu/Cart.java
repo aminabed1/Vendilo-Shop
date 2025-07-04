@@ -10,7 +10,7 @@ public class Cart implements Serializable {
     private static final String MENU = "\u001B[38;5;39m";
     private static final String OPTION = "\u001B[38;5;159m";
     private static final String PROMPT = "\u001B[38;5;228m";
-    private static final String SUCCESS = "\u001B[38;5;46m";
+//    private static final String SUCCESS = "\u001B[38;5;46m";
     private static final String ERROR = "\u001B[5;203m";
     private static final String HIGHLIGHT = "\u001B[38;5;231m";
     private static final String BOLD = "\u001B[1m";
@@ -51,9 +51,9 @@ public class Cart implements Serializable {
         }
     }
 
-    public void setTotalPrice(double totalPrice) {
-        this.totalPrice = totalPrice;
-    }
+//    public void setTotalPrice(double totalPrice) {
+//        this.totalPrice = totalPrice;
+//    }
 
     public void displayCart(Customer person) {
         if (productMap.isEmpty()) {
@@ -83,7 +83,7 @@ public class Cart implements Serializable {
     private void displayCartContents(Customer person) {
         double totalPrice = calculateTotalPrice();
         printCartHeader();
-        printProductList();
+        printProductList(person.getVendiloPlusAccount().getIsActive());
         printCartFooter(totalPrice);
     }
 
@@ -99,18 +99,19 @@ public class Cart implements Serializable {
         System.out.println(MENU + "╚══════════════════════════════════════════════╝");
     }
 
-    private void printProductList() {
+    private void printProductList(boolean isPremiumAccount) {
         List<Product> productList = new ArrayList<>(productMap.keySet());
         for (int i = 0; i < productList.size(); i++) {
-            printProductItem(i, productList.get(i));
+            printProductItem(i, productList.get(i), isPremiumAccount);
         }
     }
 
-    private void printProductItem(int i, Product product) {
+    private void printProductItem(int i, Product product, boolean isPremiumAccount) {
+        double premiumAccountPercentage = isPremiumAccount ? 0.95 : 1;
         System.out.println();
         System.out.println(MENU   + "╔══════════════════════════════════════════════╗");
         System.out.println(i + 1);
-        System.out.printf(OPTION  + "  %-30s " + HIGHLIGHT + "%10.2f $\n", product.getFullName(), Double.parseDouble(product.getPrice()));
+        System.out.printf(OPTION  + "  %-30s " + HIGHLIGHT + "%10.2f $\n", product.getFullName(), Double.parseDouble(product.getPrice()) * premiumAccountPercentage);
         System.out.println(OPTION + "  Category: " + HIGHLIGHT + product.getCategory());
         System.out.println(OPTION + "  Quantity: " + HIGHLIGHT + productMap.get(product));
         System.out.println(OPTION + "  Seller: " + HIGHLIGHT + getShopName(product.getSellerAgencyCode()));
@@ -289,4 +290,5 @@ public class Cart implements Serializable {
         }
         return totalPrice;
     }
+
 }

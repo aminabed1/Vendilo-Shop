@@ -3,7 +3,6 @@ package ir.ac.kntu;
 import java.io.Serializable;
 import java.time.Instant;
 import java.time.ZonedDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 public class CustomerMainPage implements Serializable {
@@ -33,6 +32,7 @@ public class CustomerMainPage implements Serializable {
     }
 
     public void customerMenu(Customer customer) {
+        customer.getVendiloPlusAccount().checkPremiumAccountActive();
         displayMenuHeader();
         displayCustomerDashboard();
         customerHandleChoice(customer);
@@ -146,7 +146,7 @@ public class CustomerMainPage implements Serializable {
                     return;
                 default:
                     System.out.println("Invalid Choice. Try Again");
-                    pause(1500);          
+                    Pause.pause(1500);          
             }
         } 
     }
@@ -174,35 +174,35 @@ public class CustomerMainPage implements Serializable {
 
             switch (choice) {
                 case "1":
-                    endDateTemp = ZonedDateTime.now().plus(1, ChronoUnit.MONTHS).toInstant();
+                    endDateTemp = ZonedDateTime.now().plusMonths(1).toInstant();
                     subscriptionCost = 10;
                     break;
                 case "2":
-                    endDateTemp = ZonedDateTime.now().plus(3, ChronoUnit.MONTHS).toInstant();
+                    endDateTemp = ZonedDateTime.now().plusMonths(3).toInstant();
                     subscriptionCost = 25;
                     break;
                 case "3":
-                    endDateTemp = ZonedDateTime.now().plus(12, ChronoUnit.MONTHS).toInstant();
+                    endDateTemp = ZonedDateTime.now().plusMonths(12).toInstant();
                     subscriptionCost = 100;
                     break;
                 case "4":
                     return;
                 default:
                     System.out.println("Enter A Valid Choice");
-                    pause(2000);
+                    Pause.pause(2000);
             }
 
             if (subscriptionCost > balance) {
                 System.out.println("Insufficient Balance, Returning...");
-                pause(2000);
+                Pause.pause(2000);
                 return;
             }
 
             double newBalance = customer.getWallet().getWalletBalance() - subscriptionCost;
             customer.getWallet().setWalletBalance(newBalance, "Buy Premium Account");
-            customer.getVendiloPlusAccount().setPremiumAccountDate(startDateTemp, endDateTemp);
+            customer.getVendiloPlusAccount().setPremiumAccountDateActive(startDateTemp, endDateTemp);
             System.out.println("Premium Account Updated Successfully. Now You Can See It's Details.");
-            pause(2000);
+            Pause.pause(2000);
         }
     }
 
@@ -211,12 +211,12 @@ public class CustomerMainPage implements Serializable {
     public void notificationTab(Customer customer) {
         continueState = true;
         while (continueState) { 
-            notifTabHeader();
+            notificationTabHeader();
             notifTabMenu(customer);
         }
     }
 
-    public void notifTabHeader() {
+    public void notificationTabHeader() {
         System.out.println(TITLE + "=========================================");
         System.out.println("|                                       |");
         System.out.println("|             NOTIFICATIONS             |");
@@ -248,11 +248,11 @@ public class CustomerMainPage implements Serializable {
         }
         System.out.println("1. Display Notification List");
         System.out.println("0. Back");
-        
-        notifTabChoiceHandle(notificationListTemp);
+
+        notificationTabChoiceHandle(notificationListTemp);
     }
 
-    public void notifTabChoiceHandle(List<Notification> notifications) {
+    public void notificationTabChoiceHandle(List<Notification> notifications) {
         System.out.println("Enter Your Choice :");
         String choice = scan.nextLine();
         if (!choice.matches("\\d+")) {
@@ -279,7 +279,7 @@ public class CustomerMainPage implements Serializable {
         choice = scan.nextLine();
         if (!choice.matches("\\d")) {
             System.out.println("Invalid Entered Value, Returning...");
-            pause(2000);
+            Pause.pause(2000);
             return;
         }
 
@@ -290,7 +290,7 @@ public class CustomerMainPage implements Serializable {
 
         if (choiceValue <= 0 && choiceValue > notifications.size()) {
             System.out.println("Invalid Index, Returning...");
-            pause(2000);
+            Pause.pause(2000);
             return;
         }
 
@@ -598,14 +598,6 @@ public class CustomerMainPage implements Serializable {
             DisplayProduct.getInstance().display(selectedProduct, customer);
         } else {
             System.out.println("Invalid index! Try again.");
-        }
-    }
-
-    private void pause(int milliseconds) {
-        try {
-            Thread.sleep(milliseconds);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
         }
     }
 }

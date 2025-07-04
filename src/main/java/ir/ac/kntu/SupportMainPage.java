@@ -63,7 +63,7 @@ public class SupportMainPage implements Serializable {
 
             if (sellersRequests.isEmpty()) {
                 showSuccessMessage("No pending seller requests found.");
-                pause(1500);
+                Pause.pause(1500);
                 return;
             }
 
@@ -152,7 +152,7 @@ public class SupportMainPage implements Serializable {
     private void toggleSellerStatus(Seller seller) {
         seller.setIsValidSeller(!seller.getIsValidSeller());
         showSuccessMessage("Seller account " + (seller.getIsValidSeller() ? "approved" : "disabled") + " successfully!");
-        pause(1500);
+        Pause.pause(1500);
     }
 
     private void rejectSellerRequest(SellerRequest request) {
@@ -161,7 +161,7 @@ public class SupportMainPage implements Serializable {
         request.setDescription(reason);
         request.setIsChecked(true);
         showSuccessMessage("Request rejected with reason noted.");
-        pause(1500);
+        Pause.pause(1500);
     }
 
     private void handleCustomerRequests() {
@@ -173,7 +173,7 @@ public class SupportMainPage implements Serializable {
 
             if (customerRequests.isEmpty()) {
                 showSuccessMessage("No pending customer requests found.");
-                pause(1500);
+                Pause.pause(1500);
                 return;
             }
 
@@ -283,7 +283,7 @@ public class SupportMainPage implements Serializable {
         request.setStatus("checked");
 
         showSuccessMessage("Request updated successfully!");
-        pause(1500);
+        Pause.pause(1500);
     }
 
     private void handleOrderManagement() {
@@ -301,7 +301,7 @@ public class SupportMainPage implements Serializable {
 
             if (mainOrders.isEmpty()) {
                 showSuccessMessage("No orders found.");
-                pause(1500);
+                Pause.pause(1500);
                 return;
             }
 
@@ -323,7 +323,7 @@ public class SupportMainPage implements Serializable {
 
             if (!isValidChoice(choice, mainOrders.size())) {
                 showErrorMessage("Please enter a valid choice (1-" + mainOrders.size() + ")");
-                pause(1000);
+                Pause.pause(1000);
                 continue;
             }
 
@@ -374,7 +374,7 @@ public class SupportMainPage implements Serializable {
             }
 
             showErrorMessage("Please enter a valid index (1-" + maxIndex + ")");
-            pause(1000);
+            Pause.pause(1000);
         }
     }
 
@@ -413,14 +413,6 @@ public class SupportMainPage implements Serializable {
         System.out.println(DIVIDER);
     }
 
-    private void pause(int milliseconds) {
-        try {
-            Thread.sleep(milliseconds);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-    }
-
     private void showErrorMessage(String message) {
         System.out.println(ERROR + "[!] " + message + RESET);
     }
@@ -432,7 +424,7 @@ public class SupportMainPage implements Serializable {
 
     private void showInvalidOptionError(int maxOption) {
         showErrorMessage("Please enter a valid option (0-" + maxOption + ")");
-        pause(1000);
+        Pause.pause(1000);
     }
 
     private String truncate(String text) {

@@ -111,12 +111,12 @@ public class LoginPage implements Serializable {
         System.out.println("|   " + BOLD + "LOGIN SUCCESSFUL!" + RESET + SUCCESS + "                   |");
         System.out.println("|                                       |");
         System.out.println("=========================================" + RESET);
-        pause(1500);
+        Pause.pause(1500);
     }
 
     private void showError(String message) {
         System.out.println("\n" + ERROR + "⚠ " + message + RESET + "\n");
-        pause(1000);
+        Pause.pause(1000);
     }
 
     private Person authenticateUser(String authText, String password, String role) {
@@ -154,13 +154,5 @@ public class LoginPage implements Serializable {
     private void clearScreen() {
         System.out.print("\033[H\033[2J");
         System.out.flush();
-    }
-
-    private void pause(int ms) {
-        try {
-            Thread.sleep(ms);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
     }
 }
