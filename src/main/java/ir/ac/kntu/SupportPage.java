@@ -4,9 +4,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
-import java.util.stream.Collectors;
 
-public class SupportMainPage implements Serializable {
+public class SupportPage implements Serializable {
 
     private static final String RESET = "\u001B[0m";
     private static final String TITLE = "\u001B[38;5;45m";
@@ -21,8 +20,8 @@ public class SupportMainPage implements Serializable {
 
     private static final Scanner scan = new Scanner(System.in);
 
-    public static SupportMainPage getInstance() {
-        return new SupportMainPage();
+    public static SupportPage getInstance() {
+        return new SupportPage();
     }
 
     public void mainPage(Person person) {
@@ -265,7 +264,7 @@ public class SupportMainPage implements Serializable {
 
     public Customer findCustomerByPhone(String phone) {
         for (Person person : DataBase.getPersonList()) {
-            if (person.getPhoneNumber().equals(phone)) {
+            if (((OrdinaryUsers) person).getPhoneNumber().equals(phone)) {
                 return (Customer) person;
             }
         }

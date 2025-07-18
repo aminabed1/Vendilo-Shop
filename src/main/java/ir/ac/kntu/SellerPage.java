@@ -6,7 +6,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
-public class SellerMainPage implements Serializable {
+public class SellerPage implements Serializable {
 
     private static final String RESET = "\u001B[0m";
     private static final String TITLE = "\u001B[38;5;45m";
@@ -22,8 +22,8 @@ public class SellerMainPage implements Serializable {
     private final Scanner scan = new Scanner(System.in);
     private static List<Request> currentSellerRequests = new ArrayList<>();
 
-    public static SellerMainPage getInstance() {
-        return new SellerMainPage();
+    public static SellerPage getInstance() {
+        return new SellerPage();
     }
 
     public List<Request> sellerRequests(String agencyCode) {

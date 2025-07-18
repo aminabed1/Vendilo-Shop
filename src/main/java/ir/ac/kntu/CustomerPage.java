@@ -5,7 +5,7 @@ import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.*;
 
-public class CustomerMainPage implements Serializable {
+public class CustomerPage implements Serializable {
     private static final Scanner scan = new Scanner(System.in);
     private static boolean backButtonPressed = false;
     private static boolean continueState = false;
@@ -17,9 +17,9 @@ public class CustomerMainPage implements Serializable {
     private static final String SUCCESS = "\u001B[38;5;46m";
     private static final String ERROR = "\u001B[38;5;203m";
     private static final String HIGHLIGHT = "\u001B[38;5;231m";
-    private static final CustomerMainPage customerMainPage = new CustomerMainPage();
+    private static final CustomerPage customerMainPage = new CustomerPage();
 
-    public static CustomerMainPage getInstance() {
+    public static CustomerPage getInstance() {
         return customerMainPage;
     }
 

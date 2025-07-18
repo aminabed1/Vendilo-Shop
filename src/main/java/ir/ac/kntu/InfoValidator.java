@@ -13,7 +13,7 @@ public class InfoValidator {
 
     public boolean emailUniqueCheck(String email, List<String> errorList) {
         for (Person person : personList) {
-            if (person.getEmail().equals(email)) {
+            if (((OrdinaryUsers) person).getEmail().equals(email)) {
                 errorList.add("Email already in use");
                 return false;
             }
@@ -28,19 +28,8 @@ public class InfoValidator {
                 continue;
             }
 
-            if (person.getPhoneNumber().equals(phoneNumber)) {
+            if (((OrdinaryUsers) person).getPhoneNumber().equals(phoneNumber)) {
                 errorList.add("Phone number already in use");
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    public boolean usernameUniqueCheck(String username, List<String> errorList) {
-        for (Person person : personList) {
-            if (person.getUsername().equals(username)) {
-                errorList.add("Username already in use");
                 return false;
             }
         }
@@ -146,8 +135,7 @@ public class InfoValidator {
 
     public boolean isPersonInfoValidP2(String email, String username, String password, List<String> errorList) {
         personList = DataBase.getPersonList();
-        boolean isUnique = emailUniqueCheck(email, errorList) &&
-                usernameUniqueCheck(username, errorList);
+        boolean isUnique = emailUniqueCheck(email, errorList);
 
         boolean isValid = emailValidation(email, errorList) &&
                 usernameValidation(username, errorList) &&

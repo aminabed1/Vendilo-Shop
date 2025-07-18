@@ -30,9 +30,8 @@ public class PersonAccount implements Serializable {
         System.out.println("\u001B[33mPERSONAL INFORMATION:\u001B[0m");
         System.out.printf("  %-15s: %s\n", "Name", currentPerson.getName());
         System.out.printf("  %-15s: %s\n", "Surname", currentPerson.getSurname());
-        System.out.printf("  %-15s: %s\n", "Email", currentPerson.getEmail());
-        System.out.printf("  %-15s: %s\n", "Phone", currentPerson.getPhoneNumber());
-        System.out.printf("  %-15s: %s\n", "Username", currentPerson.getUsername());
+        System.out.printf("  %-15s: %s\n", "Email", ((OrdinaryUsers)currentPerson).getEmail());
+        System.out.printf("  %-15s: %s\n", "Phone", ((OrdinaryUsers)currentPerson).getPhoneNumber());
         System.out.printf("  %-15s: %s\n", "Password", "********");
     }
 

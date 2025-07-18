@@ -65,9 +65,8 @@ public class PersonInfoEdit implements Serializable {
     private void loadTempData() {
         nameTemp = currentPerson.getName();
         surNameTemp = currentPerson.getSurname();
-        phoneTemp = currentPerson.getPhoneNumber();
-        emailTemp = currentPerson.getEmail();
-        usernameTemp = currentPerson.getUsername();
+        phoneTemp = ((OrdinaryUsers)currentPerson).getPhoneNumber();
+        emailTemp = ((OrdinaryUsers)currentPerson).getEmail();
         passwordTemp = currentPerson.getPassword();
         shopNameTemp = (currentPerson instanceof Seller seller) ? seller.getShopName() : null;
     }
@@ -82,20 +81,16 @@ public class PersonInfoEdit implements Serializable {
     private boolean tryApplyChanges() {
         List<String> errorList = new ArrayList<>();
 
-        String oldUsername = currentPerson.getUsername();
-        String oldEmail = currentPerson.getEmail();
-        String oldPhone = currentPerson.getPhoneNumber();
-        currentPerson.setUsername("");
-        currentPerson.setEmail("");
-        currentPerson.setPhoneNumber("");
+        String oldEmail = ((OrdinaryUsers)currentPerson).getEmail();
+        String oldPhone = ((OrdinaryUsers)currentPerson).getPhoneNumber();
+        ((OrdinaryUsers)currentPerson).setEmail("");
+        ((OrdinaryUsers)currentPerson).setPhoneNumber("");
         InfoValidator validator = new InfoValidator();
         boolean isValid = validator.isPersonInfoValidP1(
                 nameTemp, surNameTemp, phoneTemp, errorList) &&
                 validator.isPersonInfoValidP2(emailTemp, usernameTemp, passwordTemp, errorList);
-
-        currentPerson.setUsername(oldUsername);
-        currentPerson.setEmail(oldEmail);
-        currentPerson.setPhoneNumber(oldPhone);
+        ((OrdinaryUsers)currentPerson).setEmail(oldEmail);
+        ((OrdinaryUsers)currentPerson).setPhoneNumber(oldPhone);
 
         if (!isValid) {
             displayErrors(errorList);
@@ -109,9 +104,8 @@ public class PersonInfoEdit implements Serializable {
     private void updateInfo() {
         currentPerson.setName(nameTemp);
         currentPerson.setSurname(surNameTemp);
-        currentPerson.setPhoneNumber(phoneTemp);
-        currentPerson.setEmail(emailTemp);
-        currentPerson.setUsername(usernameTemp);
+        ((OrdinaryUsers)currentPerson).setPhoneNumber(phoneTemp);
+        ((OrdinaryUsers)currentPerson).setEmail(emailTemp);
         currentPerson.setPassword(passwordTemp);
         if (shopNameTemp != null && currentPerson instanceof Seller seller) {
             seller.setShopName(shopNameTemp);

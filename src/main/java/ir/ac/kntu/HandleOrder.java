@@ -253,7 +253,7 @@ public class HandleOrder implements Serializable {
             double currentBalance = seller.getWallet().getWalletBalance();
 
             SellerOrder sellerOrder = new SellerOrder(Instant.now(),
-                    sellerBenefit, selectedAddress, customer.getEmail(),
+                    sellerBenefit, selectedAddress, ((OrdinaryUsers) customer).getEmail(),
                     "Sale of product: ", sellerOrderProductMap);
 
             seller.getWallet().setWalletBalance(currentBalance + sellerBenefit, sellerOrder);

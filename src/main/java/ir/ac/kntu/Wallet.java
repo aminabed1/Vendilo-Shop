@@ -208,8 +208,7 @@ public class Wallet implements Serializable {
         System.out.println("╚═════════════════════════════════════╝" + RESET);
 
         if (person instanceof Customer customer) {
-            System.out.println(OPTION + "  Balance: " + HIGHLIGHT +
-                    String.format("%.2f $", this.getWalletBalance()) + RESET);
+            System.out.println(OPTION + "  Balance: " + HIGHLIGHT + String.format("%.2f $", this.getWalletBalance()) + RESET);
             System.out.println(TITLE + "═══════════════════════════════════════" + RESET);
             System.out.println(OPTION + "  Would you like to add money?");
             System.out.println("  [Y] Yes     [N] No     [BACK] Return");
@@ -365,9 +364,7 @@ public class Wallet implements Serializable {
         if (start == null || end == null) {
             return all;
         }
-        return all.stream()
-                .filter(t -> !t.getTimestamp().isBefore(start) && !t.getTimestamp().isAfter(end))
-                .toList();
+        return all.stream().filter(t -> !t.getTimestamp().isBefore(start) && !t.getTimestamp().isAfter(end)).toList();
     }
 
     private void handleTransactionSelection(Transaction transaction, Customer customer) {

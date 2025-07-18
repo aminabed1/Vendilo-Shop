@@ -17,7 +17,6 @@ public class LoginPage implements Serializable {
     private static final String BOLD = "\u001B[1m";
 
     public void loginPage() {
-        clearScreen();
         showWelcomeScreen();
         readLoginInfo();
     }
@@ -36,7 +35,7 @@ public class LoginPage implements Serializable {
             displayLoginMenu();
             String choice = scan.nextLine().trim();
 
-            if (choice.equalsIgnoreCase("4")) {
+            if (choice.equalsIgnoreCase("5")) {
                 break;
             }
             if (choice.equals("0")) {
@@ -44,8 +43,8 @@ public class LoginPage implements Serializable {
                 createAccountPage.createAccount();
                 continue;
             }
-            if (!choice.matches("[0-3]")) {
-                showError("Please enter a valid option (0-4)");
+            if (!choice.matches("[0-4]")) {
+                showError("Please enter a valid option (0-5)");
                 continue;
             }
 
@@ -69,11 +68,11 @@ public class LoginPage implements Serializable {
             if (person != null) {
                 showLoginSuccess(person);
                 if (person instanceof Customer) {
-                    CustomerMainPage.getInstance().mainPage(person);
+                    CustomerPage.getInstance().mainPage(person);
                 } else if (person instanceof Seller) {
-                    SellerMainPage.getInstance().mainPage(person);
+                    SellerPage.getInstance().mainPage(person);
                 } else {
-                    SupportMainPage.getInstance().mainPage(person);
+                    SupportPage.getInstance().mainPage(person);
                 }
             } else {
                 showError("Invalid credentials. Please try again.");
@@ -89,7 +88,8 @@ public class LoginPage implements Serializable {
         System.out.println("| " + OPTION + "1. Customer" + MENU + "                           |");
         System.out.println("| " + OPTION + "2. Seller" + MENU + "                             |");
         System.out.println("| " + OPTION + "3. Support" + MENU + "                            |");
-        System.out.println("| " + OPTION + "4. exit   " + MENU + "                            |");
+        System.out.println("| " + OPTION + "4. Manager" + MENU + "                            |");
+        System.out.println("| " + OPTION + "5. exit   " + MENU + "                            |");
         System.out.println("|                                       |");
         System.out.println("| " + OPTION + "0. Create New Account" + MENU + "                 |");
         System.out.println("+---------------------------------------+");
@@ -101,6 +101,7 @@ public class LoginPage implements Serializable {
             case "1" -> "Customer";
             case "2" -> "Seller";
             case "3" -> "Support";
+            case "4" -> "Manager";
             default -> "";
         };
     }
@@ -120,39 +121,49 @@ public class LoginPage implements Serializable {
     }
 
     private Person authenticateUser(String authText, String password, String role) {
-        for (Person p : DataBase.getPersonList()) {
-            if (!p.getRole().equals(role)) {
+        for (Person person : DataBase.getPersonList()) {
+            if (!person.getRole().equals(role)) {
                 continue;
             }
-
-            if (role.equals("Customer")) {
-                boolean isMatch = (p.getEmail().equals(authText) || p.getPhoneNumber().equals(authText))
-                        && p.getPassword().equals(password);
-                if (isMatch) {
-                    return p;
+            switch (role) {
+                case "Customer" -> {
+                    Customer customer = (Customer) person;
+                    boolean isMatch = (customer.getEmail().equals(authText) || customer.getPhoneNumber().equals(authText))
+                            && person.getPassword().equals(password);
+                    if (isMatch) {
+                        return person;
+                    }
                 }
-            } else if (role.equals("Seller")) {
-                if (p instanceof Seller seller) {
+                case "Seller" -> {
+                    Seller seller = (Seller) person;
                     boolean isMatch = seller.getAgencyCode().equals(authText)
                             && seller.getPassword().equals(password);
                     if (isMatch) {
-                        return seller;
+                        return person;
                     }
                 }
-            } else {
-                boolean isMatch = p.getUsername().equals(authText)
-                        && p.getPassword().equals(password);
-                if (isMatch) {
-                    return p;
+                case "Support" -> {
+                    Support support = (Support) person;
+
+                    boolean isMatch = support.getUsername().equals(authText)
+                            && person.getPassword().equals(password);
+                    if (isMatch) {
+                        return person;
+                    }
+                }
+                case "Manager" -> {
+                    Manager manager = (Manager) person;
+                    boolean isMatch = manager.getUsername().equals(authText)
+                            && manager.getPassword().equals(password);
+                    if (isMatch) {
+                        return person;
+                    }
+                }
+                default -> {
+                    return null;
                 }
             }
         }
-
         return null;
-    }
-
-    private void clearScreen() {
-        System.out.print("\033[H\033[2J");
-        System.out.flush();
     }
 }

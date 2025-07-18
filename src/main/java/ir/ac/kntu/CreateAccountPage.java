@@ -319,15 +319,9 @@ public class CreateAccountPage implements Serializable {
     }
 
     private Person validateAndCreateUser(String role, UserInfo info) {
-        if (role.equals("Seller")) {
-            if (isExistingSeller(info.getEmail(), info.getPhone(), info.getUsername(), info.getSellerID())) {
-                showError("Email, phone, username or sellerID already in use!");
-                return null;
-            }
-        }
-
-        if (isExistingCustomer(info.getEmail(), info.getPhone(), info.getUsername())) {
-            showError("Email, phone or username already in use");
+        String ID = (role.equals("Seller") ? info.getSellerID() : null);
+        if (isExistingPerson(info.getEmail(), info.getPhone(), ID)) {
+            showError("Email, phone or seller ID already in use!");
             return null;
         }
 
@@ -341,10 +335,10 @@ public class CreateAccountPage implements Serializable {
 
         if (role.equals("Customer")) {
             return new Customer(info.getName(), info.getSurname(), info.getPhone(),
-                    info.getEmail(), info.getUsername(), info.getPassword());
+                    info.getEmail(), info.getPassword());
         } else {
             return new Seller(info.getName(), info.getSurname(), info.getPhone(),
-                    info.getEmail(), info.getUsername(), info.getPassword(),
+                    info.getEmail(), info.getPassword(),
                     info.getShopName(), info.getSellerID(), info.getProvince(), generateAgencyCode());
         }
     }
@@ -361,29 +355,19 @@ public class CreateAccountPage implements Serializable {
             Pause.pause(5000);
         }
     }
-
-    public boolean isExistingSeller(String email, String phone, String username, String sellerID) {
-        for (Person c : DataBase.getPersonList()) {
-            if (c.getEmail().equals(email)
-                    || c.getPhoneNumber().equals(phone)
-                    || c.getUsername().equals(username)) {
-                return true;
-            }
-            if (c instanceof Seller seller) {
-                if (seller.getSellerID().equals(sellerID)) {
+    public boolean isExistingPerson(String email, String phone, String sellerID) {
+        for (Person p : DataBase.getPersonList()) {
+            if (p instanceof Seller seller) {
+                if (seller.getEmail().equals(email)
+                        || seller.getPhoneNumber().equals(phone)
+                        || seller.getSellerID().equals(sellerID)) {
                     return true;
                 }
-            }
-        }
-        return false;
-    }
-
-    public boolean isExistingCustomer(String email, String phone, String username) {
-        for (Person c : DataBase.getPersonList()) {
-            if (c.getEmail().equals(email)
-                    || c.getPhoneNumber().equals(phone)
-                    || c.getUsername().equals(username)) {
-                return true;
+            } else if (p instanceof Customer customer) {
+                if (customer.getEmail().equals(email)
+                        || customer.getPhoneNumber().equals(phone)) {
+                    return true;
+                }
             }
         }
         return false;

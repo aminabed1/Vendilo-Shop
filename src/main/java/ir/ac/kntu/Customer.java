@@ -1,9 +1,8 @@
 package ir.ac.kntu;
 
-import java.io.Serializable;
 import java.util.*;
 
-public class Customer extends Person implements Serializable {
+public class Customer extends OrdinaryUsers {
     private Cart cart;
     private Wallet wallet;
     private List<Order> orderList;
@@ -13,9 +12,8 @@ public class Customer extends Person implements Serializable {
     private List<DiscountCode> discountCodeList;
     private VendiloPlusAccount vendiloPlusAccount;
 
-    public Customer(String name, String surname, String phoneNumber, String email, String username,
-                    String password) {
-        super(name, surname, phoneNumber, email, username, password);
+    public Customer(String name, String surname, String phoneNumber, String email, String password) {
+        super(name, surname, password, phoneNumber, email);
         //TODO Cunstructor
         vendiloPlusAccount = new VendiloPlusAccount();
         orderList = new ArrayList<>();
@@ -85,30 +83,5 @@ public class Customer extends Person implements Serializable {
 
     public void setVendiloPlusAccount(VendiloPlusAccount vendiloPlusAccount) {
         this.vendiloPlusAccount = vendiloPlusAccount;
-    }
-
-    @Override
-    public boolean equals(Object object) {
-        if (this == object) {
-            return true;
-        }
-        if (object == null || this.getClass() != object.getClass()) {
-            return false;
-        }
-
-        Customer customer = (Customer) object;
-
-        return this.getName().equals(customer.getName()) &&
-                this.getSurname().equals(customer.getSurname() )&&
-                this.getPhoneNumber().equals(customer.getPhoneNumber()) &&
-                this.getEmail().equals(customer.getEmail()) &&
-                this.getUsername().equals(customer.getUsername()) &&
-                this.getPassword().equals(customer.getPassword());
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(getName(), getSurname(), getPhoneNumber(), getEmail(),
-                            getUsername(), getPassword());
     }
 }
