@@ -17,11 +17,11 @@ public class CreateAccountPage implements Serializable {
     private static final String HIGHLIGHT = "\u001B[38;5;231m";
     private static final String BOLD = "\u001B[1m";
 
-    public void createAccount() {
+    public void createAccount(String userAccess) {
         displayCreateAccountHeader();
 
         while (true) {
-            String role = selectRole();
+            String role = selectRole(userAccess);
             if (role == null) {
                 continue;
             }
@@ -46,12 +46,17 @@ public class CreateAccountPage implements Serializable {
         System.out.println();
     }
 
-    public String selectRole() {
+    public String selectRole(String userAccess) {
         System.out.println(MENU + "╔═════════════════════════════════════╗");
         System.out.println("║" + BOLD + "        SELECT ACCOUNT TYPE        " + RESET + MENU + "  ║");
         System.out.println("╠═════════════════════════════════════╣");
-        System.out.println("║ " + OPTION + "1. Customer" + MENU + "                         ║");
-        System.out.println("║ " + OPTION + "2. Seller" + MENU + "                           ║");
+        if (userAccess.equals("Ordinary")) {
+            System.out.println("║ " + OPTION + "1. Customer" + MENU + "                         ║");
+            System.out.println("║ " + OPTION + "2. Seller" + MENU + "                           ║");
+        } else {
+            System.out.println("║ " + OPTION + "1. Manager " + MENU + "                         ║");
+            System.out.println("║ " + OPTION + "2. Support" + MENU + "                          ║");
+        }
         System.out.println("╠═════════════════════════════════════╣");
         System.out.println("║ " + OPTION + "Type " + BOLD + "BACK" + RESET + OPTION + " to return" + MENU + "                 ║");
         System.out.println("╚═════════════════════════════════════╝" + RESET);
@@ -67,7 +72,11 @@ public class CreateAccountPage implements Serializable {
             showError("Please enter 1, 2 or BACK");
             return null;
         }
-        return input.equals("1") ? "Customer" : "Seller";
+        if (userAccess.equals("Ordinary")) {
+            return input.equals("1") ? "Customer" : "Seller";
+        } else {
+            return input.equals("1") ? "Manager" : "Support";
+        }
     }
 
     public Person collectUserInfo(String role) {
@@ -83,23 +92,31 @@ public class CreateAccountPage implements Serializable {
             String choice = scan.nextLine().trim();
             System.out.print(RESET);
 
-            if (choice.equals("8")) {
+            if (choice.equals("5") && (role.equals("Manager") || role.equals("Support"))) {
+                return null;
+            }
+            if (choice.equals("8") && (role.equals("Customer") || role.equals("Seller"))) {
                 return null;
             }
 
-            if (choice.equals("7")) {
-                confirmationGiven = true;
+            if ((role.equals("Manager") || role.equals("Support"))) {
+                if (choice.equals("4")) {
+                    confirmationGiven = true;
+                }
             } else {
-                processUserInput(choice, userInfo, role);
-                continue;
+                if (choice.equals("7")) {
+                    confirmationGiven = true;
+                }
             }
 
             if (confirmationGiven) {
-                if (!userInfo.isAnyFieldEmpty(role.equals("Seller"))) {
+                if (!userInfo.isAnyFieldEmpty(role)) {
                     break;
                 } else {
                     showError("Please fill all required fields");
                 }
+            } else {
+                processUserInput(choice, userInfo, role);
             }
         }
 
@@ -206,29 +223,35 @@ public class CreateAccountPage implements Serializable {
                 this.sellerID = sellerID.trim();
             }
         }
-        
-        public boolean isAnyFieldEmpty(boolean isSeller) {
-            if (name.isEmpty() || surname.isEmpty() || phone.isEmpty() ||
-                    email.isEmpty() || username.isEmpty() || password.isEmpty()) {
+
+        public boolean isAnyFieldEmpty(String role) {
+            if (name.isEmpty() || surname.isEmpty() || username.isEmpty() || password.isEmpty()) {
                 return true;
             }
-            if (isSeller) {
-                return shopName.isEmpty() || province.isEmpty() || sellerID.isEmpty();
+            if (role.equals("Customer")) {
+                return phone.isEmpty() || email.isEmpty();
+            }
+            if (role.equals("Seller")) {
+                return phone.isEmpty() || email.isEmpty() || shopName.isEmpty() || province.isEmpty() || sellerID.isEmpty();
             }
             return false;
         }
 
-        public Map<String, String> toMap() {
+        public Map<String, String> toMap(String role) {
             Map<String, String> infoMap = new LinkedHashMap<>();
             infoMap.put("Name", name);
             infoMap.put("Surname", surname);
-            infoMap.put("Phone", phone);
-            infoMap.put("Email", email);
+            if (!role.equals("Manager") && !role.equals("Support")) {
+                infoMap.put("Phone", phone);
+                infoMap.put("Email", email);
+            }
             infoMap.put("Username", username);
             infoMap.put("Password", password.isEmpty() ? "" : "******");
-            infoMap.put("Shop Name", shopName);
-            infoMap.put("Province", province);
-            infoMap.put("Seller ID", sellerID);
+            if (role.equals("Seller")) {
+                infoMap.put("Shop Name", shopName);
+                infoMap.put("Province", province);
+                infoMap.put("Seller ID", sellerID);
+            }
             return infoMap;
         }
     }
@@ -241,12 +264,16 @@ public class CreateAccountPage implements Serializable {
         System.out.println("║" + BOLD + "                ENTER YOUR INFORMATION            " + RESET + MENU + "    ║");
         System.out.println("╠══════════════════════════════════════════════════════╣");
 
-        Map<String, String> infoMap = info.toMap();
+        Map<String, String> infoMap = info.toMap(role);
 
         printInfoLine("1. Name", infoMap.get("Name"), maxLabelLength, maxValueLength);
         printInfoLine("2. Surname", infoMap.get("Surname"), maxLabelLength, maxValueLength);
-        printInfoLine("3. Phone", infoMap.get("Phone"), maxLabelLength, maxValueLength);
-        printInfoLine("4. Email", infoMap.get("Email"), maxLabelLength, maxValueLength);
+
+        if (!role.equals("Manager") && !role.equals("Support")) {
+            printInfoLine("3. Phone", infoMap.get("Phone"), maxLabelLength, maxValueLength);
+            printInfoLine("4. Email", infoMap.get("Email"), maxLabelLength, maxValueLength);
+        }
+
         printInfoLine("5. Username", infoMap.get("Username"), maxLabelLength, maxValueLength);
         printInfoLine("6. Password", infoMap.get("Password"), maxLabelLength, maxValueLength);
 
@@ -257,8 +284,13 @@ public class CreateAccountPage implements Serializable {
         }
 
         System.out.println("╠══════════════════════════════════════════════════════╣");
-        System.out.println("║ " + OPTION + "7. Confirm Information" + MENU + "                               ║");
-        System.out.println("║ " + OPTION + "8. Back" + MENU + "                                              ║");
+        if (role.equals("Manager") || role.equals("Support")) {
+            System.out.println("║ " + OPTION + "4. Confirm Information" + MENU + "                               ║");
+            System.out.println("║ " + OPTION + "5. Back" + MENU + "                                              ║");
+        } else {
+            System.out.println("║ " + OPTION + "7. Confirm Information" + MENU + "                               ║");
+            System.out.println("║ " + OPTION + "8. Back" + MENU + "                                              ║");
+        }
         System.out.println("╚══════════════════════════════════════════════════════╝" + RESET);
     }
 
@@ -279,12 +311,16 @@ public class CreateAccountPage implements Serializable {
                 info.setSurname(scan.nextLine());
                 break;
             case "3":
-                System.out.print(PROMPT + "Enter phone: " + RESET + HIGHLIGHT);
-                info.setPhone(scan.nextLine());
+                if (!role.equals("Manager") && !role.equals("Support")) {
+                    System.out.print(PROMPT + "Enter phone: " + RESET + HIGHLIGHT);
+                    info.setPhone(scan.nextLine());
+                }
                 break;
             case "4":
-                System.out.print(PROMPT + "Enter email: " + RESET + HIGHLIGHT);
-                info.setEmail(scan.nextLine());
+                if (!role.equals("Manager") && !role.equals("Support")) {
+                    System.out.print(PROMPT + "Enter email: " + RESET + HIGHLIGHT);
+                    info.setEmail(scan.nextLine());
+                }
                 break;
             case "5":
                 System.out.print(PROMPT + "Enter username: " + RESET + HIGHLIGHT);
@@ -319,28 +355,37 @@ public class CreateAccountPage implements Serializable {
     }
 
     private Person validateAndCreateUser(String role, UserInfo info) {
-        String ID = (role.equals("Seller") ? info.getSellerID() : null);
-        if (isExistingPerson(info.getEmail(), info.getPhone(), ID)) {
-            showError("Email, phone or seller ID already in use!");
-            return null;
+        if (role.equals("Manager") || role.equals("Support")) {
+            if (isExistingPerson(info.getUsername())) {
+                showError("Username already in use!");
+                return null;
+            }
+        } else {
+            if (isExistingPerson(info.getPhone(), info.getEmail())) {
+                showError("Phone Number or Email already in use!");
+                return null;
+            }
         }
+
 
         List<String> errors = new ArrayList<>();
         InfoValidator validator = new InfoValidator();
-        if (!validator.isPersonInfoValidP1(info.getName(), info.getSurname(), info.getPhone(), errors)
-            || validator.isPersonInfoValidP2(info.getName(), info.getSurname(), info.getPhone(), errors)) {
-            displayErrors(errors);
-            return null;
+
+        if (!(role.equals("Manager") || role.equals("Support"))) {
+            if (!validator.isPersonInfoValidP1(info.getName(), info.getSurname(), info.getPhone(), errors)
+                    || !validator.isPersonInfoValidP2(info.getEmail(), info.getUsername(), info.getPassword(), errors)) {
+                displayErrors(errors);
+                return null;
+            }
         }
 
-        if (role.equals("Customer")) {
-            return new Customer(info.getName(), info.getSurname(), info.getPhone(),
-                    info.getEmail(), info.getPassword());
-        } else {
-            return new Seller(info.getName(), info.getSurname(), info.getPhone(),
-                    info.getEmail(), info.getPassword(),
-                    info.getShopName(), info.getSellerID(), info.getProvince(), generateAgencyCode());
-        }
+        return switch (role) {
+            case "Customer" -> new Customer(info.getName(), info.getSurname(), info.getPhone(), info.getEmail(), info.getPassword());
+            case "Seller" -> new Seller(info.getName(), info.getSurname(), info.getPhone(), info.getEmail(), info.getPassword(), info.getShopName(), info.getSellerID(), info.getProvince(), generateAgencyCode());
+            case "Manager" -> new Manager(info.getName(), info.getSurname(), info.getUsername(), info.getPassword());
+            case "Support" -> new Support(info.getName(), info.getSurname(), info.getUsername(), info.getPassword());
+            default -> null;
+        };
     }
 
     private void completeAccountCreation(Person newUser) {
@@ -355,19 +400,28 @@ public class CreateAccountPage implements Serializable {
             Pause.pause(5000);
         }
     }
-    public boolean isExistingPerson(String email, String phone, String sellerID) {
+
+    public boolean isExistingPerson(String username) {
         for (Person p : DataBase.getPersonList()) {
-            if (p instanceof Seller seller) {
-                if (seller.getEmail().equals(email)
-                        || seller.getPhoneNumber().equals(phone)
-                        || seller.getSellerID().equals(sellerID)) {
-                    return true;
-                }
-            } else if (p instanceof Customer customer) {
-                if (customer.getEmail().equals(email)
-                        || customer.getPhoneNumber().equals(phone)) {
-                    return true;
-                }
+            if (p instanceof OrdinaryUsers) {
+                continue;
+            }
+            SpecialUsers su = (SpecialUsers) p;
+            if (su.getUsername().equals(username)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean isExistingPerson(String phoneNumber,String email) {
+        for (Person p : DataBase.getPersonList()) {
+            if (p instanceof SpecialUsers) {
+                continue;
+            }
+            OrdinaryUsers ou = (OrdinaryUsers) p;
+            if (ou.getPhoneNumber().equals(phoneNumber) && ou.getEmail().equals(email)) {
+                return true;
             }
         }
         return false;

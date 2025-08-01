@@ -15,4 +15,10 @@ public class SpecialUsers extends Person {
     public void setUsername(String username) {
         this.username = username;
     }
+
+    @Override
+    public String toString() {
+        return super.toString() + "\n"
+                + "Username: " + username + "\n";
+    }
 }

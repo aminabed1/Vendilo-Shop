@@ -4,17 +4,16 @@ import java.util.*;
 
 public class Customer extends OrdinaryUsers {
     private Cart cart;
-    private Wallet wallet;
-    private List<Order> orderList;
-    private List<Address> addressList;
-    private List<String> ratedProductsList;
-    private List<Notification> notifications;
-    private List<DiscountCode> discountCodeList;
+    private final Wallet wallet;
+    private final List<Order> orderList;
+    private final List<Address> addressList;
+    private final List<String> ratedProductsList;
+    private final List<Notification> notifications;
+    private final List<DiscountCode> discountCodeList;
     private VendiloPlusAccount vendiloPlusAccount;
 
     public Customer(String name, String surname, String phoneNumber, String email, String password) {
         super(name, surname, password, phoneNumber, email);
-        //TODO Cunstructor
         vendiloPlusAccount = new VendiloPlusAccount();
         orderList = new ArrayList<>();
         addressList = new ArrayList<>();
@@ -23,7 +22,7 @@ public class Customer extends OrdinaryUsers {
         notifications = new ArrayList<>();
         cart = new Cart();
         wallet = new Wallet();
-        this.setRole("Customer");
+        this.setRole(Role.Customer);
     }
 
     public List<Address> getAddressList() {
@@ -84,4 +83,19 @@ public class Customer extends OrdinaryUsers {
     public void setVendiloPlusAccount(VendiloPlusAccount vendiloPlusAccount) {
         this.vendiloPlusAccount = vendiloPlusAccount;
     }
+
+    @Override
+    public String toString() {
+        return String.format(
+                "%s\n" +
+                        "%sAddress         :%s %d Address%s\n" +
+                        "%sWallet Balance  :%s %.2f\n" +
+                        "%sVendilo Plus    :%s %s",
+                super.toString(),
+                YELLOW, RESET, addressList.size(), (addressList.size() == 1 || addressList.isEmpty() ? "" : "es"),
+                YELLOW, RESET, wallet.getWalletBalance(),
+                YELLOW, RESET, vendiloPlusAccount.getIsActive() ? "Yes" : "No"
+        );
+    }
+
 }

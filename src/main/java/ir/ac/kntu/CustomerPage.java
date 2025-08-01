@@ -17,10 +17,10 @@ public class CustomerPage implements Serializable {
     private static final String SUCCESS = "\u001B[38;5;46m";
     private static final String ERROR = "\u001B[38;5;203m";
     private static final String HIGHLIGHT = "\u001B[38;5;231m";
-    private static final CustomerPage customerMainPage = new CustomerPage();
+    private static final CustomerPage customerPage = new CustomerPage();
 
     public static CustomerPage getInstance() {
-        return customerMainPage;
+        return customerPage;
     }
 
     public void mainPage(Person person) {
@@ -391,7 +391,7 @@ public class CustomerPage implements Serializable {
                 System.out.println(ERROR + "Please enter a valid choice (1-4)" + RESET);
                 continue;
             }
-            String title = getRequestTitle(choice);
+            RequestTitle title = getRequestTitle(choice);
             if (title == null) {
                 continue;
             }
@@ -407,16 +407,16 @@ public class CustomerPage implements Serializable {
         System.out.println("Select an option:");
     }
 
-    private String getRequestTitle(String choice) {
+    private RequestTitle getRequestTitle(String choice) {
         return switch (choice) {
-            case "1" -> "Product quality report";
-            case "2" -> "Inconsistency in the sent order";
-            case "3" -> "Receive order problems";
+            case "1" -> RequestTitle.Products_quality;
+            case "2" -> RequestTitle.Inconsistency_In_The_Sent_Order;
+            case "3" -> RequestTitle.Receive_Order_Problems;
             default -> null;
         };
     }
 
-    private void processRequestCreation(Customer customer, String title) {
+    private void processRequestCreation(Customer customer, RequestTitle title) {
         System.out.println("Enter product serial number:");
         String serialNumber = scan.nextLine().trim();
 

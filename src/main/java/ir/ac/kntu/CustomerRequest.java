@@ -10,12 +10,12 @@ public class CustomerRequest extends Request implements Serializable {
     private static final String ERROR = "\u001B[38;5;203m";
     private static final String SUCCESS = "\u001B[38;5;46m";
 
-    final private String requestTitle;
+    final private RequestTitle requestTitle;
     final private String serialNumber;
     final private String customerPhone;
     private String status;
 
-    public CustomerRequest(String requestTitle, String status, Instant requestTime, String description, String serialNumber, String customerPhone) {
+    public CustomerRequest(RequestTitle requestTitle, String status, Instant requestTime, String description, String serialNumber, String customerPhone) {
         super(requestTime, description);
         this.requestTitle = requestTitle;
         this.status = status;
@@ -23,7 +23,7 @@ public class CustomerRequest extends Request implements Serializable {
         this.customerPhone = customerPhone;
     }
 
-    public String getRequestTitle() {
+    public RequestTitle getRequestTitle() {
         return requestTitle;
     }
 

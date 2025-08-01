@@ -13,6 +13,9 @@ public class InfoValidator {
 
     public boolean emailUniqueCheck(String email, List<String> errorList) {
         for (Person person : personList) {
+            if (person instanceof SpecialUsers) {
+                continue;
+            }
             if (((OrdinaryUsers) person).getEmail().equals(email)) {
                 errorList.add("Email already in use");
                 return false;
@@ -24,7 +27,7 @@ public class InfoValidator {
 
     public boolean phoneNumberUniqueCheck(String phoneNumber, List<String> errorList) {
         for (Person person : personList) {
-            if (person instanceof Support)  {
+            if (person instanceof SpecialUsers)  {
                 continue;
             }
 

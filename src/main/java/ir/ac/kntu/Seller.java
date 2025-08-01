@@ -20,7 +20,7 @@ public class Seller extends OrdinaryUsers {
         this.province = province;
         this.sellerID = sellerID;
         wallet = new Wallet();
-        this.setRole("Seller");
+        this.setRole(Role.Seller);
     }
 
     public String getAgencyCode() {
@@ -82,4 +82,20 @@ public class Seller extends OrdinaryUsers {
     public void addOrders(Order order) {
         orders.add(order);
     }
+
+    @Override
+    public String toString() {
+        return String.format(
+                "\n%s%sShop Name         :%s %s\n" +
+                        "%sAgency Code       :%s %s\n" +
+                        "%sSeller ID         :%s %s\n" +
+                        "%sValidation Status :%s %s",
+                super.toString(),
+                YELLOW, RESET, shopName,
+                YELLOW, RESET, agencyCode,
+                YELLOW, RESET, sellerID,
+                YELLOW, RESET, isValidSeller ? "Valid" : "Invalid Or InActive"
+        );
+    }
+
 }

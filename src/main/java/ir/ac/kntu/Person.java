@@ -4,11 +4,14 @@ import java.util.*;
 
 public abstract class Person {
     private final static Scanner scan = new Scanner(System.in);
+    public static final String RESET = "\u001B[0m";
+    public static final String CYAN = "\u001B[36m";
+    public static final String YELLOW = "\u001B[33m";
 
     private String name;
     private String surname;
     private String password;
-    private String role;
+    private Role role;
 
     public Person(String name, String surname, String password) {
         this.name = name;
@@ -40,11 +43,27 @@ public abstract class Person {
         this.password = password;
     }
 
-    public String getRole() {
+    public Role getRole() {
         return role;
     }
 
-    public void setRole(String role) {
+    public void setRole(Role role) {
         this.role = role;
     }
+
+    @Override
+    public String toString() {
+        return String.format(
+                "\n%s--- User Info ---%s\n" +
+                        "%sName        :%s %s\n" +
+                        "%sSurname     :%s %s\n" +
+                        "%sRole        :%s %s\n",
+                CYAN, RESET,
+                YELLOW, RESET, name,
+                YELLOW, RESET, surname,
+                YELLOW, RESET, role
+        );
+    }
+
+
 }

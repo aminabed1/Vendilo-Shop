@@ -25,4 +25,15 @@ public class OrdinaryUsers extends Person {
     public void setEmail(String email) {
         this.email = email;
     }
+
+    @Override
+    public String toString() {
+        return String.format(
+                 super.toString() +
+                        "%sPhoneNumber :%s %s\n" +
+                        "%sEmail       :%s %s\n",
+                YELLOW, RESET, phoneNumber,
+                YELLOW, RESET, email
+        );
+    }
 }
