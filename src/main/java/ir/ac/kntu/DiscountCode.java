@@ -1,12 +1,14 @@
 package ir.ac.kntu;
 
 public class DiscountCode {
+    private final boolean isCodeActive;
     private String code;
-    private boolean isCodeActive;
     private int usableTimes;
+    private String purpose;
 
-    public DiscountCode(String code, boolean isCodeActive, int usableTimes) {
+    public DiscountCode(String code, String purpose, boolean isCodeActive, int usableTimes) {
         this.code = code;
+        this.purpose = purpose;
         this.isCodeActive = isCodeActive;
         this.usableTimes = usableTimes;
     }
@@ -23,10 +25,6 @@ public class DiscountCode {
         return isCodeActive;
     }
 
-    public void setCodeActive(boolean codeActive) {
-        isCodeActive = codeActive;
-    }
-
     public int getUsableTimes() {
         return usableTimes;
     }
@@ -35,17 +33,16 @@ public class DiscountCode {
         this.usableTimes = usableTimes;
     }
 
-    public boolean reduceUsableTimes() {
-        if (usableTimes == 0) {
-            return false;
-        } else {
-            usableTimes--;
-            return true;
-        }
+    public String getPurpose() {
+        return purpose;
+    }
+
+    public void setPurpose(String purpose) {
+        this.purpose = purpose;
     }
 
     @Override
     public String toString() {
-        return "Code: " + code + ", Active: " + isCodeActive + "Usable Times: " + usableTimes;
+        return "Code: " + code + ", Active: " + isCodeActive + " Usable Times: " + usableTimes;
     }
 }

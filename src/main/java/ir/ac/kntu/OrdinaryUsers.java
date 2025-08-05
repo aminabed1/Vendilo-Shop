@@ -4,8 +4,8 @@ public class OrdinaryUsers extends Person {
     private String phoneNumber;
     private String email;
 
-    public OrdinaryUsers(String name, String surname, String password, String phoneNumber, String email) {
-        super(name, surname, password);
+    public OrdinaryUsers(String name, String surname, String password, String phoneNumber, String email, boolean isActive) {
+        super(name, surname, password, isActive);
         this.phoneNumber = phoneNumber;
         this.email = email;
     }

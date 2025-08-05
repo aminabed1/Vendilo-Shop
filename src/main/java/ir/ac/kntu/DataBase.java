@@ -2,62 +2,81 @@ package ir.ac.kntu;
 
 import java.io.*;
 import java.util.*;
-//TODO make methods non-static
+//TODO make methods non-
 public class DataBase implements Serializable {
-    private static final long serialVersionUID = 1L;
+    @Serial
+    private final long serialVersionUID = 1L;
+    private int priorityNumber = 0;
+    private static final DataBase dataBase = new DataBase();
+    private final List<Person> personList = new ArrayList<>();
+    private final List<Product> productList = new ArrayList<>();
+    private final List<Request> requestList = new ArrayList<>();
+    private final List<Order> orderList = new ArrayList<>();
+    private final List<DiscountCode> discountCodeList = new ArrayList<>();
+    private final List<Notification> notificationList = new ArrayList<>();
 
-    private static List<Person> personList = new ArrayList<>();
-    private static List<Product> productList = new ArrayList<>();
-    private static List<Request> requestList = new ArrayList<>();
-    private static List<Order> orderList = new ArrayList<>();
+    public static DataBase getInstance() {
+        return dataBase;
+    }
+//    private  final String DATA_FILE = "data.db";
 
-    private static final String DATA_FILE = "data.db";
-
-    public static List<Person> getPersonList() {
+    public  int getPriorityNumber() {
+        return priorityNumber;
+    }
+    
+    public void setPriorityNumber(int priorityNumber) {
+        this.priorityNumber = priorityNumber;
+    }
+    
+    public  List<Person> getPersonList() {
         return personList;
     }
 
-    public static void addPerson(Person person) {
+    public  void addPerson(Person person) {
         personList.add(person);
     }
 
-    public static List<Product> getProductList() {
+    public  List<Product> getProductList() {
         return productList;
     }
 
-    public static void addProduct(Product product) {
+    public  void addProduct(Product product) {
         productList.add(product);
     }
 
-    public static List<Request> getRequestList() {
+    public  List<Request> getRequestList() {
         return requestList;
     }
 
-    public static void addRequest(Request request) {
+    public  void addRequest(Request request) {
         requestList.add(request);
     }
 
-    public static List<Order> getOrderList() {
+    public  List<Order> getOrderList() {
         return orderList;
     }
 
-    public static void addOrder(Order order) {
+    public  void addOrder(Order order) {
         orderList.add(order);
     }
 
-    public List<Product> getProductsByCategory(String category) {
-        List<Product> result = new ArrayList<>();
-        for (Product product : productList) {
-            if ("Digital".equalsIgnoreCase(category) && product instanceof DigitalProduct) {
-                result.add(product);
-            } else if ("Book".equalsIgnoreCase(category) && product instanceof Book) {
-                result.add(product);
-            }
-        }
-        return result;
+    public  List<DiscountCode> getDiscountCodeList() {
+        return discountCodeList;
     }
 
-    public static void saveData() {
+    public  void addDiscountCode(DiscountCode discountCode) {
+        discountCodeList.add(discountCode);
+    }
+
+    public  List<Notification> getNotificationList() {
+        return notificationList;
+    }
+
+    public  void addNotification(Notification notification) {
+        notificationList.add(notification);
+    }
+/*
+    public  void saveData() {
         try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(DATA_FILE))) {
             out.writeObject(personList);
             out.writeObject(productList);
@@ -70,7 +89,7 @@ public class DataBase implements Serializable {
     }
 
     @SuppressWarnings("unchecked")
-    public static void loadData() {
+    public  void loadData() {
         File file = new File(DATA_FILE);
         if (!file.exists()) {
             System.out.println("Data file not found, starting with empty database.");
@@ -86,4 +105,6 @@ public class DataBase implements Serializable {
             System.err.println("Error loading data: " + e.getMessage());
         }
     }
+
+ */
 }

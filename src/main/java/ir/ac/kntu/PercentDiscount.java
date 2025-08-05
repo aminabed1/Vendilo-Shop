@@ -1,19 +1,15 @@
 package ir.ac.kntu;
 
 public class PercentDiscount extends DiscountCode {
-    private double percent;
+    private final double percent;
 
-    public PercentDiscount(String code, boolean isCodeActive, int usableTimes, double percent) {
-        super(code, isCodeActive, usableTimes);
+    public PercentDiscount(String code,String purpose, boolean isCodeActive, int usableTimes, double percent) {
+        super(code, purpose, isCodeActive, usableTimes);
         this.percent = percent;
     }
 
     public double getPercent() {
         return percent;
-    }
-
-    public void setPercent(double percent) {
-        this.percent = percent;
     }
 
     @Override

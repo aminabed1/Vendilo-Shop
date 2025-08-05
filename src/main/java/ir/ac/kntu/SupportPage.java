@@ -19,12 +19,14 @@ public class SupportPage implements Serializable {
     private static final String DIVIDER = "──────────────────────────────────────────────";
 
     private static final Scanner scan = new Scanner(System.in);
+    private static Support support;
 
     public static SupportPage getInstance() {
         return new SupportPage();
     }
 
     public void mainPage(Person person) {
+        support = (Support) person;
         while (true) {
             clearScreen();
             displayHeader("SUPPORT MAIN PAGE");
@@ -54,6 +56,11 @@ public class SupportPage implements Serializable {
     }
 
     private void handleSellerAuthenticationRequests() {
+        if (!(support.getRequestTitles().contains(RequestTitle.Sellers_Authentication_Requests))) {
+            SystemMessage.printMessage("You Don't Have Access To This Part", MessageTitle.Error);
+            return;
+        }
+
         List<SellerRequest> sellersRequests = getPendingSellerRequests();
 
         while (true) {
@@ -80,7 +87,7 @@ public class SupportPage implements Serializable {
 
     private List<SellerRequest> getPendingSellerRequests() {
         List<SellerRequest> pendingRequests = new ArrayList<>();
-        for (Request r : DataBase.getRequestList()) {
+        for (Request r : DataBase.getInstance().getRequestList()) {
             if (r instanceof SellerRequest) {
                 pendingRequests.add((SellerRequest) r);
             }
@@ -192,9 +199,9 @@ public class SupportPage implements Serializable {
 
     private List<CustomerRequest> getPendingCustomerRequests() {
         List<CustomerRequest> pendingRequests = new ArrayList<>();
-        for (Request r : DataBase.getRequestList()) {
+        for (Request r : DataBase.getInstance().getRequestList()) {
             if (r instanceof CustomerRequest cr) {
-                if ("unchecked".equals(cr.getStatus())) {
+                if ("unchecked".equals(cr.getStatus()) && support.getRequestTitles().contains(cr.getRequestTitle())) {
                     pendingRequests.add(cr);
                 }
             }
@@ -263,7 +270,7 @@ public class SupportPage implements Serializable {
     }
 
     public Customer findCustomerByPhone(String phone) {
-        for (Person person : DataBase.getPersonList()) {
+        for (Person person : DataBase.getInstance().getPersonList()) {
             if (((OrdinaryUsers) person).getPhoneNumber().equals(phone)) {
                 return (Customer) person;
             }
@@ -340,7 +347,7 @@ public class SupportPage implements Serializable {
 
     private List<Order> getMainOrders() {
         List<Order> mainOrders = new ArrayList<>();
-        for (Order order : DataBase.getOrderList()) {
+        for (Order order : DataBase.getInstance().getOrderList()) {
             if (order instanceof CustomerOrder) {
                 mainOrders.add(order);
             }
@@ -349,7 +356,7 @@ public class SupportPage implements Serializable {
     }
 
     private Seller findSellerByAgencyCode(String agencyCode) {
-        for (Person p : DataBase.getPersonList()) {
+        for (Person p : DataBase.getInstance().getPersonList()) {
             if (p instanceof Seller seller) {
                 if (seller.getAgencyCode().equals(agencyCode)) {
                     return seller;
@@ -379,7 +386,7 @@ public class SupportPage implements Serializable {
 
     private boolean isValidChoice(String choice, int maxIndex) {
         return choice.matches("\\d+") &&
-                Integer.parseInt(choice) > 0 &&
+                Integer.parseInt(choice) >= 0 &&
                 Integer.parseInt(choice) <= maxIndex;
     }
 

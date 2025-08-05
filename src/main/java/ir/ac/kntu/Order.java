@@ -5,8 +5,8 @@ import java.time.Instant;
 
 public class Order implements Serializable {
     private final Instant orderDate;
-    private String customerEmail;
-    private Address deliveryAddress;
+    private final String customerEmail;
+    private final Address deliveryAddress;
 
     public Order(Instant orderDate, String customerEmail, Address deliveryAddress) {
         this.orderDate = orderDate;
@@ -22,16 +22,9 @@ public class Order implements Serializable {
         return customerEmail;
     }
 
-    public void setCustomerEmail(String customerEmail) {
-        this.customerEmail = customerEmail;
-    }
-
     public Address getDeliveryAddress() {
         return deliveryAddress;
     }
 
-    public void setDeliveryAddress(Address deliveryAddress) {
-        this.deliveryAddress = deliveryAddress;
-    }
 }
 

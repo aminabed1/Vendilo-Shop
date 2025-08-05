@@ -1,33 +1,33 @@
 package ir.ac.kntu;
 
 public class Notification {
+    private final NotificationTopic topic;
     private boolean notificationSeen = false;
     private String description = null;
     private Request request = null;
     private Product chargedProduct = null;
     private DiscountCode discountCode = null;
-    private NotificationTopic topic = null;
     private boolean isVisible = true;
 
     public Notification(String description) {//General Message
         this.description = description;
-        topic = NotificationTopic.GENERAL_MESSAGE;
+        topic = NotificationTopic.General_Message;
     }
 
     public Notification(Request request) {//Request Notif
         this.request = request;
-        topic = NotificationTopic.REQUEST_CHECK_RESULT;
+        topic = NotificationTopic.Request_Check_Result;
     }
 
     public Notification(Product chargedProduct) {//Product notif
         this.chargedProduct = chargedProduct;
-        topic = NotificationTopic.PRODUCT_QUANTITY_CHARGE;
+        topic = NotificationTopic.Product_Quantity_Charge;
         isVisible = false;
     }   
 
     public Notification(DiscountCode discountCode) {//Discount Code notif
         this.discountCode = discountCode;
-        topic = NotificationTopic.NEW_DISCOUNT_CODE;
+        topic = NotificationTopic.New_Discount_Code;
     }
 
     public String getDescription() {
@@ -38,28 +38,8 @@ public class Notification {
         this.description = description;
     }
 
-    public DiscountCode getDiscountCode() {
-        return discountCode;
-    }
-
-    public void setDiscountCode(DiscountCode discountCode) {
-        this.discountCode = discountCode;
-    }
-
-    public Request getRequest() {
-        return request;
-    }
-
-    public void setRequest(Request request) {
-        this.request = request;
-    }
-
     public Product getChargedProduct() {
         return chargedProduct;
-    }
-
-    public void setChargedProductSerialNumber(Product chargedProduct) {
-        this.chargedProduct = chargedProduct;
     }
 
     public boolean isNotificationSeen() {
@@ -74,12 +54,8 @@ public class Notification {
         return topic;
     }
 
-    public void setTopic(NotificationTopic topic) {
-        this.topic = topic;
-    }
-
-    public boolean getIsVisible() {
-        return isVisible;
+    public boolean getUnVisible() {
+        return !isVisible;
     }
 
     public void setIsVisible(boolean isVisible) {
@@ -92,9 +68,9 @@ public class Notification {
         if (description != null) {
             sb.append(description);
         } else if (request != null) {
-            sb.append(request.toString());
+            sb.append(request);
         } else if (chargedProduct != null) {
-            sb.append(chargedProduct.toString());
+            sb.append(chargedProduct);
         } else {
             sb.append(discountCode.toString());
         }

@@ -2,13 +2,11 @@ package ir.ac.kntu;
 
 import java.io.Serializable;
 import java.time.Instant;
-import java.time.ZonedDateTime;
 import java.util.*;
 
 public class CustomerPage implements Serializable {
     private static final Scanner scan = new Scanner(System.in);
     private static boolean backButtonPressed = false;
-    private static boolean continueState = false;
     private static final String RESET = "\u001B[0m";
     private static final String TITLE = "\u001B[38;5;45m";
     private static final String MENU = "\u001B[38;5;39m";
@@ -108,240 +106,16 @@ public class CustomerPage implements Serializable {
                 displaySupportOptions(customer);
                 break;
             case "9":
-                handleDiscountPanel(customer);
+                DiscountCodeManage.getInstance().handleDiscountCodePanel(customer);
                 break;
             case "10":
-                notificationTab(customer);
+                NotificationManage.getInstance().notificationTab(customer);
                 break;
             case "11":
-                VendiloPlusTab(customer);
+                VendiloPlusAccountManage.getInstance().vendiloPlusTab(customer, false);
                 break;
             default:
         }
-    }
-
-    public void VendiloPlusTab(Customer customer) {
-        while (true) { 
-            System.out.println("1. Premium Account Details");
-            System.out.println("2. Buy Premium");
-            System.out.println("3. Back");
-            System.out.println("Your Choice : ");
-            String choice = scan.nextLine();
-            try {
-                Integer.parseInt(choice);
-            } catch (NumberFormatException exeption) {
-                System.out.println("Please Enter Numeric Value");
-                continue;
-            }
-            switch(choice) {
-                case "1":
-                    System.out.println(customer.getVendiloPlusAccount());
-                    System.out.println("Press Any Key To Back");
-                    scan.next();
-                    break;
-                case "2":
-                    getPlusAccount(customer);
-                    break;
-                case "3":
-                    return;
-                default:
-                    System.out.println("Invalid Choice. Try Again");
-                    Pause.pause(1500);          
-            }
-        } 
-    }
-
-    public void getPlusAccount(Customer customer) {
-        while (true) {
-            System.out.println("Choose One Subscription :");
-            System.out.println("1.  1-Month");
-            System.out.println("2.  3-Month");
-            System.out.println("3. 12-Month");
-            System.out.println("4. Back");
-            String choice = scan.nextLine();
-
-            try {
-                Integer.parseInt(choice);
-            } catch (NumberFormatException e) {
-                System.out.println("Enter A Numeric Value");
-                continue;
-            }
-
-            double balance = customer.getWallet().getWalletBalance();
-            double subscriptionCost = 0;
-            Instant startDateTemp = Instant.now();
-            Instant endDateTemp = null;
-
-            switch (choice) {
-                case "1":
-                    endDateTemp = ZonedDateTime.now().plusMonths(1).toInstant();
-                    subscriptionCost = 10;
-                    break;
-                case "2":
-                    endDateTemp = ZonedDateTime.now().plusMonths(3).toInstant();
-                    subscriptionCost = 25;
-                    break;
-                case "3":
-                    endDateTemp = ZonedDateTime.now().plusMonths(12).toInstant();
-                    subscriptionCost = 100;
-                    break;
-                case "4":
-                    return;
-                default:
-                    System.out.println("Enter A Valid Choice");
-                    Pause.pause(2000);
-            }
-
-            if (subscriptionCost > balance) {
-                System.out.println("Insufficient Balance, Returning...");
-                Pause.pause(2000);
-                return;
-            }
-
-            double newBalance = customer.getWallet().getWalletBalance() - subscriptionCost;
-            customer.getWallet().setWalletBalance(newBalance, "Buy Premium Account");
-            customer.getVendiloPlusAccount().setPremiumAccountDateActive(startDateTemp, endDateTemp);
-            System.out.println("Premium Account Updated Successfully. Now You Can See It's Details.");
-            Pause.pause(2000);
-        }
-    }
-
-
-
-    public void notificationTab(Customer customer) {
-        continueState = true;
-        while (continueState) { 
-            notificationTabHeader();
-            notifTabMenu(customer);
-        }
-    }
-
-    public void notificationTabHeader() {
-        System.out.println(TITLE + "=========================================");
-        System.out.println("|                                       |");
-        System.out.println("|             NOTIFICATIONS             |");
-        System.out.println("|                                       |");
-        System.out.println("=========================================" + RESET);    
-        System.out.println();
-    }
-
-    public void notifTabMenu(Customer customer) {
-        int unseenNotifs = 0;
-        List<Notification> notificationListTemp = new ArrayList<>();
-        for (Notification notification : customer.getNotifications()) {
-            //TODO
-            if (notification.getChargedProduct().getStock() > 0 && !notification.getIsVisible()) {
-                notification.setIsVisible(true);
-            }
-            if (!notification.getIsVisible()) {
-                continue;
-            }
-            notificationListTemp.add(notification);
-            if (!notification.isNotificationSeen()) {
-                unseenNotifs++;
-            }
-        }
-        if (unseenNotifs == 0) {
-            System.out.println("You have not any unseen nofication");
-        } else {
-            System.out.printf(" %d new notification%s", unseenNotifs, (unseenNotifs == 1 ? "" : "s"));
-        }
-        System.out.println("1. Display Notification List");
-        System.out.println("0. Back");
-
-        notificationTabChoiceHandle(notificationListTemp);
-    }
-
-    public void notificationTabChoiceHandle(List<Notification> notifications) {
-        System.out.println("Enter Your Choice :");
-        String choice = scan.nextLine();
-        if (!choice.matches("\\d+")) {
-            System.out.println("Please Enter Numeric Choice.");
-            return;
-        } 
-        int choiceValue = Integer.parseInt(choice);
-        if (choiceValue != 0 && choiceValue != 1) {
-            System.out.println("Please Enter Valid Choice, (0\1).");
-        } 
-
-        if (choiceValue == 0) {
-            continueState = false;
-            return;
-        } 
-
-        if (notifications.isEmpty()) {
-            System.out.println("You Don't Have Any Notification Yet");
-            return;
-        }
-
-        displayNotifacationList(notifications);
-        System.out.println("Select A Notification (By Index) Or Back (Enter 0)");
-        choice = scan.nextLine();
-        if (!choice.matches("\\d")) {
-            System.out.println("Invalid Entered Value, Returning...");
-            Pause.pause(2000);
-            return;
-        }
-
-        choiceValue = Integer.parseInt(choice);
-        if (choiceValue == 0) {
-            return;
-        }
-
-        if (choiceValue <= 0 && choiceValue > notifications.size()) {
-            System.out.println("Invalid Index, Returning...");
-            Pause.pause(2000);
-            return;
-        }
-
-        System.out.println(notifications.get(choiceValue - 1));
-        changeNotifStatus(notifications.get(choiceValue - 1));
-        System.out.println("Press Any Key To Continue...");
-        scan.next();
-    }
-
-    public void changeNotifStatus(Notification notification) {
-        notification.setNotificationSeen(true);
-    }
-
-    public void displayNotifacationList(List<Notification> notifications) {
-        int counter = 1;
-        for (Notification nofication : notifications) {
-            System.out.println(counter + ". Title : " + nofication.getTopic().name() + "Status : " + (nofication.isNotificationSeen() ? "seen" : "unseen"));
-        }   
-    }
-
-    public void handleDiscountPanel(Customer customer) {
-        List<DiscountCode> discountCodeList = customer.getDiscountCodeList();
-        if (discountCodeList.isEmpty()) {
-            System.out.println(ERROR + "No discount codes found\n");
-            return;
-        }
-        int counter = 1;
-        for (DiscountCode discountCode : discountCodeList) {
-            String codeCategory = discountCode.getClass().getSimpleName();
-            System.out.println(counter + ". " + "Code : " + discountCode.getCode() + " Category : " +codeCategory);
-        }
-        handleDiscountMenuSelection(discountCodeList);
-    }
-
-    public void handleDiscountMenuSelection(List<DiscountCode> discountCodeList) {
-        System.out.println();
-        System.out.println("Select discount code by index");
-        Scanner scan = new Scanner(System.in);
-        String choice = scan.nextLine().trim();
-        if (!choice.matches("\\d+")) {
-            System.out.println(ERROR + "Please enter a valid index");
-            return;
-        }
-        int selectedIndex = Integer.parseInt(choice);
-        if (selectedIndex <= 0 || selectedIndex > discountCodeList.size()) {
-            System.out.println(ERROR + "Please enter a valid index");
-            return;
-        }
-        System.out.println(discountCodeList.get(selectedIndex - 1));
-        System.out.println("press enter to back");
-        scan.nextLine();
     }
 
     public void displaySupportOptions(Customer customer) {
@@ -427,12 +201,12 @@ public class CustomerPage implements Serializable {
 
         Request request = new CustomerRequest(title, "unchecked", Instant.now(),
                 "empty", serialNumber, customer.getPhoneNumber());
-        DataBase.addRequest(request);
+        DataBase.getInstance().addRequest(request);
         System.out.println(SUCCESS + "Customer Request successfully added!" + RESET);
     }
 
     public boolean findProductBySerialNumber(String serialNumber) {
-        return DataBase.getProductList().stream()
+        return DataBase.getInstance().getProductList().stream()
                 .anyMatch(p -> p.getSerialNumber().equals(serialNumber));
     }
 
@@ -450,7 +224,7 @@ public class CustomerPage implements Serializable {
 
     private List<CustomerRequest> getCustomerRequests(Customer customer) {
         List<CustomerRequest> customerRequests = new ArrayList<>();
-        for (Request request : DataBase.getRequestList()) {
+        for (Request request : DataBase.getInstance().getRequestList()) {
             if (request instanceof CustomerRequest cr &&
                     cr.getCustomerPhone().equals(customer.getPhoneNumber())) {
                 customerRequests.add(cr);
@@ -547,7 +321,7 @@ public class CustomerPage implements Serializable {
 
     private List<Product> filterProductsByCategory(String category) {
         List<Product> products = new ArrayList<>();
-        for (Product p : DataBase.getProductList()) {
+        for (Product p : DataBase.getInstance().getProductList()) {
             if (p.getCategory().equalsIgnoreCase(category)) {
                 products.add(p);
             }

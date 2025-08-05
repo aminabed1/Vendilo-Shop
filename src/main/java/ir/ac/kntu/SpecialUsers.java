@@ -4,7 +4,7 @@ public class SpecialUsers extends Person {
     private String username;
 
     public SpecialUsers(String name, String surname, String username, String password) {
-        super(name, surname, password);
+        super(name, surname, password, true);
         this.username = username;
     }
 
@@ -18,7 +18,10 @@ public class SpecialUsers extends Person {
 
     @Override
     public String toString() {
-        return super.toString() + "\n"
-                + "Username: " + username + "\n";
+        return String.format(
+                super.toString() +
+                "%sUsername    :%s %s\n",
+                YELLOW, RESET, username
+        );
     }
 }

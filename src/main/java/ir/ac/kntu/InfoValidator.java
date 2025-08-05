@@ -11,6 +11,10 @@ public class InfoValidator {
 
     private static List<Person> personList;
 
+    public static InfoValidator getInstance() {
+        return new InfoValidator();
+    }
+
     public boolean emailUniqueCheck(String email, List<String> errorList) {
         for (Person person : personList) {
             if (person instanceof SpecialUsers) {
@@ -126,7 +130,7 @@ public class InfoValidator {
     }
 
     public boolean isPersonInfoValidP1(String name, String surname, String phoneNumber, List<String> errorList) {
-        personList = DataBase.getPersonList();
+        personList = DataBase.getInstance().getPersonList();
         boolean isUnique = phoneNumberUniqueCheck(phoneNumber, errorList);
 
         boolean isValid = nameValidation(name, errorList) &&
@@ -137,7 +141,7 @@ public class InfoValidator {
     }
 
     public boolean isPersonInfoValidP2(String email, String username, String password, List<String> errorList) {
-        personList = DataBase.getPersonList();
+        personList = DataBase.getInstance().getPersonList();
         boolean isUnique = emailUniqueCheck(email, errorList);
 
         boolean isValid = emailValidation(email, errorList) &&

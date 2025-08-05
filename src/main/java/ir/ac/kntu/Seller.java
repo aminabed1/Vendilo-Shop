@@ -14,7 +14,7 @@ public class Seller extends OrdinaryUsers {
 
     public Seller(String name, String surname, String phoneNumber, String email, String password, String shopName,String sellerID,
                   String province, String agencyCode) {
-        super(name, surname, password, phoneNumber, email);
+        super(name, surname, password, phoneNumber, email, true);
         this.agencyCode = agencyCode;
         this.shopName = shopName;
         this.province = province;

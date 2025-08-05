@@ -29,9 +29,8 @@ public class Support extends SpecialUsers {
         sb.append(super.toString()).append("\n");
         sb.append(String.format("%sRequest Titles (%d):%s\n", YELLOW, requestTitles.size(), RESET));
         for (RequestTitle rt : requestTitles) {
-            sb.append("  - ").append(rt.toString()).append("\n");
+            sb.append("  - ").append(rt.toString().replace("_", " ")).append("\n");
         }
         return sb.toString();
     }
-
 }

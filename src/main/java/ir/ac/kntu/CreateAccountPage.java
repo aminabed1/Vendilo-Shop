@@ -17,6 +17,10 @@ public class CreateAccountPage implements Serializable {
     private static final String HIGHLIGHT = "\u001B[38;5;231m";
     private static final String BOLD = "\u001B[1m";
 
+    public static CreateAccountPage getInstance() {
+        return new CreateAccountPage();
+    }
+
     public void createAccount(String userAccess) {
         displayCreateAccountHeader();
 
@@ -92,7 +96,7 @@ public class CreateAccountPage implements Serializable {
             String choice = scan.nextLine().trim();
             System.out.print(RESET);
 
-            if (choice.equals("5") && (role.equals("Manager") || role.equals("Support"))) {
+            if (choice.equals("6") && (role.equals("Manager") || role.equals("Support"))) {
                 return null;
             }
             if (choice.equals("8") && (role.equals("Customer") || role.equals("Seller"))) {
@@ -100,7 +104,7 @@ public class CreateAccountPage implements Serializable {
             }
 
             if ((role.equals("Manager") || role.equals("Support"))) {
-                if (choice.equals("4")) {
+                if (choice.equals("5")) {
                     confirmationGiven = true;
                 }
             } else {
@@ -257,6 +261,12 @@ public class CreateAccountPage implements Serializable {
     }
 
     private void printUserInfoMenu(UserInfo info, String role) {
+        String accessLevel;
+        if (role.equals("Manager") || role.equals("Support")) {
+            accessLevel = "Special";
+        } else {
+            accessLevel = "Ordinary";
+        }
         int maxLabelLength = 15;
         int maxValueLength = 30;
 
@@ -274,8 +284,8 @@ public class CreateAccountPage implements Serializable {
             printInfoLine("4. Email", infoMap.get("Email"), maxLabelLength, maxValueLength);
         }
 
-        printInfoLine("5. Username", infoMap.get("Username"), maxLabelLength, maxValueLength);
-        printInfoLine("6. Password", infoMap.get("Password"), maxLabelLength, maxValueLength);
+        printInfoLine(accessLevel.equals("Ordinary") ? "5" : "3" + ". Username", infoMap.get("Username"), maxLabelLength, maxValueLength);
+        printInfoLine(accessLevel.equals("Ordinary") ? "5" : "4" + ". Password", infoMap.get("Password"), maxLabelLength, maxValueLength);
 
         if (role.equals("Seller")) {
             printInfoLine("9. Shop Name", infoMap.get("Shop Name"), maxLabelLength, maxValueLength);
@@ -285,8 +295,8 @@ public class CreateAccountPage implements Serializable {
 
         System.out.println("╠══════════════════════════════════════════════════════╣");
         if (role.equals("Manager") || role.equals("Support")) {
-            System.out.println("║ " + OPTION + "4. Confirm Information" + MENU + "                               ║");
-            System.out.println("║ " + OPTION + "5. Back" + MENU + "                                              ║");
+            System.out.println("║ " + OPTION + "5. Confirm Information" + MENU + "                               ║");
+            System.out.println("║ " + OPTION + "6. Back" + MENU + "                                              ║");
         } else {
             System.out.println("║ " + OPTION + "7. Confirm Information" + MENU + "                               ║");
             System.out.println("║ " + OPTION + "8. Back" + MENU + "                                              ║");
@@ -314,12 +324,18 @@ public class CreateAccountPage implements Serializable {
                 if (!role.equals("Manager") && !role.equals("Support")) {
                     System.out.print(PROMPT + "Enter phone: " + RESET + HIGHLIGHT);
                     info.setPhone(scan.nextLine());
+                } else {
+                    System.out.print(PROMPT + "Enter Username: " + RESET + HIGHLIGHT);
+                    info.setUsername(scan.nextLine());
                 }
                 break;
             case "4":
                 if (!role.equals("Manager") && !role.equals("Support")) {
                     System.out.print(PROMPT + "Enter email: " + RESET + HIGHLIGHT);
                     info.setEmail(scan.nextLine());
+                } else {
+                    System.out.print(PROMPT + "Enter Password: " + RESET + HIGHLIGHT);
+                    info.setPassword(scan.nextLine());
                 }
                 break;
             case "5":
@@ -367,7 +383,6 @@ public class CreateAccountPage implements Serializable {
             }
         }
 
-
         List<String> errors = new ArrayList<>();
         InfoValidator validator = new InfoValidator();
 
@@ -382,7 +397,7 @@ public class CreateAccountPage implements Serializable {
         return switch (role) {
             case "Customer" -> new Customer(info.getName(), info.getSurname(), info.getPhone(), info.getEmail(), info.getPassword());
             case "Seller" -> new Seller(info.getName(), info.getSurname(), info.getPhone(), info.getEmail(), info.getPassword(), info.getShopName(), info.getSellerID(), info.getProvince(), generateAgencyCode());
-            case "Manager" -> new Manager(info.getName(), info.getSurname(), info.getUsername(), info.getPassword());
+            case "Manager" -> new Manager(info.getName(), info.getSurname(), info.getUsername(), info.getPassword(), getNewPriorityCode());
             case "Support" -> new Support(info.getName(), info.getSurname(), info.getUsername(), info.getPassword());
             default -> null;
         };
@@ -390,19 +405,19 @@ public class CreateAccountPage implements Serializable {
 
     private void completeAccountCreation(Person newUser) {
         showSuccessMessage(newUser);
-        DataBase.addPerson(newUser);
+        DataBase.getInstance().addPerson(newUser);
 
         if (newUser instanceof Seller) {
             String description = "New seller sign up";
             System.out.println("Your agency code is : " + ((Seller) newUser).getAgencyCode());
-            DataBase.addRequest(new SellerRequest(((Seller) newUser).getAgencyCode(), description, Instant.now()));
+            DataBase.getInstance().addRequest(new SellerRequest(((Seller) newUser).getAgencyCode(), description, Instant.now()));
             System.out.println(SUCCESS + "Your seller request has been submitted for Support" + RESET);
             Pause.pause(5000);
         }
     }
 
     public boolean isExistingPerson(String username) {
-        for (Person p : DataBase.getPersonList()) {
+        for (Person p : DataBase.getInstance().getPersonList()) {
             if (p instanceof OrdinaryUsers) {
                 continue;
             }
@@ -415,7 +430,7 @@ public class CreateAccountPage implements Serializable {
     }
 
     public boolean isExistingPerson(String phoneNumber,String email) {
-        for (Person p : DataBase.getPersonList()) {
+        for (Person p : DataBase.getInstance().getPersonList()) {
             if (p instanceof SpecialUsers) {
                 continue;
             }
@@ -463,5 +478,11 @@ public class CreateAccountPage implements Serializable {
 
     public String generateCharacter() {
         return String.valueOf((char) ((int) (Math.random() * 25) + 65));
+    }
+
+    public int getNewPriorityCode() {
+        int priorityNumber = DataBase.getInstance().getPriorityNumber();
+        DataBase.getInstance().setPriorityNumber(priorityNumber + 1);
+        return priorityNumber + 1;
     }
 }

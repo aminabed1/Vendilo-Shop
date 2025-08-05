@@ -13,12 +13,6 @@ public class VendiloPlusAccount {
     private Instant startDate = null;
     private Instant endDate = null;
 
-    // public VendiloPlusAccount(boolean isActive, Instant startDate, Instant endDate) {
-    //     this.isActive = isActive;
-    //     this.startDate = startDate;
-    //     this.endDate = endDate;
-    // }
-
     public boolean getIsActive() {
         return isActive;
     }

@@ -3,8 +3,8 @@ package ir.ac.kntu;
 public class ValueDiscount extends DiscountCode {
     private double value;
 
-    public ValueDiscount(String code, boolean isCodeActive, int usableTimes, double value) {
-        super(code, isCodeActive, usableTimes);
+    public ValueDiscount(String code, String purpose, boolean isCodeActive, int usableTimes, double value) {
+        super(code, purpose, isCodeActive, usableTimes);
         this.value = value;
     }
 

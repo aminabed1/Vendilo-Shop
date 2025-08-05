@@ -13,7 +13,7 @@ public class Phone extends DigitalProduct implements Serializable {
 
     public Phone(String brand, String internalStorage, String RAM, String OS, String batteryCapacity, String chipset,
                  String mainCamResolution, String frontCamResolution, String networkInfo, boolean supportSDCard,String price, int stock, String sellerAgencyCode) {
-        super(brand, price, internalStorage, RAM, OS, batteryCapacity, chipset, stock, sellerAgencyCode);
+        super(brand, price, internalStorage, RAM, OS, chipset, stock, sellerAgencyCode);
         this.mainCamResolution = mainCamResolution;
         this.frontCamResolution = frontCamResolution;
         this.networkInfo = networkInfo;

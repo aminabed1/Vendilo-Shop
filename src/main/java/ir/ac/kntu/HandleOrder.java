@@ -9,7 +9,6 @@ public class HandleOrder implements Serializable {
     private static double totalPrice;
     private static double postPrice;
     private static double finalPrice;
-    private static double discountedPrice;
     private static List<String> sellersAgencyCode;
     private static Address selectedAddress;
     private HashMap<Product, Integer> productMap;
@@ -31,9 +30,7 @@ public class HandleOrder implements Serializable {
 
     public void handleOrder(Person person) {
         productMap = new HashMap<>();
-        if (person instanceof Customer) {
-            customerOrder(person);
-        }
+        customerOrder(person);
     }
 
     public void customerOrder(Person person) {
@@ -48,12 +45,12 @@ public class HandleOrder implements Serializable {
         }
 
         postPrice = calculatePostingPrice(selectedAddress.getProvince(), cart, ((Customer) person).getVendiloPlusAccount().getIsActive());
-        totalPrice = cart.getTotalPrice();
-        finalPrice = calculateFinalPrice();
 
-        boolean discountCodeChanged = false;
+        boolean discountCodeChanged;
         while (true) {
-            displayCartSummary(cart, person);
+            totalPrice = cart.getTotalPrice();
+            finalPrice = calculateFinalPrice();
+            displayCartSummary(cart);
             discountCodeChanged = discountCodeHandle(cart, person);
             if (discountCodeChanged) {
                 continue;
@@ -94,7 +91,7 @@ public class HandleOrder implements Serializable {
     }
 
     public String getSellerProvince(String agencyCode) {
-        for (Person person : DataBase.getPersonList()) {
+        for (Person person : DataBase.getInstance().getPersonList()) {
             if (person instanceof Seller && agencyCode.equals(((Seller) person).getAgencyCode())) {
                 return ((Seller) person).getProvince();
             }
@@ -103,7 +100,7 @@ public class HandleOrder implements Serializable {
     }
 
     public String getShopName(String agencyCode) {
-        for (Person person : DataBase.getPersonList()) {
+        for (Person person : DataBase.getInstance().getPersonList()) {
             if (person instanceof Seller && agencyCode.equals(((Seller) person).getAgencyCode())) {
                 return ((Seller) person).getShopName();
             }
@@ -115,7 +112,7 @@ public class HandleOrder implements Serializable {
         return postPrice + totalPrice;
     }
 
-    public void displayCartSummary(Cart cart, Person person) {
+    public void displayCartSummary(Cart cart) {
         displayOrderSummaryHeader();
 
         for (Product product : cart.getProductMap().keySet()) {
@@ -123,49 +120,56 @@ public class HandleOrder implements Serializable {
         }
 
         displayPrices();
-//        discountCodeHandle(cart, person);
     }
 
     public boolean discountCodeHandle(Cart cart, Person person) {
-        double premiumAccountPercentage = ((Customer) person).getVendiloPlusAccount().getIsActive() ? 0.95 : 1;
-        boolean isDiscountCodeEntered = cart.getDiscountCode() != null;
-        totalPrice = cart.getTotalPrice() * premiumAccountPercentage;
-        System.out.println("Do you want to " + (isDiscountCodeEntered ? "remove" : "add") + " discount code ? (y/n)");
-        String choice = scan.nextLine();
-        if (!(choice.equalsIgnoreCase("y") || choice.equalsIgnoreCase("n"))) {
-            System.out.println("Please enter valid choice");
-            return false;
-        }
-
-        if (choice.equalsIgnoreCase("n")) {
-            return false;
-        }
-
-        String operation;
-        DiscountCode dc = null;
-        if (!isDiscountCodeEntered) {
-            System.out.println("Please enter a discount code");
-            String discountCode = scan.nextLine();
-            operation = "Add Discount Code";
-
-            dc = isDiscountCodeForPerson(discountCode, person);
-            if (dc == null) {
-                System.out.println("Invalid discount code");
-                return true;
+        while (true) {
+            double premiumAccountPercentage = ((Customer) person).getVendiloPlusAccount().getIsActive() ? 0.95 : 1;
+            boolean isDiscountCodeEntered = cart.getDiscountCode() != null;
+            totalPrice = cart.getTotalPrice() * premiumAccountPercentage;
+            System.out.println("Do you want to " + (isDiscountCodeEntered ? "remove" : "add") + " discount code ? (y/n)");
+            String choice = scan.nextLine();
+            if (!(choice.equalsIgnoreCase("y") || choice.equalsIgnoreCase("n"))) {
+                System.out.println("Please enter valid choice");
+                continue;
             }
-        } else {
-           operation = "Remove Discount Code";
+
+            if (choice.equalsIgnoreCase("n")) {
+                return false;
+            }
+
+            String operation;
+            DiscountCode dc = null;
+            if (!isDiscountCodeEntered) {
+                System.out.println("Please enter a discount code");
+                String discountCode = scan.nextLine();
+                operation = "Add Discount Code";
+
+                dc = isDiscountCodeAllowedForPerson(discountCode, person);
+                if (dc == null) {
+                    System.out.println("Invalid discount code");
+                    //TODO
+                    continue;
+                }
+            } else {
+                operation = "Remove Discount Code";
+            }
+
+            cart.discountCodeHandle(dc, operation);
+            totalPrice = cart.getTotalPrice() * premiumAccountPercentage;
+            return true;
         }
-
-        cart.discountCodeHandle(dc, operation);
-        totalPrice = cart.getTotalPrice() * premiumAccountPercentage;
-
-        return true;
     }
 
-    public DiscountCode isDiscountCodeForPerson(String discountCode, Person person) {
-        List<DiscountCode> discountCodeList =((Customer) person).getDiscountCodeList();
+    public DiscountCode isDiscountCodeAllowedForPerson(String discountCode, Person person) {
+        List<DiscountCode> discountCodeList = ((Customer) person).getDiscountCodeList();
         for (DiscountCode DC : discountCodeList) {
+            if (DC.getCode().equals(discountCode)) {
+                return DC;
+            }
+        }
+
+        for (DiscountCode DC : DataBase.getInstance().getDiscountCodeList()) {
             if (DC.getCode().equals(discountCode)) {
                 return DC;
             }
@@ -178,7 +182,7 @@ public class HandleOrder implements Serializable {
         while (true) {
             displayFinalizePrompt();
             String choice = scan.nextLine().trim();
-            if (choice.equalsIgnoreCase("Y")) {
+            if (choice.equalsIgnoreCase("y")) {
                 if (checkEnoughBalance(person)) {
                     finalizeOrder(person);
                 }
@@ -186,7 +190,7 @@ public class HandleOrder implements Serializable {
             } else if (choice.equalsIgnoreCase("N")) {
                 return;
             } else {
-                showError("Please enter Y or N");
+                SystemMessage.printMessage("Please enter Y or N", MessageTitle.Error);
             }
         }
     }
@@ -221,13 +225,18 @@ public class HandleOrder implements Serializable {
     public void finalizeOrder(Person person) {
         setSellersCodeList();
         Customer customer = (Customer) person;
-        CustomerOrder newOrder = new CustomerOrder(Instant.now(), sellersAgencyCode, customer.getEmail(), selectedAddress, postPrice, finalPrice, productMap);
+        CustomerOrder newOrder = new CustomerOrder(Instant.now(), sellersAgencyCode, customer.getEmail(), selectedAddress, finalPrice, productMap);
         //TODO enhance here and prevent duplicate heap memory usage
-        DataBase.addOrder(newOrder);
+        DataBase.getInstance().addOrder(newOrder);
         customer.addOrder(newOrder);
         //TODO till here
         double newBalance = customer.getWallet().getWalletBalance() - finalPrice;
         customer.getWallet().setWalletBalance(newBalance, newOrder);
+        DiscountCode dc = ((Customer) person).getCart().getDiscountCode();
+
+        if (dc != null) {
+            dc.setUsableTimes(dc.getUsableTimes() - 1);
+        }
         customer.setCart(new Cart());
 
         displayOrderCompleted(newBalance);
@@ -252,13 +261,11 @@ public class HandleOrder implements Serializable {
             double sellerBenefit = productPrice * 0.9;
             double currentBalance = seller.getWallet().getWalletBalance();
 
-            SellerOrder sellerOrder = new SellerOrder(Instant.now(),
-                    sellerBenefit, selectedAddress, ((OrdinaryUsers) customer).getEmail(),
-                    "Sale of product: ", sellerOrderProductMap);
+            SellerOrder sellerOrder = new SellerOrder(agencyCode, Instant.now(), sellerBenefit, selectedAddress, ((OrdinaryUsers) customer).getEmail(), "Sale of product: ", sellerOrderProductMap);
 
             seller.getWallet().setWalletBalance(currentBalance + sellerBenefit, sellerOrder);
             seller.addOrder(sellerOrder);
-            DataBase.addOrder(sellerOrder);
+            DataBase.getInstance().addOrder(sellerOrder);
         }
     }
 
@@ -278,7 +285,6 @@ public class HandleOrder implements Serializable {
 
         while (true) {
             displayAddressSelectionHeader();
-
             if (addressList.isEmpty()) {
                 System.out.println(WARNING + "You have no saved addresses.\n" + RESET);
             } else {
@@ -306,15 +312,15 @@ public class HandleOrder implements Serializable {
                 try {
                     int selectedIndex = Integer.parseInt(scan.nextLine().trim());
                     if (selectedIndex < 1 || selectedIndex > addressList.size()) {
-                        showError("Please enter a valid number");
+                        SystemMessage.printMessage("Please enter a valid number", MessageTitle.Error);
                         continue;
                     }
                     return addressList.get(selectedIndex - 1);
                 } catch (NumberFormatException e) {
-                    showError("Please enter a valid number");
+                    SystemMessage.printMessage("Please enter a valid number", MessageTitle.Error);
                 }
             } else {
-                showError("Please enter Y or N");
+                SystemMessage.printMessage("Please enter Y or N", MessageTitle.Error);
             }
         }
     }
@@ -379,14 +385,9 @@ public class HandleOrder implements Serializable {
         System.out.printf("  New Balance: %.2f $ \n", newBalance);
         System.out.println("═══════════════════════════════════════" + RESET);
     }
-
-    private void showError(String message) {
-        System.out.println(ERROR + "\n " + message + RESET);
-        Pause.pause(1000);
-    }
     
     public Seller findSellerByAgencyCode(String agencyCode) {
-        for (Person p : DataBase.getPersonList()) {
+        for (Person p : DataBase.getInstance().getPersonList()) {
             if (p instanceof Seller seller) {
                 if (seller.getAgencyCode().equals(agencyCode)) {
                     return seller;

@@ -10,20 +10,16 @@ public class Cart implements Serializable {
     private static final String MENU = "\u001B[38;5;39m";
     private static final String OPTION = "\u001B[38;5;159m";
     private static final String PROMPT = "\u001B[38;5;228m";
-//    private static final String SUCCESS = "\u001B[38;5;46m";
-    private static final String ERROR = "\u001B[5;203m";
     private static final String HIGHLIGHT = "\u001B[38;5;231m";
     private static final String BOLD = "\u001B[1m";
 
-    private HashMap<Product, Integer> productMap;
+    private final HashMap<Product, Integer> productMap;
     private DiscountCode discountCode;
     private double totalPrice;
 
     public Cart() {
         discountCode = null;
         productMap = new HashMap<>();
-//        DiscountCode dc = new PercentDiscount("ABCD", true, 10, 10);
-//        this.setDiscountCode(dc);
     }
 
     public HashMap<Product, Integer> getProductMap() {
@@ -51,10 +47,6 @@ public class Cart implements Serializable {
         }
     }
 
-//    public void setTotalPrice(double totalPrice) {
-//        this.totalPrice = totalPrice;
-//    }
-
     public void displayCart(Customer person) {
         if (productMap.isEmpty()) {
             displayEmptyCart();
@@ -67,7 +59,7 @@ public class Cart implements Serializable {
             if (handleCartNavigation(choice, person)) {
                 return;
             }
-            handleProductSelection(choice, scan, person);
+            handleProductSelection(choice, scan);
         }
     }
 
@@ -149,9 +141,9 @@ public class Cart implements Serializable {
         return false;
     }
 
-    private void handleProductSelection(String choice, Scanner input, Customer person) {
+    private void handleProductSelection(String choice, Scanner input) {
         if (!choice.matches("\\d+")) {
-            showError("Please enter a valid number");
+            SystemMessage.printMessage("Please enter a valid number", MessageTitle.Error);
             return;
         }
 
@@ -159,7 +151,7 @@ public class Cart implements Serializable {
         List<Product> productList = new ArrayList<>(productMap.keySet());
 
         if (index < 0 || index >= productList.size()) {
-            showError("Invalid product number");
+            SystemMessage.printMessage("Invalid product number", MessageTitle.Error);
             return;
         }
         processSelectedProduct(input, productList.get(index));
@@ -195,17 +187,12 @@ public class Cart implements Serializable {
     }
 
     public String getShopName(String agencyCode) {
-        for (Person person : DataBase.getPersonList()) {
+        for (Person person : DataBase.getInstance().getPersonList()) {
             if (person instanceof Seller && agencyCode.equals(((Seller) person).getAgencyCode())) {
                 return ((Seller) person).getShopName();
             }
         }
         return null;
-    }
-
-    public void showError(String message) {
-        System.out.println(ERROR + "\n⚠ " + message + RESET);
-        pause(1000);
     }
 
     public void pause(int milliseconds) {
@@ -229,17 +216,16 @@ public class Cart implements Serializable {
         }
         this.setDiscountCode(discountCode);
         System.out.println("Discount Code Applied Successfully.");
-//        applyDiscountCodeToPrice(discountCode);
     }
 
     public boolean isValidDiscountCode(DiscountCode discountCode) {
         if (!discountCode.getIsCodeActive()) {
-            showError("Discount Code is inactive.");
+            SystemMessage.printMessage("Discount Code is inactive.", MessageTitle.Error);
             return false;
         }
 
         if (discountCode.getUsableTimes() <= 0) {
-            showError("Discount Code is out of usage.");
+            SystemMessage.printMessage("Discount Code is out of usage.", MessageTitle.Error);
         }
 
         return true;
@@ -255,27 +241,23 @@ public class Cart implements Serializable {
         if ((codeDiscount.getValue() * 10) > totalPrice) {
             return true;
         } else {
-            showError("Total price is less than required price to allow discounting.");
+            SystemMessage.printMessage("Total price is less than required price to allow discounting.", MessageTitle.Error);
             return false;
         }
     }
 
     public void applyDiscountCodeToPrice() {
         totalPrice = calcTotalPrice();
-        if (this.discountCode == null) {
-            return;
-        } else {
+        if (!(this.discountCode == null)) {
             if (discountCode instanceof PercentDiscount) {
                 totalPrice *= (100 - ((PercentDiscount) discountCode).getPercent()) / 100;
             } else {
                 totalPrice -= ((ValueDiscount) discountCode).getValue();
             }
-            discountCode.setUsableTimes(discountCode.getUsableTimes() - 1);
         }
     }
 
     public void removeDiscountCode() {
-        discountCode.setUsableTimes(discountCode.getUsableTimes() + 1);
         this.discountCode = null;
         System.out.println("Discount Code Has Been Removed Successfully.");
         pause(2000);
@@ -283,12 +265,11 @@ public class Cart implements Serializable {
 
     public double calcTotalPrice() {
         double totalPrice = 0.0;
-        int productQuantity = 0;
+        int productQuantity;
         for (Product product : this.getProductMap().keySet()) {
             productQuantity = this.getProductMap().get(product);
             totalPrice += Double.parseDouble(product.getPrice()) * productQuantity;
         }
         return totalPrice;
     }
-
 }

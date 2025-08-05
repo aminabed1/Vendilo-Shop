@@ -12,7 +12,6 @@ public class AddProduct implements Serializable {
     public static final String SUCCESS = "\u001B[38;5;46m";
     public static final String ERROR = "\u001B[38;5;203m";
     public static final String HIGHLIGHT = "\u001B[38;5;231m";
-    public static final String BOLD = "\u001B[1m";
     public final static Scanner scan = new Scanner(System.in);
 
     public static AddProduct getInstance() {
@@ -28,7 +27,7 @@ public class AddProduct implements Serializable {
         Product newProduct = buildProduct(seller, productType);
 
         if (newProduct != null) {
-            DataBase.addProduct(newProduct);
+            DataBase.getInstance().addProduct(newProduct);
             System.out.println(SUCCESS + "Product added successfully!" + RESET);
         }
     }
@@ -269,7 +268,6 @@ abstract class BaseProductBuilder implements ProductBuilder {
 
     abstract String getProductTitle();
 
-    abstract void validate() throws IllegalStateException;
 }
 
 class BookBuilder extends BaseProductBuilder {
@@ -308,7 +306,6 @@ class BookBuilder extends BaseProductBuilder {
         return "BOOK INFORMATION";
     }
 
-    @Override
     void validate() throws IllegalStateException {
         List<String> errors = new ArrayList<>();
 
@@ -372,8 +369,7 @@ class LaptopBuilder extends BaseProductBuilder {
         return "LAPTOP INFORMATION";
     }
 
-    @Override
-    void validate() throws IllegalStateException {
+    void validate() {
         List<String> errors = new ArrayList<>();
 
         for (int i = 0; i < getFieldCount(); i++) {
@@ -435,8 +431,7 @@ class PhoneBuilder extends BaseProductBuilder {
         return "PHONE INFORMATION";
     }
 
-    @Override
-    void validate() throws IllegalStateException {
+    void validate() {
         List<String> errors = new ArrayList<>();
 
         for (int i = 0; i < getFieldCount(); i++) {

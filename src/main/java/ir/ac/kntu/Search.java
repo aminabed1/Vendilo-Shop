@@ -42,7 +42,7 @@ public class Search implements Serializable {
         System.out.print("Enter Product name: ");
         String name = scan.nextLine();
 
-        List<Product> products = DataBase.getProductList();
+        List<Product> products = DataBase.getInstance().getProductList();
         List<Product> filteredProducts = new ArrayList<>();
 
         for (Product product : products) {
@@ -71,7 +71,7 @@ public class Search implements Serializable {
             return;
         }
 
-        List<Product> products = DataBase.getProductList();
+        List<Product> products = DataBase.getInstance().getProductList();
         List<Product> filteredProducts = new ArrayList<>();
 
         for (Product product : products) {
@@ -120,7 +120,7 @@ public class Search implements Serializable {
 
 
     public void combinedSearch() {
-        List<Product> filteredProducts = new ArrayList<>(DataBase.getProductList());
+        List<Product> filteredProducts = new ArrayList<>(DataBase.getInstance().getProductList());
 
         while (true) {
             System.out.print("Do you want to filter by category? (y/n): ");

@@ -66,18 +66,24 @@ public class LoginPage implements Serializable {
             System.out.print(RESET);
             Person person = authenticateUser(authenticationField, passwordField, roleName);
             if (person != null) {
-                showLoginSuccess(person);
+                if (!person.getIsActive()) {
+                    SystemMessage.printMessage("Your Account has been closed.", MessageTitle.Error);
+                    continue;
+                }
+                showLoginSuccess();
                 if (person instanceof Customer) {
                     CustomerPage.getInstance().mainPage(person);
+
                 } else if (person instanceof Seller) {
                     SellerPage.getInstance().mainPage(person);
+
                 } else if (person instanceof Support) {
                     SupportPage.getInstance().mainPage(person);
-                } else {
+                } else if (person instanceof Manager){
                     ManagerPage.getInstance().mainPage(person);
+                } else {
+                    SystemMessage.printMessage("Invalid credentials. Please try again.", MessageTitle.Error);
                 }
-            } else {
-                showError("Invalid credentials. Please try again.");
             }
         }
     }
@@ -108,7 +114,7 @@ public class LoginPage implements Serializable {
         };
     }
 
-    private void showLoginSuccess(Person person) {
+    private void showLoginSuccess() {
         System.out.println("\n" + SUCCESS + "=========================================");
         System.out.println("|                                       |");
         System.out.println("|   " + BOLD + "LOGIN SUCCESSFUL!" + RESET + SUCCESS + "                   |");
@@ -123,7 +129,7 @@ public class LoginPage implements Serializable {
     }
 
     private Person authenticateUser(String authText, String password, Role role) {
-        for (Person person : DataBase.getPersonList()) {
+        for (Person person : DataBase.getInstance().getPersonList()) {
             if (person.getRole() != role) {
                 continue;
             }

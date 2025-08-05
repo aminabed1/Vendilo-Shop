@@ -28,7 +28,7 @@ public class SellerPage implements Serializable {
 
     public List<Request> sellerRequests(String agencyCode) {
         currentSellerRequests.clear();
-        List<Request> requests = DataBase.getRequestList();
+        List<Request> requests = DataBase.getInstance().getRequestList();
         for (Request request : requests) {
             if (!(request instanceof SellerRequest)) {
                 continue;
@@ -347,14 +347,14 @@ public class SellerPage implements Serializable {
             return;
         }
 
-        DataBase.addRequest(new SellerRequest(seller.getAgencyCode(), description, Instant.now()));
+        DataBase.getInstance().addRequest(new SellerRequest(seller.getAgencyCode(), description, Instant.now()));
         System.out.println(SUCCESS + "Request submitted successfully!" + RESET);
         Pause.pause(2000);
     }
 
     public void displayRequest(Seller seller) {
         currentSellerRequests = new ArrayList<>();
-        for (Request req : DataBase.getRequestList()) {
+        for (Request req : DataBase.getInstance().getRequestList()) {
             if (req instanceof SellerRequest sellerRequest) {
                 if (sellerRequest.getSellerAgencyCode().equals(seller.getAgencyCode())) {
                     currentSellerRequests.add(req);
@@ -404,7 +404,7 @@ public class SellerPage implements Serializable {
     }
 
     public Seller findSellerByAgencyCode(String agencyCode) {
-        for (Person p : DataBase.getPersonList()) {
+        for (Person p : DataBase.getInstance().getPersonList()) {
             if (p instanceof Seller s) {
                 if (s.getAgencyCode().equals(agencyCode)) {
                     return s;
@@ -416,7 +416,7 @@ public class SellerPage implements Serializable {
 
     public List<Product> getSellerProducts(String agencyCode) {
         List<Product> result = new ArrayList<>();
-        for (Product p : DataBase.getProductList()) {
+        for (Product p : DataBase.getInstance().getProductList()) {
             if (p.getSellerAgencyCode().equals(agencyCode)) {
                 result.add(p);
             }
