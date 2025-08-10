@@ -64,16 +64,16 @@ public class Notification {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder(topic.name() + "\n");
+        StringBuilder stringBuilder = new StringBuilder(topic.name() + "\n");
         if (description != null) {
-            sb.append(description);
+            stringBuilder.append(description);
         } else if (request != null) {
-            sb.append(request);
+            stringBuilder.append(request);
         } else if (chargedProduct != null) {
-            sb.append(chargedProduct);
+            stringBuilder.append(chargedProduct);
         } else {
-            sb.append(discountCode.toString());
+            stringBuilder.append(discountCode.toString());
         }
-        return sb.toString();
+        return stringBuilder.toString();
     }
 }

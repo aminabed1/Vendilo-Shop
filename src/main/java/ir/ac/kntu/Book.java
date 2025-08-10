@@ -9,17 +9,17 @@ public class Book extends Product implements Serializable {
     final private String author;
     final private String numberOfPage;
     final private String genre;
-    final private String ISBN;
+    final private String iSBN;
     final private String publishDate;
     private String weight;
 
     public Book(String fullName, String price, String description, String author, String numberOfPage,
-                String genre, String ISBN, String publishDate, String weight, int stock, String sellerAgencyCode) {
+                String genre, String iSBN, String publishDate, String weight, int stock, String sellerAgencyCode) {
         super("Book", sellerAgencyCode);
         this.author = author;
         this.numberOfPage = numberOfPage;
         this.genre = genre;
-        this.ISBN = ISBN;
+        this.iSBN = iSBN;
         this.publishDate = publishDate;
         this.setFullName(fullName);
         this.setPrice(price);
@@ -38,6 +38,7 @@ public class Book extends Product implements Serializable {
         return super.displayField(key, value);
     }
 
+    @Override
     public String toString() {
         return super.toString() +
                 "\n" + ANSI_CYAN + "        ── Book Details ──" + ANSI_RESET +
@@ -45,7 +46,7 @@ public class Book extends Product implements Serializable {
                 displayField("Author", author) +
                 displayField("Pages", numberOfPage) +
                 displayField("Genre", genre) +
-                displayField("ISBN", ISBN) +
+                displayField("ISBN", iSBN) +
                 displayField("Publish Date", publishDate) +
                 displayField("Weight", weight);
     }

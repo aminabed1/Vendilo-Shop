@@ -343,7 +343,7 @@ class LaptopBuilder extends BaseProductBuilder {
         if (index == 1 || index == 11) {
             validateNumericField(value, index == 1 ? "Price" : "Stock", index == 1);
         } else if (index == 8 || index == 9) {
-            if (!value.equalsIgnoreCase("yes") && !value.equalsIgnoreCase("no")) {
+            if (!"yes".equalsIgnoreCase(value) && !"no".equalsIgnoreCase(value)) {
                 throw new IllegalArgumentException("Must be 'yes' or 'no'");
             }
             value = value.toLowerCase();
@@ -356,10 +356,10 @@ class LaptopBuilder extends BaseProductBuilder {
         validate();
         return new LopTop(
                 getFieldValue(0), getFieldValue(1), getFieldValue(2),
-                getFieldValue(3), getFieldValue(4), getFieldValue(5),
+                getFieldValue(3), getFieldValue(4),
                 getFieldValue(6), getFieldValue(7),
-                getFieldValue(8).equals("yes"),
-                getFieldValue(9).equals("yes"), getFieldValue(10),
+                "yes".equals(getFieldValue(8)),
+                "yes".equals(getFieldValue(9)), getFieldValue(10),
                 Integer.parseInt(getFieldValue(11)), seller.getAgencyCode()
         );
     }
@@ -406,7 +406,7 @@ class PhoneBuilder extends BaseProductBuilder {
         if (index == 1 || index == 11) {
             validateNumericField(value, index == 1 ? "Price" : "Stock", index == 1);
         } else if (index == 10) {
-            if (!value.equalsIgnoreCase("yes") && !value.equalsIgnoreCase("no")) {
+            if (!"yes".equalsIgnoreCase(value) && !"no".equalsIgnoreCase(value)) {
                 throw new IllegalArgumentException("Must be 'yes' or 'no'");
             }
             value = value.toLowerCase();
@@ -419,9 +419,9 @@ class PhoneBuilder extends BaseProductBuilder {
         validate();
         return new Phone(
                 getFieldValue(0), getFieldValue(2), getFieldValue(3),
-                getFieldValue(4), getFieldValue(5), getFieldValue(6),
+                getFieldValue(4), getFieldValue(6),
                 getFieldValue(7), getFieldValue(8), getFieldValue(9),
-                getFieldValue(10).equals("yes"), getFieldValue(1),
+                "yes".equals(getFieldValue(10)), getFieldValue(1),
                 Integer.parseInt(getFieldValue(11)), seller.getAgencyCode()
         );
     }

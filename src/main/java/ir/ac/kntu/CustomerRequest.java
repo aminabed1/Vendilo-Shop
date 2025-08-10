@@ -47,7 +47,7 @@ public class CustomerRequest extends Request implements Serializable {
     public String toString() {
         return  TITLE + "════════════ REQUEST DETAILS ════════════" + RESET + "\n" + 
             OPTION + "Title: " + RESET + requestTitle + "\n" + 
-            OPTION + "Status: " + RESET + (getStatus().equals("unchecked") ? ERROR : SUCCESS) + status + RESET + "\n" + 
+            OPTION + "Status: " + RESET + ("unchecked".equals(getStatus()) ? ERROR : SUCCESS) + status + RESET + "\n" +
             OPTION + "Date: " + RESET + getTimestamp().toString() + "\n" +
             OPTION + "Serial Number: " + RESET + serialNumber + "\n" + 
             OPTION + "Your Phone: " + RESET + customerPhone + "\n" +

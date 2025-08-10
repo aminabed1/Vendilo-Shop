@@ -60,20 +60,20 @@ public class VendiloPlusAccount {
     @Override
     public String toString() {
         long remainingDays;
-        StringBuilder sb = new StringBuilder();
+        StringBuilder stringBuilder = new StringBuilder();
 
-        sb.append("Active Account: ").append(isActive ? "Yes" : "No").append("\n");
+        stringBuilder.append("Active Account: ").append(isActive ? "Yes" : "No").append("\n");
         if (isActive) {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
             LocalDateTime startDateTime = LocalDateTime.ofInstant(startDate, ZoneId.systemDefault());
             LocalDateTime endDateTime = LocalDateTime.ofInstant(endDate, ZoneId.systemDefault());
             remainingDays = ChronoUnit.DAYS.between(Calendar.now(), endDate);
-            sb.append("Start Date: ").append(startDateTime.format(formatter)).append("\n");
-            sb.append("End Date: ").append(endDateTime.format(formatter)).append("\n");
-            sb.append("Remaining Days: ").append(remainingDays).append(" days");
+            stringBuilder.append("Start Date: ").append(startDateTime.format(formatter)).append("\n");
+            stringBuilder.append("End Date: ").append(endDateTime.format(formatter)).append("\n");
+            stringBuilder.append("Remaining Days: ").append(remainingDays).append(" days");
         } else {
-            sb.append("Remaining Days: ").append(0).append(" days");
+            stringBuilder.append("Remaining Days: ").append(0).append(" days");
         }
-        return sb.toString();
+        return stringBuilder.toString();
     }
 }

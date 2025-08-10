@@ -20,7 +20,7 @@ public abstract class Product implements Serializable {
     private String category;
     private String sellerAgencyCode;
     private final String serialNumber;
-    private final HashMap<Person, ProductReview> ratingMap;
+    private final Map<Person, ProductReview> ratingMap;
 
 
     public Product(String category, String sellerAgencyCode) {
@@ -91,7 +91,7 @@ public abstract class Product implements Serializable {
         return serialNumber;
     }
 
-    public HashMap<Person, ProductReview> getRatingMap() {
+    public Map<Person, ProductReview> getRatingMap() {
         return ratingMap;
     }
 
@@ -111,6 +111,7 @@ public abstract class Product implements Serializable {
             return ANSI_GREEN + formattedKey + ANSI_RESET + value + "\n";
         }
     }
+
     private String productReview() {
         StringBuilder productReview = new StringBuilder();
         int counter = 1;
@@ -123,9 +124,9 @@ public abstract class Product implements Serializable {
     }
 
     private String displayAverageRating() {
-        StringBuilder sb = new StringBuilder("⭐ Average Rating: ");
+        StringBuilder stringBuilder = new StringBuilder("⭐ Average Rating: ");
         if (ratingMap == null || ratingMap.isEmpty()) {
-            sb.append(ANSI_RED +  "No ratings yet" + ANSI_RESET);
+            stringBuilder.append(ANSI_RED +  "No ratings yet" + ANSI_RESET);
         } else {
             double sum = 0;
             for (ProductReview productReview: ratingMap.values()) {
@@ -133,9 +134,9 @@ public abstract class Product implements Serializable {
             }
             double average = sum / ratingMap.size();
             String formattedAverage = String.format("%.2f/5 (%d ratings)%s\n", average, ratingMap.size(), average < 2 ? " 😞" : average < 4 ? " 🙂" : " 😃");
-            sb.append(ANSI_GREEN).append(formattedAverage).append(ANSI_RESET);
+            stringBuilder.append(ANSI_GREEN).append(formattedAverage).append(ANSI_RESET);
         }
-        return sb.toString();
+        return stringBuilder.toString();
     }
 
     @Override

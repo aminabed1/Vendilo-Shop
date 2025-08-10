@@ -12,8 +12,4 @@ public class Manager extends SpecialUsers {
         return priorityCode;
     }
 
-    @Override
-    public String toString() {
-        return super.toString();
-    }
 }

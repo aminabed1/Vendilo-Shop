@@ -8,7 +8,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Scanner;
 
 public class VendiloPlusAccountManage {
-    public static Scanner scan = new Scanner(System.in);
+    private final static Scanner scan = new Scanner(System.in);
     private static boolean managerLogin = false;
 
     public static VendiloPlusAccountManage getInstance() {
@@ -20,22 +20,13 @@ public class VendiloPlusAccountManage {
             VendiloPlusAccountManage.managerLogin = true;
         }
         while (true) {
-            System.out.println("1. Vendilo Plus Account Details");
-            System.out.println("2. Buy Vendilo Plus Account");
-            System.out.println("3. Back");
-            System.out.println("Your Choice : ");
+            System.out.println("1. Account Details\n2. Buy Account\n3. Back\nYour choice: ");
             String choice = scan.nextLine();
-            try {
-                Integer.parseInt(choice);
-            } catch (NumberFormatException exeption) {
-                System.out.println("Please Enter Numeric Value");
-                continue;
-            }
-            switch(choice) {
+            switch (choice) {
                 case "1":
                     checkRemainingDays(customer);
-                    System.out.println(customer.getVendiloPlusAccount());
-                    System.out.println("Press Any Key To Back");
+                    System.out.println(customer.getVendiloPlus());
+                    System.out.println("Press any key to back");
                     scan.nextLine();
                     break;
                 case "2":
@@ -44,74 +35,79 @@ public class VendiloPlusAccountManage {
                 case "3":
                     return;
                 default:
-                    System.out.println("Invalid Choice. Try Again");
-                    Pause.pause(1500);
+                    System.out.println("Enter 1, 2 or 3");
             }
         }
     }
 
     public void checkRemainingDays(Customer customer) {
-        Instant endDate = customer.getVendiloPlusAccount().getEndDate();
+        Instant endDate = customer.getVendiloPlus().getEndDate();
         long remainingDays = ChronoUnit.DAYS.between(Calendar.now(), endDate);
         if (remainingDays <= 0) {
-            customer.getVendiloPlusAccount().setIsActive(false);
+            customer.getVendiloPlus().setIsActive(false);
         }
     }
 
     public void getPlusAccount(Customer customer) {
         while (true) {
-            System.out.println("Choose One Subscription :");
-            System.out.println("1.  1-Month");
-            System.out.println("2.  3-Month");
-            System.out.println("3. 12-Month");
-            System.out.println("4. Back");
-            String choice = scan.nextLine();
-
-            double balance = customer.getWallet().getWalletBalance();
-            double subscriptionCost;
-            Instant startDateTemp = Instant.now();
-            Instant endDateTemp;
-
-            switch (choice) {
-                case "1" -> {
-                    endDateTemp = ZonedDateTime.now().plusMonths(1).toInstant();
-                    subscriptionCost = 10;
-                }
-                case "2" -> {
-                    endDateTemp = ZonedDateTime.now().plusMonths(3).toInstant();
-                    subscriptionCost = 25;
-                }
-                case "3" -> {
-                    endDateTemp = ZonedDateTime.now().plusMonths(12).toInstant();
-                    subscriptionCost = 100;
-                }
-                case "4" -> {
-                    return;
-                }
-                default -> {
-                    SystemMessage.printMessage("Enter A Numeric Value", MessageTitle.Error);
-                    Pause.pause(2000);
-                    continue;
-                }
-            }
-            if (managerLogin) {
-                customer.getVendiloPlusAccount().setPremiumAccountDateActive(startDateTemp, endDateTemp);
-                SystemMessage.printMessage("Vendilo Plus Account Is Active Now. You Can See It's Details.", MessageTitle.Success);
-                Pause.pause(2000);
+            String choice = getSubscriptionChoice();
+            if ("4".equals(choice)) {
                 return;
             }
-
+            double subscriptionCost;
+            Instant startDate = Instant.now();
+            Instant endDate = calculateEndDate(choice);
+            subscriptionCost = getSubscriptionCost(choice);
+            if (endDate == null || subscriptionCost == -1) {
+                SystemMessage.printMessage("Enter A Numeric Value", MessageTitle.Error);
+                Pause.pause(2000);
+                continue;
+            }
+            if (managerLogin) {
+                activatePremiumAccount(customer, startDate, endDate);
+                return;
+            }
+            double balance = customer.getWallet().getWalletBalance();
             if (subscriptionCost > balance) {
                 System.out.println("Insufficient Balance, Returning...");
                 Pause.pause(2000);
                 return;
             }
-
-            double newBalance = customer.getWallet().getWalletBalance() - subscriptionCost;
-            customer.getWallet().setWalletBalance(newBalance, "Buy Premium Account");
-            customer.getVendiloPlusAccount().setPremiumAccountDateActive(startDateTemp, endDateTemp);
-            SystemMessage.printMessage("Vendilo Plus Account Is Active Now. You Can See It's Details.", MessageTitle.Success);
-            Pause.pause(2000);
+            customer.getWallet().setWalletBalance(balance - subscriptionCost, "Buy Premium Account");
+            activatePremiumAccount(customer, startDate, endDate);
         }
+    }
+
+    private String getSubscriptionChoice() {
+        System.out.println("Choose One Subscription :");
+        System.out.println("1.  1-Month");
+        System.out.println("2.  3-Month");
+        System.out.println("3. 12-Month");
+        System.out.println("4. Back");
+        return scan.nextLine();
+    }
+
+    private Instant calculateEndDate(String choice) {
+        return switch (choice) {
+            case "1" -> ZonedDateTime.now().plusMonths(1).toInstant();
+            case "2" -> ZonedDateTime.now().plusMonths(3).toInstant();
+            case "3" -> ZonedDateTime.now().plusMonths(12).toInstant();
+            default -> null;
+        };
+    }
+
+    private double getSubscriptionCost(String choice) {
+        return switch (choice) {
+            case "1" -> 10;
+            case "2" -> 25;
+            case "3" -> 100;
+            default -> -1;
+        };
+    }
+
+    private void activatePremiumAccount(Customer customer, Instant start, Instant end) {
+        customer.getVendiloPlus().setPremiumAccountDateActive(start, end);
+        SystemMessage.printMessage("Vendilo Plus Account Is Active Now. You Can See It's Details.", MessageTitle.Success);
+        Pause.pause(2000);
     }
 }

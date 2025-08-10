@@ -4,8 +4,8 @@ import java.io.*;
 import java.util.*;
 //TODO make methods non-
 public class DataBase implements Serializable {
-    @Serial
-    private final long serialVersionUID = 1L;
+//    @Serial
+//    private final long serialVersionUID = 1L;
     private int priorityNumber = 0;
     private static final DataBase dataBase = new DataBase();
     private final List<Person> personList = new ArrayList<>();

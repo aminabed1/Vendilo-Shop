@@ -29,7 +29,7 @@ public class CreateAccountPage implements Serializable {
             if (role == null) {
                 continue;
             }
-            if (role.equals("BACK")) {
+            if ("back".equals(role)) {
                 break;
             }
 
@@ -54,7 +54,7 @@ public class CreateAccountPage implements Serializable {
         System.out.println(MENU + "╔═════════════════════════════════════╗");
         System.out.println("║" + BOLD + "        SELECT ACCOUNT TYPE        " + RESET + MENU + "  ║");
         System.out.println("╠═════════════════════════════════════╣");
-        if (userAccess.equals("Ordinary")) {
+        if ("Ordinary".equals(userAccess)) {
             System.out.println("║ " + OPTION + "1. Customer" + MENU + "                         ║");
             System.out.println("║ " + OPTION + "2. Seller" + MENU + "                           ║");
         } else {
@@ -65,54 +65,33 @@ public class CreateAccountPage implements Serializable {
         System.out.println("║ " + OPTION + "Type " + BOLD + "BACK" + RESET + OPTION + " to return" + MENU + "                 ║");
         System.out.println("╚═════════════════════════════════════╝" + RESET);
         System.out.print(PROMPT + "Your choice (1-2): " + RESET + HIGHLIGHT);
-
         String input = scan.nextLine().trim();
         System.out.print(RESET);
-
-        if (input.equalsIgnoreCase("BACK")) {
+        if ("back".equalsIgnoreCase(input)) {
             return "BACK";
         }
-        if (!input.equals("1") && !input.equals("2")) {
+        if (!"1".equals(input) && !"2".equals(input)) {
             showError("Please enter 1, 2 or BACK");
             return null;
         }
-        if (userAccess.equals("Ordinary")) {
-            return input.equals("1") ? "Customer" : "Seller";
-        } else {
-            return input.equals("1") ? "Manager" : "Support";
-        }
+        return "Ordinary".equals(userAccess) ? ("1".equals(input) ? "Customer" : "Seller") : ("1".equals(input) ? "Manager" : "Support");
     }
 
     public Person collectUserInfo(String role) {
         System.out.println("\n" + PROMPT + "Please enter your information:" + RESET);
-
         UserInfo userInfo = new UserInfo();
         boolean confirmationGiven = false;
-
         while (true) {
             printUserInfoMenu(userInfo, role);
-
             System.out.print(PROMPT + "Enter your choice: " + RESET + HIGHLIGHT);
             String choice = scan.nextLine().trim();
             System.out.print(RESET);
-
-            if (choice.equals("6") && (role.equals("Manager") || role.equals("Support"))) {
+            if (("6".equals(choice) && ("Manager".equals(role) || "Support".equals(role))) || ("8".equals(choice) && ("Customer".equals(role) || "Seller".equals(role)))) {
                 return null;
             }
-            if (choice.equals("8") && (role.equals("Customer") || role.equals("Seller"))) {
-                return null;
+            if (("Manager".equals(role) || "Support".equals(role) ? "5" : "7").equals(choice)) {
+                confirmationGiven = true;
             }
-
-            if ((role.equals("Manager") || role.equals("Support"))) {
-                if (choice.equals("5")) {
-                    confirmationGiven = true;
-                }
-            } else {
-                if (choice.equals("7")) {
-                    confirmationGiven = true;
-                }
-            }
-
             if (confirmationGiven) {
                 if (!userInfo.isAnyFieldEmpty(role)) {
                     break;
@@ -123,7 +102,6 @@ public class CreateAccountPage implements Serializable {
                 processUserInput(choice, userInfo, role);
             }
         }
-
         return validateAndCreateUser(role, userInfo);
     }
 
@@ -232,10 +210,10 @@ public class CreateAccountPage implements Serializable {
             if (name.isEmpty() || surname.isEmpty() || username.isEmpty() || password.isEmpty()) {
                 return true;
             }
-            if (role.equals("Customer")) {
+            if ("Customer".equals(role)) {
                 return phone.isEmpty() || email.isEmpty();
             }
-            if (role.equals("Seller")) {
+            if ("Seller".equals(role)) {
                 return phone.isEmpty() || email.isEmpty() || shopName.isEmpty() || province.isEmpty() || sellerID.isEmpty();
             }
             return false;
@@ -245,13 +223,13 @@ public class CreateAccountPage implements Serializable {
             Map<String, String> infoMap = new LinkedHashMap<>();
             infoMap.put("Name", name);
             infoMap.put("Surname", surname);
-            if (!role.equals("Manager") && !role.equals("Support")) {
+            if (!"Manager".equals(role) && !"Support".equals(role)) {
                 infoMap.put("Phone", phone);
                 infoMap.put("Email", email);
             }
             infoMap.put("Username", username);
             infoMap.put("Password", password.isEmpty() ? "" : "******");
-            if (role.equals("Seller")) {
+            if ("Seller".equals(role)) {
                 infoMap.put("Shop Name", shopName);
                 infoMap.put("Province", province);
                 infoMap.put("Seller ID", sellerID);
@@ -261,40 +239,25 @@ public class CreateAccountPage implements Serializable {
     }
 
     private void printUserInfoMenu(UserInfo info, String role) {
-        String accessLevel;
-        if (role.equals("Manager") || role.equals("Support")) {
-            accessLevel = "Special";
-        } else {
-            accessLevel = "Ordinary";
-        }
-        int maxLabelLength = 15;
-        int maxValueLength = 30;
-
+        String accessLevel = ("Manager".equals(role) || "Support".equals(role)) ? "Special" : "Ordinary";
+        int maxLabelLength = 15, maxValueLength = 30;
         System.out.println(MENU + "╔══════════════════════════════════════════════════════╗");
         System.out.println("║" + BOLD + "                ENTER YOUR INFORMATION            " + RESET + MENU + "    ║");
         System.out.println("╠══════════════════════════════════════════════════════╣");
-
         Map<String, String> infoMap = info.toMap(role);
-
         printInfoLine("1. Name", infoMap.get("Name"), maxLabelLength, maxValueLength);
         printInfoLine("2. Surname", infoMap.get("Surname"), maxLabelLength, maxValueLength);
-
-        if (!role.equals("Manager") && !role.equals("Support")) {
+        if (!"Manager".equals(role) && !"Support".equals(role)) {
             printInfoLine("3. Phone", infoMap.get("Phone"), maxLabelLength, maxValueLength);
             printInfoLine("4. Email", infoMap.get("Email"), maxLabelLength, maxValueLength);
         }
-
-        printInfoLine(accessLevel.equals("Ordinary") ? "5" : "3" + ". Username", infoMap.get("Username"), maxLabelLength, maxValueLength);
-        printInfoLine(accessLevel.equals("Ordinary") ? "5" : "4" + ". Password", infoMap.get("Password"), maxLabelLength, maxValueLength);
-
-        if (role.equals("Seller")) {
-            printInfoLine("9. Shop Name", infoMap.get("Shop Name"), maxLabelLength, maxValueLength);
-            printInfoLine("10. Province", infoMap.get("Province"), maxLabelLength, maxValueLength);
-            printInfoLine("11. SellerID", infoMap.get("Seller ID"), maxLabelLength, maxValueLength);
+        printInfoLine(("Ordinary".equals(accessLevel) ? "5" : "3") + ". Username", infoMap.get("Username"), maxLabelLength, maxValueLength);
+        printInfoLine(("Ordinary".equals(accessLevel) ? "5" : "4") + ". Password", infoMap.get("Password"), maxLabelLength, maxValueLength);
+        if ("Seller".equals(role)) {
+            printSellerInfo(info);
         }
-
         System.out.println("╠══════════════════════════════════════════════════════╣");
-        if (role.equals("Manager") || role.equals("Support")) {
+        if ("Manager".equals(role) || "Support".equals(role)) {
             System.out.println("║ " + OPTION + "5. Confirm Information" + MENU + "                               ║");
             System.out.println("║ " + OPTION + "6. Back" + MENU + "                                              ║");
         } else {
@@ -304,74 +267,84 @@ public class CreateAccountPage implements Serializable {
         System.out.println("╚══════════════════════════════════════════════════════╝" + RESET);
     }
 
+    private void printSellerInfo(UserInfo info) {
+        Map<String, String> infoMap = info.toMap("Seller");
+        int maxLabelLength = 15, maxValueLength = 30;
+        printInfoLine("9. Shop Name", infoMap.get("Shop Name"), maxLabelLength, maxValueLength);
+        printInfoLine("10. Province", infoMap.get("Province"), maxLabelLength, maxValueLength);
+        printInfoLine("11. SellerID", infoMap.get("Seller ID"), maxLabelLength, maxValueLength);
+    }
+
     private void printInfoLine(String label, String value, int labelWidth, int valueWidth) {
         String displayValue = value == null || value.isEmpty() ? "Empty" : value;
         System.out.printf("║ " + OPTION + "%-" + labelWidth + "s: " + HIGHLIGHT + "%-" + valueWidth + "s" + MENU + "      ║\n",
                 label, displayValue.length() > valueWidth ? displayValue.substring(0, valueWidth-3) + "..." : displayValue);
     }
 
-    private void processUserInput(String choice, UserInfo info, String role) {
+    public void processUserInput(String choice, UserInfo info, String role) {
         switch (choice) {
-            case "1":
-                System.out.print(PROMPT + "Enter name: " + RESET + HIGHLIGHT);
-                info.setName(scan.nextLine());
-                break;
-            case "2":
-                System.out.print(PROMPT + "Enter surname: " + RESET + HIGHLIGHT);
-                info.setSurname(scan.nextLine());
-                break;
-            case "3":
-                if (!role.equals("Manager") && !role.equals("Support")) {
-                    System.out.print(PROMPT + "Enter phone: " + RESET + HIGHLIGHT);
-                    info.setPhone(scan.nextLine());
-                } else {
-                    System.out.print(PROMPT + "Enter Username: " + RESET + HIGHLIGHT);
-                    info.setUsername(scan.nextLine());
+            case "1" -> info.setName(promptInput("Enter name: "));
+            case "2" -> info.setSurname(promptInput("Enter surname: "));
+            case "3" -> handleCase3(info, role);
+            case "4" -> handleCase4(info, role);
+            case "5" -> info.setUsername(promptInput("Enter username: "));
+            case "6" -> info.setPassword(promptPassword("Enter password: "));
+            case "9" -> {
+                if ("Seller".equals(role)) {
+                    info.setShopName(promptInput("Enter shop name: "));
                 }
-                break;
-            case "4":
-                if (!role.equals("Manager") && !role.equals("Support")) {
-                    System.out.print(PROMPT + "Enter email: " + RESET + HIGHLIGHT);
-                    info.setEmail(scan.nextLine());
-                } else {
-                    System.out.print(PROMPT + "Enter Password: " + RESET + HIGHLIGHT);
-                    info.setPassword(scan.nextLine());
+            }
+            case "10" -> {
+                if ("Seller".equals(role)) {
+                    info.setProvince(promptInput("Enter province: "));
                 }
-                break;
-            case "5":
-                System.out.print(PROMPT + "Enter username: " + RESET + HIGHLIGHT);
-                info.setUsername(scan.nextLine());
-                break;
-            case "6":
-                System.out.print(PROMPT + "Enter password: " + RESET);
-                info.setPassword(new String(System.console().readPassword()));
-                break;
-            case "9":
-                if (role.equals("Seller")) {
-                    System.out.print(PROMPT + "Enter shop name: " + RESET + HIGHLIGHT);
-                    info.setShopName(scan.nextLine());
+            }
+            case "11" -> {
+                if ("Seller".equals(role)) {
+                    info.setSellerID(promptInput("Enter sellerID: "));
                 }
-                break;
-            case "10":
-                if (role.equals("Seller")) {
-                    System.out.print(PROMPT + "Enter province: " + RESET + HIGHLIGHT);
-                    info.setProvince(scan.nextLine());
-                }
-                break;
-            case "11":
-                if (role.equals("Seller")) {
-                    System.out.print(PROMPT + "Enter sellerID: " + RESET);
-                    info.setSellerID(scan.nextLine());
-                }
-                break;
-            default:
-                showError("Please enter a valid choice!");
+            }
+            default -> showError("Please enter a valid choice!");
         }
         System.out.print(RESET);
     }
 
+    private void handleCase3(UserInfo info, String role) {
+        if (isManagerOrSupport(role)) {
+            info.setUsername(promptInput("Enter Username: "));
+        } else {
+            info.setPhone(promptInput("Enter phone: "));
+        }
+    }
+
+    private void handleCase4(UserInfo info, String role) {
+        if (isManagerOrSupport(role)) {
+            info.setPassword(promptPassword("Enter Password: "));
+        } else {
+            info.setEmail(promptInput("Enter email: "));
+        }
+    }
+
+    private boolean isManagerOrSupport(String role) {
+        return "Manager".equals(role) || "Support".equals(role);
+    }
+
+    private String promptInput(String prompt) {
+        System.out.print(PROMPT + prompt + RESET + HIGHLIGHT);
+        return scan.nextLine();
+    }
+
+    private String promptPassword(String prompt) {
+        System.out.print(PROMPT + prompt + RESET);
+        if (System.console() != null) {
+            return new String(System.console().readPassword());
+        } else {
+            return scan.nextLine();
+        }
+    }
+
     private Person validateAndCreateUser(String role, UserInfo info) {
-        if (role.equals("Manager") || role.equals("Support")) {
+        if ("Manager".equals(role) || "Support".equals(role)) {
             if (isExistingPerson(info.getUsername())) {
                 showError("Username already in use!");
                 return null;
@@ -386,7 +359,7 @@ public class CreateAccountPage implements Serializable {
         List<String> errors = new ArrayList<>();
         InfoValidator validator = new InfoValidator();
 
-        if (!(role.equals("Manager") || role.equals("Support"))) {
+        if (!("Manager".equals(role) || "Support".equals(role))) {
             if (!validator.isPersonInfoValidP1(info.getName(), info.getSurname(), info.getPhone(), errors)
                     || !validator.isPersonInfoValidP2(info.getEmail(), info.getUsername(), info.getPassword(), errors)) {
                 displayErrors(errors);
@@ -417,12 +390,12 @@ public class CreateAccountPage implements Serializable {
     }
 
     public boolean isExistingPerson(String username) {
-        for (Person p : DataBase.getInstance().getPersonList()) {
-            if (p instanceof OrdinaryUsers) {
+        for (Person person : DataBase.getInstance().getPersonList()) {
+            if (person instanceof OrdinaryUsers) {
                 continue;
             }
-            SpecialUsers su = (SpecialUsers) p;
-            if (su.getUsername().equals(username)) {
+            SpecialUsers specialUsers = (SpecialUsers) person;
+            if (specialUsers.getUsername().equals(username)) {
                 return true;
             }
         }
@@ -430,12 +403,12 @@ public class CreateAccountPage implements Serializable {
     }
 
     public boolean isExistingPerson(String phoneNumber,String email) {
-        for (Person p : DataBase.getInstance().getPersonList()) {
-            if (p instanceof SpecialUsers) {
+        for (Person person : DataBase.getInstance().getPersonList()) {
+            if (person instanceof SpecialUsers) {
                 continue;
             }
-            OrdinaryUsers ou = (OrdinaryUsers) p;
-            if (ou.getPhoneNumber().equals(phoneNumber) && ou.getEmail().equals(email)) {
+            OrdinaryUsers ordinaryUsers = (OrdinaryUsers) person;
+            if (ordinaryUsers.getPhoneNumber().equals(phoneNumber) && ordinaryUsers.getEmail().equals(email)) {
                 return true;
             }
         }

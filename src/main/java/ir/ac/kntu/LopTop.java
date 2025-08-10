@@ -9,15 +9,15 @@ public class LopTop extends DigitalProduct implements Serializable {
     private final String GPUChipset;
     private final boolean supportBluetooth;
     private final boolean hasWebCam;
-    private final String RAMGeneration;
+    private final String ramGeneration;
 
-    public LopTop(String brand,String price, String internalStorage, String RAM, String OS, String batteryCapacity,
-                  String chipset, String GPUChipset, boolean supportBluetooth, boolean hasWebCam, String RAMGeneration, int stock, String sellerAgencyCode) {
-        super(brand, price, internalStorage, RAM, OS, chipset, stock, sellerAgencyCode);
-        this.GPUChipset = GPUChipset;
+    public LopTop(String brand,String price, String internalStorage, String rAM, String operationSystem,
+                  String chipset, String gPUChipset, boolean supportBluetooth, boolean hasWebCam, String ramGeneration, int stock, String sellerAgencyCode) {
+        super(brand, price, internalStorage, rAM, operationSystem, chipset, stock, sellerAgencyCode);
+        this.GPUChipset = gPUChipset;
         this.supportBluetooth = supportBluetooth;
         this.hasWebCam = hasWebCam;
-        this.RAMGeneration = RAMGeneration;
+        this.ramGeneration = ramGeneration;
     }
 
     @Override
@@ -32,7 +32,7 @@ public class LopTop extends DigitalProduct implements Serializable {
                 displayField("GPU Chipset", GPUChipset) +
                 displayField("Bluetooth", supportBluetooth ? "Yes" : "No") +
                 displayField("Webcam", hasWebCam ? "Yes" : "No") +
-                displayField("RAM Generation", RAMGeneration) +
+                displayField("RAM Generation", ramGeneration) +
                 ANSI_CYAN + "==================================================" + ANSI_RESET;
     }
 }

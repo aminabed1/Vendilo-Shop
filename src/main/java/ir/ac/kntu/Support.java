@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Support extends SpecialUsers {
-    List<RequestTitle> requestTitles;
+    private final List<RequestTitle> requestTitles;
     public Support(String name, String surname, String username, String password) {
         super(name, surname, username, password);
         requestTitles = new ArrayList<RequestTitle>();
@@ -25,12 +25,12 @@ public class Support extends SpecialUsers {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(super.toString()).append("\n");
-        sb.append(String.format("%sRequest Titles (%d):%s\n", YELLOW, requestTitles.size(), RESET));
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(super.toString()).append("\n");
+        stringBuilder.append(String.format("%sRequest Titles (%d):%s\n", YELLOW, requestTitles.size(), RESET));
         for (RequestTitle rt : requestTitles) {
-            sb.append("  - ").append(rt.toString().replace("_", " ")).append("\n");
+            stringBuilder.append("  - ").append(rt.toString().replace("_", " ")).append("\n");
         }
-        return sb.toString();
+        return stringBuilder.toString();
     }
 }

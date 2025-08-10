@@ -77,7 +77,7 @@ public class PersonAccount implements Serializable {
 
             switch (choice) {
                 case "1":
-                    PersonalInfoOption();
+                    personalInfoOption();
                     break;
                 case "2":
                     if (currentPerson instanceof Customer) {
@@ -116,14 +116,14 @@ public class PersonAccount implements Serializable {
         System.out.println("\n\u001B[32mAddress added successfully!\u001B[0m");
     }
 
-    public void PersonalInfoOption() {
+    public void personalInfoOption() {
         while (true) {
             displayAccountInfo();
             System.out.println("Do you want to edit your personal information? (Y/N -> BACK)");
             String choice = scan.nextLine().trim().toLowerCase();
-            if (choice.equals("y")) {
+            if ("y".equalsIgnoreCase(choice)) {
                 PersonInfoEdit.getInstance().editUserInfo(currentPerson);
-            } else if (choice.equals("n") || choice.equals("back")) {
+            } else if ("n".equals(choice) || "back".equalsIgnoreCase(choice)) {
                 return;
             } else {
                 System.out.println("\n\u001B[31mInvalid option. Please try again.");

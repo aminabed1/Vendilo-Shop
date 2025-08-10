@@ -24,11 +24,11 @@ public class NotificationManage {
 
     public void notificationTabMenu(Customer customer) {
         while (true) {
-            List<Notification> unseenNotifications = getUnseenNotificationsList(customer);
-            if (unseenNotifications.isEmpty()) {
+            List<Notification> newNotifications = getUnseenNotificationsList(customer);
+            if (newNotifications.isEmpty()) {
                 System.out.println("No New Notification");
             } else {
-                System.out.printf(" %d New Notification%s\n", unseenNotifications.size(), (unseenNotifications.size() == 1 ? "" : "s"));
+                System.out.printf(" %d New Notification%s\n", newNotifications.size(), (newNotifications.size() == 1 ? "" : "s"));
 
             }
             System.out.println("1. Display Notification List");
@@ -36,7 +36,7 @@ public class NotificationManage {
             String choice = scan.nextLine();
             switch (choice) {
                 case "1" -> {
-                    notificationTabChoiceHandle(unseenNotifications);
+                    notificationTabChoiceHandle(newNotifications);
                 }
                 case "0" -> {
                     return;
@@ -50,7 +50,7 @@ public class NotificationManage {
 
     public List<Notification> getUnseenNotificationsList(Customer customer) {
         int unseenNotifs = 0;
-        List<Notification> notificationListTemp = new ArrayList<>();
+        List<Notification> tempList = new ArrayList<>();
         List<Notification> notificationList = customer.getNotifications();
         notificationList.addAll(DataBase.getInstance().getNotificationList());
         for (Notification notification : notificationList) {
@@ -63,7 +63,7 @@ public class NotificationManage {
             if (notification.getUnVisible()) {
                 continue;
             }
-            notificationListTemp.add(notification);
+            tempList.add(notification);
             if (!notification.isNotificationSeen()) {
                 unseenNotifs++;
             }
@@ -71,56 +71,66 @@ public class NotificationManage {
         if (unseenNotifs == 0) {
             return null;
         }
-        return notificationListTemp;
+        return tempList;
     }
 
     public void notificationTabChoiceHandle(List<Notification> notifications) {
-        System.out.println("Enter Your Choice :");
-        String choice = scan.nextLine();
-        if (!choice.matches("\\d+")) {
-            System.out.println("Please Enter Numeric Choice.");
+        if (!handleInitialChoice()) {
             return;
         }
-        int choiceValue = Integer.parseInt(choice);
-        if (choiceValue != 0 && choiceValue != 1) {
-            System.out.println("Please Enter Valid Choice, (0\1).");
-        }
-
-        if (choiceValue == 0) {
-            continueState = false;
-            return;
-        }
-
         if (notifications.isEmpty()) {
             System.out.println("You Don't Have Any Notification Yet");
             return;
         }
-
         displayNotificationList(notifications);
+        if (!handleNotificationSelection(notifications)) {
+            return;
+        }
+    }
+
+    private boolean handleInitialChoice() {
+        System.out.println("Enter Your Choice :");
+        String choice = scan.nextLine();
+        if (!choice.matches("\\d+")) {
+            System.out.println("Please Enter Numeric Choice.");
+            return false;
+        }
+        int choiceValue = Integer.parseInt(choice);
+        if (choiceValue != 0 && choiceValue != 1) {
+            System.out.println("Please Enter Valid Choice, (0\\1).");
+            return false;
+        }
+        if (choiceValue == 0) {
+            continueState = false;
+            return false;
+        }
+        return true;
+    }
+
+    private boolean handleNotificationSelection(List<Notification> notifications) {
         System.out.println("Select A Notification (By Index) Or Back (Enter 0)");
-        choice = scan.nextLine();
+        String choice = scan.nextLine();
         if (!choice.matches("\\d+")) {
             System.out.println("Invalid Entered Value, Returning...");
             Pause.pause(2000);
-            return;
+            return false;
         }
-
-        choiceValue = Integer.parseInt(choice);
+        int choiceValue = Integer.parseInt(choice);
         if (choiceValue == 0) {
-            return;
+            return false;
         }
-
         if (choiceValue < 0 || choiceValue > notifications.size()) {
             System.out.println("Invalid Index, Returning...");
             Pause.pause(2000);
-            return;
+            return false;
         }
-
         System.out.println(notifications.get(choiceValue - 1));
         changeNotificationStatus(notifications.get(choiceValue - 1));
         System.out.println("Press Any Key To Continue...");
         scan.next();
+        return true;
     }
+
 
     public void changeNotificationStatus(Notification notification) {
         notification.setNotificationSeen(true);

@@ -20,14 +20,14 @@ public class SellerPage implements Serializable {
     private static final String WARNING = "\u001B[38;5;208m";
 
     private final Scanner scan = new Scanner(System.in);
-    private static List<Request> currentSellerRequests = new ArrayList<>();
+    private static List<Request> currentSellerReq = new ArrayList<>();
 
     public static SellerPage getInstance() {
         return new SellerPage();
     }
 
     public List<Request> sellerRequests(String agencyCode) {
-        currentSellerRequests.clear();
+        currentSellerReq.clear();
         List<Request> requests = DataBase.getInstance().getRequestList();
         for (Request request : requests) {
             if (!(request instanceof SellerRequest)) {
@@ -35,10 +35,10 @@ public class SellerPage implements Serializable {
             }
 
             if (((SellerRequest) request).getSellerAgencyCode().equals(agencyCode)) {
-                currentSellerRequests.add(request);
+                currentSellerReq.add(request);
             }
         }
-        return currentSellerRequests;
+        return currentSellerReq;
     }
 
     public void displayMenuHeader(String title) {
@@ -74,7 +74,7 @@ public class SellerPage implements Serializable {
     }
 
     public void mainPage(Person person) {
-        currentSellerRequests = sellerRequests(((Seller) person).getAgencyCode());
+        currentSellerReq = sellerRequests(((Seller) person).getAgencyCode());
 
         Seller seller = (Seller) person;
 
@@ -110,72 +110,67 @@ public class SellerPage implements Serializable {
     }
 
     private void displaySellerOrders(Seller seller) {
-        List<Order> sellerOrders = seller.getOrders();
-        if (sellerOrders.isEmpty()) {
+        List<Order> orders = seller.getOrders();
+        if (orders.isEmpty()) {
             System.out.println(WARNING + "You don't have any orders yet." + RESET);
             Pause.pause(1500);
             return;
         }
-
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd").withZone(ZoneId.systemDefault());
         while (true) {
             clearScreen();
             displayMenuHeader("MY ORDERS");
-
-            System.out.println(MENU + String.format("%-5s %-30s %-15s %-15s",
-                    "No.", "Products", "Date", "Your Share") + RESET);
-            System.out.println(MENU + "--------------------------------------------------------------" + RESET);
-
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-                    .withZone(ZoneId.systemDefault());
-
-            for (int i = 0; i < sellerOrders.size(); i++) {
-                Order order = sellerOrders.get(i);
-                if (!(order instanceof SellerOrder sellerOrder)) {
-                    continue;
-                }
-
-                Map<Product, Integer> productMap = sellerOrder.getSellerProductMap();
-                StringBuilder productSummary = new StringBuilder();
-
-                for (Map.Entry<Product, Integer> entry : productMap.entrySet()) {
-                    Product product = entry.getKey();
-
-                    productSummary.append(product.getCategory())
-                            .append(": ")
-                            .append(product.getFullName())
-                            .append(" x").append(entry.getValue())
-                            .append(", ");
-                }
-
-                if (!productSummary.isEmpty()) {
-                    productSummary.setLength(productSummary.length() - 2);
-                }
-
-                String date = formatter.format(order.getOrderDate());
-                String sellerShare = String.format("%.2f $", sellerOrder.getSellerBenefit());
-
-                System.out.println(OPTION + String.format("%-5d %-30s %-15s %-15s",
-                        i + 1, productSummary.toString(), date, SUCCESS + sellerShare + RESET) + RESET);
-            }
-
+            printOrdersHeader();
+            printOrdersList(orders, formatter);
             System.out.print(PROMPT + "\nSelect an order (or 0 to back): " + RESET);
             String input = scan.nextLine().trim();
-
-            if (input.equals("0")) {
+            if ("0".equals(input)) {
                 return;
             }
-
-            try {
-                int selected = Integer.parseInt(input);
-                if (selected < 1 || selected > sellerOrders.size()) {
-                    showError("Invalid selection!");
-                    continue;
-                }
-
-                displayOrderDetails((SellerOrder) sellerOrders.get(selected - 1));
-            } catch (NumberFormatException e) {
-                showError("Please enter a valid number");
+            if (!isValidSelection(input, orders.size())) {
+                showError("Invalid selection!");
+                continue;
             }
+            displayOrderDetails((SellerOrder) orders.get(Integer.parseInt(input) - 1));
+        }
+    }
+
+    private void printOrdersHeader() {
+        System.out.println(MENU + String.format("%-5s %-30s %-15s %-15s",
+                "No.", "Products", "Date", "Your Share") + RESET);
+        System.out.println(MENU + "--------------------------------------------------------------" + RESET);
+    }
+
+    private void printOrdersList(List<Order> orders, DateTimeFormatter formatter) {
+        for (int i = 0; i < orders.size(); i++) {
+            if (!(orders.get(i) instanceof SellerOrder sellerOrder)) {
+                continue;
+            }
+            String productsSummary = getProductsSummary(sellerOrder.getSellerProductMap());
+            String date = formatter.format(orders.get(i).getOrderDate());
+            String sellerShare = String.format("%.2f $", sellerOrder.getSellerBenefit());
+            System.out.println(OPTION + String.format("%-5d %-30s %-15s %-15s", i + 1, productsSummary, date, SUCCESS + sellerShare + RESET) + RESET);
+        }
+    }
+
+    private String getProductsSummary(Map<Product, Integer> productMap) {
+        StringBuilder summary = new StringBuilder();
+        for (Map.Entry<Product, Integer> entry : productMap.entrySet()) {
+            Product product = entry.getKey();
+            summary.append(product.getCategory()).append(": ").append(product.getFullName()).append(" x").append(entry.getValue()).append(", ");
+        }
+        if (summary.length() > 2) {
+            summary.setLength(summary.length() - 2);
+        }
+        return summary.toString();
+    }
+
+    private boolean isValidSelection(String input, int max) {
+        try {
+            int selected = Integer.parseInt(input);
+            return selected >= 1 && selected <= max;
+        } catch (NumberFormatException e) {
+            return false;
         }
     }
 
@@ -186,34 +181,40 @@ public class SellerPage implements Serializable {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
                 .withZone(ZoneId.systemDefault());
 
-        System.out.println(OPTION + "Date: " + HIGHLIGHT + formatter.format(order.getOrderDate()) + RESET);
-        System.out.println(OPTION + "Customer Email: " + HIGHLIGHT + order.getCustomerEmail() + RESET);
-        System.out.println(OPTION + "Delivery Address: " + HIGHLIGHT +
-                order.getDeliveryAddress().toString() + RESET);
+        printLine("Date: ", formatter.format(order.getOrderDate()));
+        printLine("Customer Email: ", order.getCustomerEmail());
+        printLine("Delivery Address: ", order.getDeliveryAddress().toString());
 
         System.out.println(MENU + "\n════════════════ PRODUCTS ════════════════" + RESET);
-        double productsTotalPrice = 0;
-        for (Map.Entry<Product, Integer> entry : order.getSellerProductMap().entrySet()) {
-            Product product = entry.getKey();
-            int quantity = entry.getValue();
-            productsTotalPrice += Double.parseDouble(product.getPrice()) * quantity;
-            System.out.println(OPTION + "- " + product.getFullName() + " (" + product.getCategory() + ") x" + quantity);
-            System.out.println("  Price: " + HIGHLIGHT + product.getPrice() + " $" + RESET);
-        }
+        double totalPrice = printProducts(order.getSellerProductMap());
 
         System.out.println(MENU + "\n════════════════ SUMMARY ════════════════" + RESET);
-        System.out.println(OPTION + "Products Total: " + HIGHLIGHT + productsTotalPrice + " $" + RESET);
-        String formattedString = String.format("%.2f", productsTotalPrice * 0.9);
-        System.out.println(OPTION + "Your Benefit : " + HIGHLIGHT + formattedString + " $" + RESET);
-
-        double sellerShare = order.getSellerBenefit();
-
-        formattedString = String.format("%.2f $", sellerShare);
-        System.out.println(OPTION + "Your Share (90%): " + SUCCESS +
-                formattedString + RESET);
+        printLine("Products Total: ", String.format("%.2f $", totalPrice));
+        printLine("Your Benefit : ", String.format("%.2f $", totalPrice * 0.9));
+        printLine("Your Share (90%): ", String.format("%.2f $", order.getSellerBenefit()), SUCCESS);
 
         System.out.print(PROMPT + "\nPress ENTER to continue..." + RESET);
         scan.nextLine();
+    }
+
+    private void printLine(String label, String value) {
+        System.out.println(OPTION + label + HIGHLIGHT + value + RESET);
+    }
+
+    private void printLine(String label, String value, String color) {
+        System.out.println(OPTION + label + color + value + RESET);
+    }
+
+    private double printProducts(Map<Product, Integer> products) {
+        double total = 0;
+        for (Map.Entry<Product, Integer> entry : products.entrySet()) {
+            Product product = entry.getKey();
+            int qty = entry.getValue();
+            total += Double.parseDouble(product.getPrice()) * qty;
+            System.out.println(OPTION + "- " + product.getFullName() + " (" + product.getCategory() + ") x" + qty);
+            printLine("  Price: ", product.getPrice() + " $");
+        }
+        return total;
     }
 
     public void myProductsMenu(String agencyCode) {
@@ -254,7 +255,7 @@ public class SellerPage implements Serializable {
             System.out.print(PROMPT + "Select a product by index or press 0 to back: " + RESET);
             String choice = scan.nextLine().trim();
 
-            if (choice.equals("0")) {
+            if ("0".equals(choice)) {
                 return;
             }
 
@@ -294,13 +295,13 @@ public class SellerPage implements Serializable {
         System.out.println(MENU + "----------------------------------------------------------" + RESET);
 
         for (int i = 0; i < products.size(); i++) {
-            Product p = products.get(i);
+            Product product = products.get(i);
             System.out.println(OPTION + String.format("%-5d %-20s %-15s %-10s %-10d",
                     i+1,
-                    p.getFullName(),
-                    p.getCategory(),
-                    p.getPrice(),
-                    p.getStock()) + RESET);
+                    product.getFullName(),
+                    product.getCategory(),
+                    product.getPrice(),
+                    product.getStock()) + RESET);
         }
         System.out.println();
     }
@@ -310,7 +311,7 @@ public class SellerPage implements Serializable {
             System.out.print(PROMPT + "Enter new stock (or 'back' to cancel): " + RESET);
             String input = scan.nextLine().trim();
 
-            if (input.equalsIgnoreCase("back")) {
+            if ("back".equalsIgnoreCase(input)) {
                 return;
             }
 
@@ -333,7 +334,7 @@ public class SellerPage implements Serializable {
     }
 
     public void sendNewRequest(Seller seller) {
-        if (!currentSellerRequests.isEmpty() && !currentSellerRequests.get(currentSellerRequests.size() - 1).getIsChecked()) {
+        if (!currentSellerReq.isEmpty() && !currentSellerReq.get(currentSellerReq.size() - 1).getIsChecked()) {
             System.out.println(WARNING + "Your last request has not been checked yet. Please wait." + RESET);
             Pause.pause(2000);
             return;
@@ -353,42 +354,44 @@ public class SellerPage implements Serializable {
     }
 
     public void displayRequest(Seller seller) {
-        currentSellerRequests = new ArrayList<>();
-        for (Request req : DataBase.getInstance().getRequestList()) {
-            if (req instanceof SellerRequest sellerRequest) {
-                if (sellerRequest.getSellerAgencyCode().equals(seller.getAgencyCode())) {
-                    currentSellerRequests.add(req);
-                }
-            }
-        }
-
-        if (currentSellerRequests.isEmpty()) {
+        AutoAnswerToRequests.getInstance().autoAnswer(seller); // TODO Auto Answer
+        currentSellerReq = filterSellerRequests(seller);
+        if (currentSellerReq.isEmpty()) {
             System.out.println(WARNING + "You don't have any requests yet." + RESET);
             Pause.pause(2000);
             return;
         }
-
         while (true) {
             displayMenuHeader("MY REQUESTS");
-            listRequests(currentSellerRequests);
+            listRequests(currentSellerReq);
             System.out.print(PROMPT + "Select a request by index or 0 to go back: " + RESET);
-
             String input = scan.nextLine().trim();
-            if (input.equals("0")) {
+            if ("0".equals(input)) {
                 return;
             }
-
-            if (isValidChoice(input, currentSellerRequests.size())) {
+            if (!isValidChoice(input, currentSellerReq.size())) {
                 System.out.println(ERROR + "Invalid request index." + RESET);
                 continue;
             }
-
-            Request request = currentSellerRequests.get(Integer.parseInt(input) - 1);
-
-            System.out.println(request);
-            System.out.print(PROMPT + "\nPress any key to continue..." + RESET);
-            scan.nextLine();
+            showRequestDetails(Integer.parseInt(input) - 1);
         }
+    }
+
+    private List<Request> filterSellerRequests(Seller seller) {
+        List<Request> filtered = new ArrayList<>();
+        for (Request request : DataBase.getInstance().getRequestList()) {
+            if (request instanceof SellerRequest sellerRequest &&
+                    sellerRequest.getSellerAgencyCode().equals(seller.getAgencyCode())) {
+                filtered.add(request);
+            }
+        }
+        return filtered;
+    }
+
+    private void showRequestDetails(int index) {
+        System.out.println(currentSellerReq.get(index));
+        System.out.print(PROMPT + "\nPress any key to continue..." + RESET);
+        scan.nextLine();
     }
 
     private void listRequests(List<Request> requests) {
@@ -404,10 +407,10 @@ public class SellerPage implements Serializable {
     }
 
     public Seller findSellerByAgencyCode(String agencyCode) {
-        for (Person p : DataBase.getInstance().getPersonList()) {
-            if (p instanceof Seller s) {
-                if (s.getAgencyCode().equals(agencyCode)) {
-                    return s;
+        for (Person person : DataBase.getInstance().getPersonList()) {
+            if (person instanceof Seller seller) {
+                if (seller.getAgencyCode().equals(agencyCode)) {
+                    return seller;
                 }
             }
         }
@@ -443,10 +446,8 @@ public class SellerPage implements Serializable {
         double totalSales = calculateTotalSales(seller);
 
         System.out.println(TITLE + "\n═══════════════════════════════════════" + RESET);
-        System.out.println(OPTION + "  Current Balance: " + HIGHLIGHT +
-                String.format("%.2f $", balance) + RESET);
-        System.out.println(OPTION + "  Total Sales: " + HIGHLIGHT +
-                String.format("%.2f $", totalSales) + RESET);
+        System.out.println(OPTION + "  Current Balance: " + HIGHLIGHT + String.format("%.2f $", balance) + RESET);
+        System.out.println(OPTION + "  Total Sales: " + HIGHLIGHT + String.format("%.2f $", totalSales) + RESET);
         System.out.println(TITLE + "═══════════════════════════════════════" + RESET);
     }
 

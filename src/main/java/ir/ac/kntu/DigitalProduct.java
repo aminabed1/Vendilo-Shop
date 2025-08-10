@@ -6,16 +6,16 @@ public class DigitalProduct extends Product implements Serializable {
     private final String brand;
     private final String internalStorage;
     private final String ram;
-    private final String OS;
+    private final String operatingSystem;
     private final String chipset;
 
-    public DigitalProduct(String brand, String price, String internalStorage, String ram, String OS, String chipset, int stock, String sellerAgencyCode) {
+    public DigitalProduct(String brand, String price, String internalStorage, String ram, String operatingSystem, String chipset, int stock, String sellerAgencyCode) {
         super("Digital Product", sellerAgencyCode);
         this.brand = brand;
         this.setFullName(brand);
         this.internalStorage = internalStorage;
         this.ram = ram;
-        this.OS = OS;
+        this.operatingSystem = operatingSystem;
         this.chipset = chipset;
         this.setStock(stock);
         this.setPrice(price);
@@ -32,7 +32,7 @@ public class DigitalProduct extends Product implements Serializable {
                 displayField("Brand", brand) +
                 displayField("Storage", internalStorage) +
                 displayField("RAM", ram) +
-                displayField("OS", OS) +
+                displayField("OS", operatingSystem) +
                 displayField("Battery", brand) +
                 displayField("Chipset", chipset);
     }

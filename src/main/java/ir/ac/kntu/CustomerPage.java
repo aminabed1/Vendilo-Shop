@@ -31,19 +31,19 @@ public class CustomerPage implements Serializable {
 
     public void customerMenu(Customer customer) {
         pupUpNotificationTab(customer);
-        customer.getVendiloPlusAccount().checkPremiumAccountActive();
+        customer.getVendiloPlus().checkPremiumAccountActive();
         displayMenuHeader();
         displayCustomerDashboard();
         customerHandleChoice(customer);
     }
 
     public void pupUpNotificationTab(Customer customer) {
-        List<Notification> unseenNotifications = NotificationManage.getInstance().getUnseenNotificationsList(customer);
-        if (unseenNotifications == null || unseenNotifications.isEmpty()) {
+        List<Notification> newNotifications = NotificationManage.getInstance().getUnseenNotificationsList(customer);
+        if (newNotifications == null || newNotifications.isEmpty()) {
             return;
         }
 
-        String formatted = String.format("          %d New Notification%s          ", unseenNotifications.size(), unseenNotifications.size() == 1 ? "" : "s");
+        String formatted = String.format("          %d New Notification%s          ", newNotifications.size(), newNotifications.size() == 1 ? "" : "s");
         System.out.println(TITLE + "=========================================");
         System.out.println("|                                       |");
         System.out.println(formatted);
@@ -81,7 +81,7 @@ public class CustomerPage implements Serializable {
         while (true) {
             String choice = scan.nextLine().trim();
 
-            if (choice.equalsIgnoreCase("BACK")) {
+            if ("back".equalsIgnoreCase(choice)) {
                 backButtonPressed = true;
                 break;
             }
@@ -98,41 +98,60 @@ public class CustomerPage implements Serializable {
 
     private void handleCustomerChoice(String choice, Customer customer) {
         switch (choice) {
-            case "1":
-                new PersonAccount().infoView(customer);
-                break;
-            case "2":
-                customer.displayCart();
-                break;
-            case "3":
-                DisplayOrder.getInstance().display(customer);
-                break;
-            case "4":
-                customer.getWallet().walletOptionHandler(customer);
-                break;
-            case "5":
-                backButtonPressed = true;
-                break;
-            case "6":
-                displayProductsList(customer);
-                break;
-            case "7":
-                Search.getInstance().handleSearch(customer);
-                break;
-            case "8":
-                displaySupportOptions(customer);
-                break;
-            case "9":
-                DiscountCodeManage.getInstance().handleDiscountCodePanel(customer);
-                break;
-            case "10":
-                NotificationManage.getInstance().notificationTab(customer);
-                break;
-            case "11":
-                VendiloPlusAccountManage.getInstance().vendiloPlusTab(customer, false);
-                break;
-            default:
+            case "1" -> showAccountInfo(customer);
+            case "2" -> showCart(customer);
+            case "3" -> showOrders(customer);
+            case "4" -> handleWallet(customer);
+            case "5" -> backButtonPressed = true;
+            case "6" -> showProductList(customer);
+            case "7" -> handleSearch(customer);
+            case "8" -> showSupportOptions(customer);
+            case "9" -> handleDiscountCodes(customer);
+            case "10" -> showNotifications(customer);
+            case "11" -> handleVendiloPlus(customer);
+            default -> {
+            }
         }
+    }
+
+    private void showAccountInfo(Customer customer) {
+        new PersonAccount().infoView(customer);
+    }
+
+    private void showCart(Customer customer) {
+        customer.displayCart();
+    }
+
+    private void showOrders(Customer customer) {
+        DisplayOrder.getInstance().display(customer);
+    }
+
+    private void handleWallet(Customer customer) {
+        customer.getWallet().walletOptionHandler(customer);
+    }
+
+    private void showProductList(Customer customer) {
+        displayProductsList(customer);
+    }
+
+    private void handleSearch(Customer customer) {
+        Search.getInstance().handleSearch(customer);
+    }
+
+    private void showSupportOptions(Customer customer) {
+        displaySupportOptions(customer);
+    }
+
+    private void handleDiscountCodes(Customer customer) {
+        DiscountCodeManage.getInstance().handleDiscountCodePanel(customer);
+    }
+
+    private void showNotifications(Customer customer) {
+        NotificationManage.getInstance().notificationTab(customer);
+    }
+
+    private void handleVendiloPlus(Customer customer) {
+        VendiloPlusAccountManage.getInstance().vendiloPlusTab(customer, false);
     }
 
     public void displaySupportOptions(Customer customer) {
@@ -159,6 +178,7 @@ public class CustomerPage implements Serializable {
 
             switch (choice) {
                 case "1":
+                    AutoAnswerToRequests.getInstance().autoAnswer(customer);//TODO Auto Answer
                     displayRequest(customer);
                     return;
                 case "2":
@@ -176,7 +196,7 @@ public class CustomerPage implements Serializable {
         while (true) {
             displayRequestTypes();
             String choice = scan.nextLine().trim();
-            if (choice.equals("4")) {
+            if ("4".equals(choice)) {
                 return;
             } else if (!choice.matches("[1-4]")) {
                 System.out.println(ERROR + "Please enter a valid choice (1-4)" + RESET);
@@ -242,9 +262,8 @@ public class CustomerPage implements Serializable {
     private List<CustomerRequest> getCustomerRequests(Customer customer) {
         List<CustomerRequest> customerRequests = new ArrayList<>();
         for (Request request : DataBase.getInstance().getRequestList()) {
-            if (request instanceof CustomerRequest cr &&
-                    cr.getCustomerPhone().equals(customer.getPhoneNumber())) {
-                customerRequests.add(cr);
+            if (request instanceof CustomerRequest customerRequest && customerRequest.getCustomerPhone().equals(customer.getPhoneNumber())) {
+                customerRequests.add(customerRequest);
             }
         }
         return customerRequests;
@@ -260,7 +279,7 @@ public class CustomerPage implements Serializable {
         System.out.println(TITLE + "════════════ YOUR REQUESTS ════════════" + RESET);
         for (int i = 0; i < requests.size(); i++) {
             CustomerRequest request = requests.get(i);
-            String statusColor = request.getStatus().equals("unchecked") ? ERROR : SUCCESS;
+            String statusColor = "unchecked".equals(request.getStatus()) ? ERROR : SUCCESS;
             System.out.printf(OPTION + "%2d. " + RESET + "%-20s " + statusColor + "%-10s" + RESET +
                             " %-15s %s\n",
                     i + 1,
@@ -275,7 +294,7 @@ public class CustomerPage implements Serializable {
         System.out.println("\n" + PROMPT + "Enter request number to view details or 'BACK' to return: " + RESET);
         while (true) {
             String input = scan.nextLine().trim();
-            if (input.equalsIgnoreCase("BACK")) {
+            if ("back".equalsIgnoreCase(input)) {
                 return;
             }
 
@@ -365,12 +384,12 @@ public class CustomerPage implements Serializable {
         System.out.println("║ 0. Back to category selection              ║");
 
         for (int i = 0; i < products.size(); i++) {
-            Product p = products.get(i);
+            Product product = products.get(i);
             System.out.printf("║ %d. %s | Price: %s | Type: %s%n",
                     i + 1,
-                    p.getFullName(),
-                    p.getPrice(),
-                    p.getCategory()
+                    product.getFullName(),
+                    product.getPrice(),
+                    product.getCategory()
             );
         }
         System.out.println("╚════════════════════════════════════════════╝");

@@ -7,14 +7,14 @@ import java.util.*;
 public class SellerOrder extends Order implements Serializable {
     private final String sellerAgencyCode;
     private final double sellerBenefit;
-    private final String transactionDescription;
+    private final String description;
     private final Map<Product, Integer> sellerProductMap = new HashMap<>();
 
-    public SellerOrder(String sellerAgencyCode, Instant orderDate, double sellerBenefit, Address deliveryAddress, String customerEmail, String transactionDescription, Map<Product, Integer> sellerProductMap) {
+    public SellerOrder(String sellerAgencyCode, Instant orderDate, double sellerBenefit, Address deliveryAddress, String customerEmail, String description, Map<Product, Integer> sellerProductMap) {
         super(orderDate, customerEmail, deliveryAddress);
         this.sellerAgencyCode = sellerAgencyCode;
         this.sellerBenefit = sellerBenefit;
-        this.transactionDescription = transactionDescription;
+        this.description = description;
         this.sellerProductMap.putAll(sellerProductMap);
     }
     public String getSellerAgencyCode() {
@@ -26,7 +26,7 @@ public class SellerOrder extends Order implements Serializable {
     }
 
     public String getTransactionDescription() {
-        return transactionDescription;
+        return description;
     }
 
     public Map<Product, Integer> getSellerProductMap() {

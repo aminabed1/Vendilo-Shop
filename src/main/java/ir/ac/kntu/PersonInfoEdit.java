@@ -29,37 +29,43 @@ public class PersonInfoEdit implements Serializable {
 
         while (true) {
             printUserInfoMenu();
-
             System.out.print(PROMPT + "Select an option: " + RESET + HIGHLIGHT);
             String choice = scan.nextLine().trim();
             System.out.print(RESET);
 
-            switch (choice) {
-                case "1" -> nameTemp = promptInput("Enter new name: ");
-                case "2" -> surNameTemp = promptInput("Enter new surname: ");
-                case "3" -> phoneTemp = promptInput("Enter new phone: ");
-                case "4" -> emailTemp = promptInput("Enter new email: ");
-                case "5" -> usernameTemp = promptInput("Enter new username: ");
-                case "6" -> passwordTemp = promptInput("Enter new password: ");
-                case "7" -> {
-                    if (currentPerson instanceof Seller) {
-                        shopNameTemp = promptInput("Enter new shop name: ");
-                    } else {
-                        System.out.println(ERROR + "Invalid choice." + RESET);
-                    }
-                }
-                case "#" -> {
-                    if (tryApplyChanges()) {
-                        System.out.println(SUCCESS + "Information updated successfully!" + RESET);
-                        return;
-                    }
-                }
-                case "0" -> {
-                    return;
-                }
-                default -> System.out.println(ERROR + "Invalid choice." + RESET);
+            if (handleEditChoice(choice)) {
+                return;
             }
         }
+    }
+
+    private boolean handleEditChoice(String choice) {
+        switch (choice) {
+            case "1" -> nameTemp = promptInput("Enter new name: ");
+            case "2" -> surNameTemp = promptInput("Enter new surname: ");
+            case "3" -> phoneTemp = promptInput("Enter new phone: ");
+            case "4" -> emailTemp = promptInput("Enter new email: ");
+            case "5" -> usernameTemp = promptInput("Enter new username: ");
+            case "6" -> passwordTemp = promptInput("Enter new password: ");
+            case "7" -> {
+                if (currentPerson instanceof Seller) {
+                    shopNameTemp = promptInput("Enter new shop name: ");
+                } else {
+                    System.out.println(ERROR + "Invalid choice." + RESET);
+                }
+            }
+            case "#" -> {
+                if (tryApplyChanges()) {
+                    System.out.println(SUCCESS + "Information updated successfully!" + RESET);
+                    return true;
+                }
+            }
+            case "0" -> {
+                return true;
+            }
+            default -> System.out.println(ERROR + "Invalid choice." + RESET);
+        }
+        return false;
     }
 
     private void loadTempData() {

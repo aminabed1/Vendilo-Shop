@@ -9,11 +9,11 @@ public class Customer extends OrdinaryUsers {
     private final List<Address> addressList;
     private final List<Notification> notifications;
     private final List<DiscountCode> discountCodeList;
-    private final VendiloPlusAccount vendiloPlusAccount;
+    private final VendiloPlusAccount vendiloPlus;
 
     public Customer(String name, String surname, String phoneNumber, String email, String password) {
         super(name, surname, password, phoneNumber, email, true);
-        vendiloPlusAccount = new VendiloPlusAccount();
+        vendiloPlus = new VendiloPlusAccount();
         orderList = new ArrayList<>();
         addressList = new ArrayList<>();
         discountCodeList = new ArrayList<>();
@@ -74,8 +74,8 @@ public class Customer extends OrdinaryUsers {
         notifications.add(notification);
     }
 
-    public VendiloPlusAccount getVendiloPlusAccount() {
-        return vendiloPlusAccount;
+    public VendiloPlusAccount getVendiloPlus() {
+        return vendiloPlus;
     }
 
     @Override
@@ -89,7 +89,7 @@ public class Customer extends OrdinaryUsers {
                 super.toString(),
                 YELLOW, RESET, addressList.size(), (addressList.size() == 1 || addressList.isEmpty() ? "" : "es"),
                 YELLOW, RESET, wallet.getWalletBalance(),
-                YELLOW, RESET, vendiloPlusAccount.getIsActive() ? "Yes" : "No"
+                YELLOW, RESET, vendiloPlus.getIsActive() ? "Yes" : "No"
         );
     }
 

@@ -35,6 +35,7 @@ public class ManagerPage {
                 case "3" -> sellersOrCustomersActivities(Role.Customer);
                 case "4" -> DiscountCodeManage.getInstance().generateDiscountCode();
                 case "5" -> generalMessage();
+                default -> {}
             }
         }
     }
@@ -87,7 +88,9 @@ public class ManagerPage {
             }
             printPersonsList(persons);
             String choice = getUserChoice("Select a Person By Index Or Press 0 To Back: ", "\\d+");
-            if (choice == null || choice.equals("0")) return;
+            if (choice == null || "0".equals(choice)) {
+                return;
+            }
 
             int index = Integer.parseInt(choice);
             if (index < 1 || index > persons.size()) {
@@ -140,7 +143,9 @@ public class ManagerPage {
                 case "3" -> {
                     return applyFilter(persons, username, role);
                 }
-                case "4" -> { return null; }
+                case "4" -> {
+                    return null;
+                }
                 default -> System.out.println(RED_BOLD + "Invalid choice, try again..." + RESET);
             }
         }
@@ -148,11 +153,11 @@ public class ManagerPage {
 
     private List<Person> applyFilter(List<Person> persons, String username, String role) {
         List<Person> filtered = new ArrayList<>();
-        for (Person p : persons) {
-            boolean userMatch = username.isEmpty() || (p instanceof SpecialUsers su && su.getUsername().equalsIgnoreCase(username));
-            boolean roleMatch = role.isEmpty() || p.getRole().name().equalsIgnoreCase(role);
+        for (Person person : persons) {
+            boolean userMatch = username.isEmpty() || (person instanceof SpecialUsers specialUsers && specialUsers.getUsername().equalsIgnoreCase(username));
+            boolean roleMatch = role.isEmpty() || person.getRole().name().equalsIgnoreCase(role);
             if (userMatch && roleMatch) {
-                filtered.add(p);
+                filtered.add(person);
             }
         }
         return filtered;
@@ -183,78 +188,96 @@ public class ManagerPage {
 
     private void displayAndManagePerson(Person person, Manager manager) {
         while (true) {
-            System.out.println("\n" + person);
-            System.out.println("\n");
-            System.out.println(RED_BOLD + "----Options----" + RESET);
-            System.out.println("1. Edit Information");
-            System.out.println("2. Active Or Deactivate Account");
-            if (person instanceof Support) {
-                System.out.println("3. Manage Support Tasks");
-            }
-            System.out.println("0. Back");
+            printPersonInfoMenu(person);
             String choice = scan.nextLine();
-            switch (choice) {
-                case "1" -> {
-                    EditPersonInfo.getInstance().handleEdit(person);
-                }
-                case "2" -> {
-                    if (person instanceof Manager manager1 && manager.getPriorityCode() < manager1.getPriorityCode()) {
-                        SystemMessage.printMessage("You Can Not InActive This Manager", MessageTitle.Error);
-                        Pause.pause(1500);
-                        continue;
-                    }
-                    changeActivationStatus(person);
-                }
-                case "3" -> {
-                    if (!(person instanceof Support)) {
-                        System.out.println(RED_BOLD + "Invalid choice, try again..." + RESET);
-                    } else {
-                    manageSupportTasks(person);
-                    }
-                }
-                case "back", "Back", "0" -> {
-                    return;
-                }
-                default -> System.out.println(RED_BOLD + "Invalid choice, try again..." + RESET);
+            if (handlePersonChoice(choice, person, manager)) {
+                return;
             }
         }
+    }
+
+    private void printPersonInfoMenu(Person person) {
+        System.out.println("\n" + person + "\n");
+        System.out.println(RED_BOLD + "----Options----" + RESET);
+        System.out.println("1. Edit Information");
+        System.out.println("2. Active Or Deactivate Account");
+        if (person instanceof Support) {
+            System.out.println("3. Manage Support Tasks");
+        }
+        System.out.println("0. Back");
+    }
+
+    private boolean handlePersonChoice(String choice, Person person, Manager manager) {
+        switch (choice) {
+            case "1" -> EditPersonInfo.getInstance().handleEdit(person);
+            case "2" -> {
+                if (person instanceof Manager otherManager && manager.getPriorityCode() < otherManager.getPriorityCode()) {
+                    SystemMessage.printMessage("You Can Not InActive This Manager", MessageTitle.Error);
+                    Pause.pause(1500);
+                } else {
+                    changeActivationStatus(person);
+                }
+            }
+            case "3" -> {
+                if (person instanceof Support) {
+                    manageSupportTasks(person);
+                } else {
+                    System.out.println(RED_BOLD + "Invalid choice, try again..." + RESET);
+                }
+            }
+            case "0", "back", "Back" -> {
+                return true;
+            }
+            default -> System.out.println(RED_BOLD + "Invalid choice, try again..." + RESET);
+        }
+        return false;
     }
 
     private void manageSupportTasks(Person person) {
         Support support = (Support) person;
         while (true) {
             clearConsole();
-            System.out.println("========== Support Tasks ==========");
-            int index = 1;
-            for (RequestTitle requestTitle : RequestTitle.values()) {
-                boolean isSelected = support.getRequestTitles().contains(requestTitle);
-                String checkbox = isSelected ? "X" : " ";
-                String displayName = formatTitle(requestTitle);
-                System.out.printf("%d. [%s] %s\n", index, checkbox, displayName);
-                index++;
-            }
-            System.out.println("5. Confirm and Back");
-            System.out.print("\nSelect (1-4): ");
+            printSupportMenu(support);
             String input = scan.nextLine().trim();
-            switch (input) {
-                case "1", "2", "3", "4" -> {
-                    int choice = Integer.parseInt(input) - 1;
-                    RequestTitle selectedTitle = RequestTitle.values()[choice];
-                    if (support.getRequestTitles().contains(selectedTitle)) {
-                        support.removeRequestTitle(selectedTitle);
-                    } else {
-                        support.addRequestTitle(selectedTitle);
-                    }
+            if (handleSupportChoice(input, support)) {
+                return;
+            }
+        }
+    }
+
+    private void printSupportMenu(Support support) {
+        System.out.println("========== Support Tasks ==========");
+        int index = 1;
+        for (RequestTitle requestTitle : RequestTitle.values()) {
+            String checkbox = support.getRequestTitles().contains(requestTitle) ? "X" : " ";
+            String displayName = formatTitle(requestTitle);
+            System.out.printf("%d. [%s] %s\n", index++, checkbox, displayName);
+        }
+        System.out.println("5. Confirm and Back");
+        System.out.print("\nSelect (1-4): ");
+    }
+
+    private boolean handleSupportChoice(String input, Support support) {
+        switch (input) {
+            case "1", "2", "3", "4" -> {
+                int choice = Integer.parseInt(input) - 1;
+                RequestTitle title = RequestTitle.values()[choice];
+                if (support.getRequestTitles().contains(title)) {
+                    support.removeRequestTitle(title);
+                } else {
+                    support.addRequestTitle(title);
                 }
-                case "5" -> {
-                    SystemMessage.printMessage("Changes saved.", MessageTitle.Success);
-                    waitEnter();
-                    return;
-                }
-                default -> {
-                    SystemMessage.printMessage("Invalid choice. Try again...", MessageTitle.Error);
-                    waitEnter();
-                }
+                return false;
+            }
+            case "5" -> {
+                SystemMessage.printMessage("Changes saved.", MessageTitle.Success);
+                waitEnter();
+                return true;
+            }
+            default -> {
+                SystemMessage.printMessage("Invalid choice. Try again...", MessageTitle.Error);
+                waitEnter();
+                return false;
             }
         }
     }
@@ -345,11 +368,11 @@ public class ManagerPage {
 
     private void displayOneSellerOrCustomerActivities(Role role) {
         String roleName = (role == Role.Customer ? "Customer" : "Seller");
-        System.out.printf(YELLOW + "Enter %s : " + RESET, roleName.equals("Customer") ? "Customer's Phone Number" : "Seller's Agency Code");
-        String authenticationField = scan.nextLine().trim();
-        Person person = (Person) findSellerOrCustomer(authenticationField, role);
+        System.out.printf(YELLOW + "Enter %s : " + RESET, "Customer".equals(roleName) ? "Customer's Phone Number" : "Seller's Agency Code");
+        String authField = scan.nextLine().trim();
+        Person person = (Person) findSellerOrCustomer(authField, role);
         if (person == null) {
-            String errorMessage = String.format("%s Not Found", roleName.equals("Customer") ? "Customer" : "Seller");
+            String errorMessage = String.format("%s Not Found", "Customer".equals(roleName) ? "Customer" : "Seller");
             SystemMessage.printMessage(errorMessage, MessageTitle.Error);
         } else if (person instanceof Customer customer) {
             manageCustomer(customer);
@@ -359,40 +382,44 @@ public class ManagerPage {
     }
 
     public void manageSeller(Seller seller) {
-        final String decimalRegex = "\\d+(\\.\\d+)?";
         while (true) {
-            double totalBenefit = calculateSellerOrCustomerFee(seller);
-            System.out.println(CYAN + "\n=== Seller Activities ===" + RESET);
-            System.out.printf("%sSeller:%s %s %s (%s)%n", YELLOW, RESET, seller.getName(), seller.getSurname(), seller.getAgencyCode());
-            System.out.printf("%sTotal Benefit:%s %.2f%n%n", GREEN, RESET, totalBenefit);
-            System.out.println("1. " + CYAN + "Give Bonus to Seller" + RESET);
-            System.out.println("0. " + RED_BOLD + "Back" + RESET);
-            System.out.print(YELLOW + "Your choice: " + RESET);
+            printSellerHeader(seller);
+            System.out.print(YELLOW + "Choice: " + RESET);
             String choice = scan.nextLine().trim();
             switch (choice) {
-                case "1" -> {
-                    System.out.print("Enter Bonus Amount: ");
-                    String amountStr = scan.nextLine().trim();
-                    if (!amountStr.matches(decimalRegex)) {
-                        SystemMessage.printMessage("Invalid amount. Please enter a valid number.", MessageTitle.Error);
-                        break;
-                    }
-                    double amount = Double.parseDouble(amountStr);
-                    if (amount <= 0) {
-                        SystemMessage.printMessage("Amount must be positive.", MessageTitle.Error);
-                        break;
-                    }
-                    seller.getWallet().setWalletBalance(amount, "Bonus Given by Manager");
-                    SystemMessage.printMessage("Bonus Added to Seller Wallet", MessageTitle.Success);
-                }
+                case "1" -> handleBonusInput(seller);
                 case "0" -> {
                     return;
                 }
-                default -> {
-                    SystemMessage.printMessage("Invalid choice. Try again...", MessageTitle.Error);
-                }
+                default -> SystemMessage.printMessage("Invalid choice.", MessageTitle.Error);
             }
         }
+    }
+
+    private void printSellerHeader(Seller seller) {
+        double totalBenefit = calculateSellerOrCustomerFee(seller);
+        System.out.println(CYAN + "\n=== Seller Activities ===" + RESET);
+        System.out.printf("%sSeller:%s %s %s (%s)%n", YELLOW, RESET,
+                seller.getName(), seller.getSurname(), seller.getAgencyCode());
+        System.out.printf("%sTotal Benefit:%s %.2f%n%n", GREEN, RESET, totalBenefit);
+        System.out.println("1. " + CYAN + "Give Bonus" + RESET);
+        System.out.println("0. " + RED_BOLD + "Back" + RESET);
+    }
+
+    private void handleBonusInput(Seller seller) {
+        System.out.print("Bonus Amount: ");
+        String amt = scan.nextLine().trim();
+        if (!amt.matches("\\d+")) {
+            SystemMessage.printMessage("Invalid amount.", MessageTitle.Error);
+            return;
+        }
+        double amount = Double.parseDouble(amt);
+        if (amount <= 0) {
+            SystemMessage.printMessage("Amount must be positive.", MessageTitle.Error);
+            return;
+        }
+        seller.getWallet().setWalletBalance(amount, "Bonus Given");
+        SystemMessage.printMessage("Bonus Added.", MessageTitle.Success);
     }
 
     private void manageCustomer(Customer customer) {
@@ -423,23 +450,24 @@ public class ManagerPage {
         }
     }
 
-    private Object findSellerOrCustomer(String authenticationCode, Role role) {
+    private Object findSellerOrCustomer(String authCode, Role role) {
         for (Person person : DataBase.getInstance().getPersonList()) {
             switch (role) {
                 case Customer:
                     if (!(person instanceof Customer customer)) {
                         continue;
                     }
-                    if (customer.getPhoneNumber().equals(authenticationCode)) {
+                    if (customer.getPhoneNumber().equals(authCode)) {
                         return customer;
                     }
                 case Seller:
                     if (!(person instanceof Seller seller)) {
                         continue;
                     }
-                    if (seller.getAgencyCode().equals(authenticationCode)) {
+                    if (seller.getAgencyCode().equals(authCode)) {
                         return seller;
                     }
+                default:
             }
         }
         return null;

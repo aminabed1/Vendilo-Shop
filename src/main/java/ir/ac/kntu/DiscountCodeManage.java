@@ -73,7 +73,9 @@ public class DiscountCodeManage {
                     }
                     objectReceiver(mainCustomer);
                 }
-                case "0" -> { return; }
+                case "0" -> {
+                    return;
+                }
                 default -> SystemMessage.printMessage("Enter Valid Number", MessageTitle.Error);
             }
         }
@@ -109,7 +111,9 @@ public class DiscountCodeManage {
             switch (choice) {
                 case "1" -> generateValueCode(purpose);
                 case "2" -> generatePercentCode(purpose);
-                case "0" -> { return; }
+                case "0" -> {
+                    return;
+                }
                 default -> SystemMessage.printMessage("Enter Valid Number", MessageTitle.Error);
             }
         }
@@ -118,47 +122,66 @@ public class DiscountCodeManage {
     private void generateValueCode(String purpose) {
         while (true) {
             System.out.println("\n--- Create Value Discount Code ---");
-            System.out.print("Enter Value Of Discount Code (or 0 to Back): ");
-            String valueInput = scanner.nextLine();
 
-            if (valueInput.equals("0")) return;
-            if (!valueInput.matches("\\d+")) {
+            Double value = readPositiveDouble("Enter Value Of Discount Code (or 0 to Back): ");
+            if (value == null || value == 0) {
+                return;
+            }
+            Integer usableTimes = readPositiveInt("Enter Usable Times: ");
+            if (usableTimes == null) {
+                continue;
+            }
+            String code = generateRandomDiscountCode();
+            DiscountCode discountCode = new ValueDiscount(code, purpose, true, usableTimes, value);
+            registerDiscountCode(discountCode, purpose);
+        }
+    }
+
+    private Double readPositiveDouble(String prompt) {
+        while (true) {
+            System.out.print(prompt);
+            String input = scanner.nextLine();
+            if ("0".equals(input)) {
+                return 0.0;
+            }
+            if (!input.matches("\\d+(\\.\\d+)?")) {
                 SystemMessage.printMessage("Please Enter A Valid Value.", MessageTitle.Error);
                 continue;
             }
-
-            double value = Double.parseDouble(valueInput);
-            if (value <= 0) {
+            double val = Double.parseDouble(input);
+            if (val <= 0) {
                 SystemMessage.printMessage("Value Must Be Greater Than 0.", MessageTitle.Error);
                 continue;
             }
+            return val;
+        }
+    }
 
-            System.out.print("Enter Usable Times: ");
-            String usableTimesInput = scanner.nextLine();
-            if (!usableTimesInput.matches("\\d+")) {
+    private Integer readPositiveInt(String prompt) {
+        while (true) {
+            System.out.print(prompt);
+            String input = scanner.nextLine();
+            if (!input.matches("\\d+")) {
                 SystemMessage.printMessage("Please Enter A Valid Number.", MessageTitle.Error);
                 continue;
             }
-
-            int usableTimes = Integer.parseInt(usableTimesInput);
-            if (usableTimes <= 0) {
+            int val = Integer.parseInt(input);
+            if (val <= 0) {
                 SystemMessage.printMessage("Usable Times Must Be Greater Than 0.", MessageTitle.Error);
                 continue;
             }
-
-            String code = generateRandomDiscountCode();
-            DiscountCode dc = new ValueDiscount(code, purpose, true, usableTimes, value);
-            registerDiscountCode(dc, purpose);
+            return val;
         }
     }
 
     public void generatePercentCode(String purpose) {
         while (true) {
             System.out.println("\n--- Create Percent Discount Code ---");
-            System.out.print("Enter Percent Of Discount Code (or 0 to Back): ");
-            String percentInput = scanner.nextLine();
 
-            if (percentInput.equals("0")) return;
+            String percentInput = readInput("Enter Percent Of Discount Code (or 0 to Back): ");
+            if ("0".equals(percentInput)) {
+                return;
+            }
             if (!percentInput.matches("\\d+")) {
                 SystemMessage.printMessage("Please Enter A Valid Percent.", MessageTitle.Error);
                 continue;
@@ -170,8 +193,7 @@ public class DiscountCodeManage {
                 continue;
             }
 
-            System.out.print("Enter Usable Times: ");
-            String usableTimesInput = scanner.nextLine();
+            String usableTimesInput = readInput("Enter Usable Times: ");
             if (!usableTimesInput.matches("\\d+")) {
                 SystemMessage.printMessage("Please Enter A Valid Number.", MessageTitle.Error);
                 continue;
@@ -184,17 +206,23 @@ public class DiscountCodeManage {
             }
 
             String code = generateRandomDiscountCode();
-            DiscountCode dc = new PercentDiscount(code, purpose,true, usableTimes, percent);
-            registerDiscountCode(dc, purpose);
+            DiscountCode discountCode = new PercentDiscount(code, purpose, true, usableTimes, percent);
+            registerDiscountCode(discountCode, purpose);
         }
     }
 
-    private void registerDiscountCode(DiscountCode dc, String purpose) {
-        DataBase.getInstance().addDiscountCode(dc);
-        Notification notification = new Notification(dc);
+    private String readInput(String prompt) {
+        System.out.print(prompt);
+        return scanner.nextLine().trim();
+    }
 
-        if (!purpose.equals("General")) {
-            mainCustomer.addToDiscountCodeList(dc);
+
+    private void registerDiscountCode(DiscountCode discountCode, String purpose) {
+        DataBase.getInstance().addDiscountCode(discountCode);
+        Notification notification = new Notification(discountCode);
+
+        if (!"General".equals(purpose)) {
+            mainCustomer.addToDiscountCodeList(discountCode);
             mainCustomer.addNotification(notification);
         } else {
             DataBase.getInstance().addNotification(notification);

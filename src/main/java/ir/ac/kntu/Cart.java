@@ -13,7 +13,8 @@ public class Cart implements Serializable {
     private static final String HIGHLIGHT = "\u001B[38;5;231m";
     private static final String BOLD = "\u001B[1m";
 
-    private final HashMap<Product, Integer> productMap;
+    private final static Scanner scan = new Scanner(System.in);
+    private final Map<Product, Integer> productMap;
     private DiscountCode discountCode;
     private double totalPrice;
 
@@ -22,7 +23,7 @@ public class Cart implements Serializable {
         productMap = new HashMap<>();
     }
 
-    public HashMap<Product, Integer> getProductMap() {
+    public Map<Product, Integer> getProductMap() {
         return productMap;
     }
 
@@ -52,7 +53,6 @@ public class Cart implements Serializable {
             displayEmptyCart();
             return;
         }
-        Scanner scan = new Scanner(System.in);
         while (true) {
             displayCartContents(person);
             String choice = getCustomerChoice(scan);
@@ -75,7 +75,7 @@ public class Cart implements Serializable {
     private void displayCartContents(Customer person) {
         double totalPrice = calculateTotalPrice();
         printCartHeader();
-        printProductList(person.getVendiloPlusAccount().getIsActive());
+        printProductList(person.getVendiloPlus().getIsActive());
         printCartFooter(totalPrice);
     }
 
@@ -98,12 +98,12 @@ public class Cart implements Serializable {
         }
     }
 
-    private void printProductItem(int i, Product product, boolean isPremiumAccount) {
-        double premiumAccountPercentage = isPremiumAccount ? 0.95 : 1;
+    private void printProductItem(int counter, Product product, boolean isPremiumAccount) {
+        double percentage = isPremiumAccount ? 0.95 : 1;
         System.out.println();
         System.out.println(MENU   + "╔══════════════════════════════════════════════╗");
-        System.out.println(i + 1);
-        System.out.printf(OPTION  + "  %-30s " + HIGHLIGHT + "%10.2f $\n", product.getFullName(), Double.parseDouble(product.getPrice()) * premiumAccountPercentage);
+        System.out.println(counter + 1);
+        System.out.printf(OPTION  + "  %-30s " + HIGHLIGHT + "%10.2f $\n", product.getFullName(), Double.parseDouble(product.getPrice()) * percentage);
         System.out.println(OPTION + "  Category: " + HIGHLIGHT + product.getCategory());
         System.out.println(OPTION + "  Quantity: " + HIGHLIGHT + productMap.get(product));
         System.out.println(OPTION + "  Seller: " + HIGHLIGHT + getShopName(product.getSellerAgencyCode()));
@@ -129,11 +129,11 @@ public class Cart implements Serializable {
     }
 
     private boolean handleCartNavigation(String choice, Customer person) {
-        if (choice.equalsIgnoreCase("BACK")) {
+        if ("back".equalsIgnoreCase(choice)) {
             return true;
         }
 
-        if (choice.equalsIgnoreCase("DONE")) {
+        if ("done".equalsIgnoreCase(choice)) {
             HandleOrder.getInstance().handleOrder(person);
             pause(2000);
             return true;
@@ -204,7 +204,7 @@ public class Cart implements Serializable {
     }
 
     public void discountCodeHandle(DiscountCode discountCode, String operation) {
-        if (operation.equals("Remove Discount Code")) {
+        if ("Remove Discount Code".equals(operation)) {
             removeDiscountCode();
         } else {
             if (!isValidDiscountCode(discountCode)) {

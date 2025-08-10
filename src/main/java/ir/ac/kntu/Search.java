@@ -33,7 +33,7 @@ public class Search implements Serializable {
                     System.out.println("Please enter a valid choice!");
                     continue;
                 }
-            };
+            }
         }
 
     }
@@ -62,9 +62,9 @@ public class Search implements Serializable {
         String category = null;
         String choice = scan.nextLine();
 
-        if (choice.equals("1")) {
+        if ("1".equals(choice)) {
             category = "Digital product";
-        } else if (choice.equals("2")) {
+        } else if ("2".equals(choice)) {
             category = "Book";
         } else {
             System.out.println("Invalid choice. Returning to main menu.");
@@ -99,7 +99,7 @@ public class Search implements Serializable {
         while (true) {
             System.out.print("Enter product index to view full details (or '0' to return): ");
             String input = scan.nextLine().trim();
-            if (input.equals("0")) {
+            if ("0".equals(input)) {
                 return;
             }
 
@@ -121,41 +121,19 @@ public class Search implements Serializable {
 
     public void combinedSearch() {
         List<Product> filteredProducts = new ArrayList<>(DataBase.getInstance().getProductList());
-
-        while (true) {
-            System.out.print("Do you want to filter by category? (y/n): ");
-            String choice = scan.nextLine().trim().toLowerCase();
-            if (choice.equals("y")) {
-                filteredProducts = filterByCategory(filteredProducts);
-                break;
-            } else if (choice.equals("n")) {
-                break;
-            } else {
-                System.out.println("Please enter a valid choice!");
-            }
+        if (askYesNo("Do you want to filter by category? (y/n): ")) {
+            filteredProducts = filterByCategory(filteredProducts);
         }
-
-        while (true) {
-            System.out.print("Do you want to filter by name? (y/n): ");
-            String choice = scan.nextLine().trim().toLowerCase();
-
-            if (choice.equals("y")) {
-                filteredProducts = filterByName(filteredProducts);
-                break;
-            } else if (choice.equals("n")) {
-                break;
-            } else {
-                System.out.println("Please enter a valid choice!");
-            }
+        if (askYesNo("Do you want to filter by name? (y/n): ")) {
+            filteredProducts = filterByName(filteredProducts);
         }
-
         double minPrice = getValidDouble("Enter minimum price: ");
         double maxPrice = getValidDouble("Enter maximum price: ");
-
         List<Product> finalFiltered = new ArrayList<>();
-        for (Product product : filteredProducts) {
-            if (Double.parseDouble(product.getPrice()) >= minPrice && Double.parseDouble(product.getPrice()) <= maxPrice) {
-                finalFiltered.add(product);
+        for (Product p : filteredProducts) {
+            double price = Double.parseDouble(p.getPrice());
+            if (price >= minPrice && price <= maxPrice) {
+                finalFiltered.add(p);
             }
         }
 
@@ -170,15 +148,29 @@ public class Search implements Serializable {
         }
     }
 
+    private boolean askYesNo(String prompt) {
+        while (true) {
+            System.out.print(prompt);
+            String choice = scan.nextLine().trim().toLowerCase();
+            if ("y".equals(choice)) {
+                return true;
+            }
+            if ("n".equals(choice)) {
+                return false;
+            }
+            System.out.println("Please enter a valid choice!");
+        }
+    }
+
     private List<Product> filterByCategory(List<Product> products) {
         System.out.println("1. Digital products");
         System.out.println("2. Books");
         String choice = scan.nextLine();
 
         String category = null;
-        if (choice.equals("1")) {
+        if ("1".equals(choice)) {
             category = "Digital products";
-        } else if (choice.equals("2")) {
+        } else if ("2".equals(choice)) {
             category = "Books";
         } else {
             System.out.println("Invalid category, skipping category filter.");

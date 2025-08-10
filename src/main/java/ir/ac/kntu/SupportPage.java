@@ -117,25 +117,14 @@ public class SupportPage implements Serializable {
 
     private void handleSellerRequestDetails(SellerRequest request) {
         Seller seller = findSellerByAgencyCode(request.getSellerAgencyCode());
-
         while (true) {
             clearScreen();
             displayHeader("SELLER REQUEST DETAILS");
-
             displaySellerInfo(seller);
             displayRequestDetails(request);
-
-            if (!seller.getIsValidSeller()) {
-                System.out.println(OPTION + "\n1. Approve seller account");
-                System.out.println("2. Reject request and provide reason");
-            } else {
-                System.out.println(OPTION + "\n1. Disable seller account");
-            }
-            System.out.println("0. Back to list" + RESET);
-
+            printSellerOptions(seller);
             System.out.print(PROMPT + "\nEnter your choice: " + RESET);
             String choice = scan.nextLine().trim();
-
             switch (choice) {
                 case "0" -> {
                     return;
@@ -153,6 +142,16 @@ public class SupportPage implements Serializable {
                 default -> showInvalidOptionError(2);
             }
         }
+    }
+
+    private void printSellerOptions(Seller seller) {
+        if (!seller.getIsValidSeller()) {
+            System.out.println(OPTION + "\n1. Approve seller account");
+            System.out.println("2. Reject request and provide reason");
+        } else {
+            System.out.println(OPTION + "\n1. Disable seller account");
+        }
+        System.out.println("0. Back to list" + RESET);
     }
 
     private void toggleSellerStatus(Seller seller) {
@@ -199,10 +198,10 @@ public class SupportPage implements Serializable {
 
     private List<CustomerRequest> getPendingCustomerRequests() {
         List<CustomerRequest> pendingRequests = new ArrayList<>();
-        for (Request r : DataBase.getInstance().getRequestList()) {
-            if (r instanceof CustomerRequest cr) {
-                if ("unchecked".equals(cr.getStatus()) && support.getRequestTitles().contains(cr.getRequestTitle())) {
-                    pendingRequests.add(cr);
+        for (Request request : DataBase.getInstance().getRequestList()) {
+            if (request instanceof CustomerRequest customerRequest) {
+                if ("unchecked".equals(customerRequest.getStatus()) && support.getRequestTitles().contains(customerRequest.getRequestTitle())) {
+                    pendingRequests.add(customerRequest);
                 }
             }
         }
@@ -215,7 +214,7 @@ public class SupportPage implements Serializable {
 
         for (int i = 0; i < requests.size(); i++) {
             CustomerRequest request = requests.get(i);
-            String status = request.getStatus().equals("unchecked")
+            String status = "unchecked".equals(request.getStatus())
                     ? ERROR + "PENDING" + RESET
                     : SUCCESS + "CHECKED" + RESET;
 
@@ -233,26 +232,11 @@ public class SupportPage implements Serializable {
         while (true) {
             clearScreen();
             displayHeader("CUSTOMER REQUEST DETAILS");
-
-            System.out.println(MENU + "Request Information:" + RESET);
-            System.out.println(DIVIDER);
-            System.out.printf("%-15s: %s\n", "Title", request.getRequestTitle());
-            System.out.printf("%-15s: %s\n", "Status",
-                    request.getStatus().equals("unchecked") ? ERROR + "PENDING" + RESET : SUCCESS + "CHECKED" + RESET);
-            System.out.printf("%-15s: %s\n", "Customer Phone", request.getCustomerPhone());
-            System.out.printf("%-15s: %s\n", "Serial Number", request.getSerialNumber());
-            System.out.printf("%-15s: %s\n", "Date", request.getTimestamp());
-            System.out.println(DIVIDER);
-            System.out.println(MENU + "\nOriginal Description:" + RESET);
-            System.out.println(request.getDescription());
-            System.out.println(DIVIDER);
-
+            printRequestInfo(request);
             System.out.println(OPTION + "\n1. Add response and mark as checked");
             System.out.println("0. Back to list" + RESET);
-
             System.out.print(PROMPT + "\nEnter your choice: " + RESET);
             String choice = scan.nextLine().trim();
-
             switch (choice) {
                 case "0" -> {
                     return;
@@ -269,6 +253,21 @@ public class SupportPage implements Serializable {
         }
     }
 
+    private void printRequestInfo(CustomerRequest request) {
+        System.out.println(MENU + "Request Information:" + RESET);
+        System.out.println(DIVIDER);
+        System.out.printf("%-15s: %s\n", "Title", request.getRequestTitle());
+        System.out.printf("%-15s: %s\n", "Status",
+                "unchecked".equals(request.getStatus()) ? ERROR + "PENDING" + RESET : SUCCESS + "CHECKED" + RESET);
+        System.out.printf("%-15s: %s\n", "Customer Phone", request.getCustomerPhone());
+        System.out.printf("%-15s: %s\n", "Serial Number", request.getSerialNumber());
+        System.out.printf("%-15s: %s\n", "Date", request.getTimestamp());
+        System.out.println(DIVIDER);
+        System.out.println(MENU + "\nOriginal Description:" + RESET);
+        System.out.println(request.getDescription());
+        System.out.println(DIVIDER);
+    }
+
     public Customer findCustomerByPhone(String phone) {
         for (Person person : DataBase.getInstance().getPersonList()) {
             if (((OrdinaryUsers) person).getPhoneNumber().equals(phone)) {
@@ -282,10 +281,10 @@ public class SupportPage implements Serializable {
         System.out.print(PROMPT + "\nEnter your response to this request: " + RESET);
         String response = scan.nextLine().trim();
 
-        String updatedDescription = request.getDescription() +
+        String newDescription = request.getDescription() +
                 "\n\n=== SUPPORT RESPONSE ===\n" + response;
 
-        request.setDescription(updatedDescription);
+        request.setDescription(newDescription);
         request.setStatus("checked");
 
         showSuccessMessage("Request updated successfully!");
@@ -300,48 +299,41 @@ public class SupportPage implements Serializable {
 
     private void displayOrdersList() {
         List<Order> mainOrders = getMainOrders();
-
+        if (mainOrders.isEmpty()) {
+            showSuccessMessage("No orders found.");
+            Pause.pause(1500);
+            return;
+        }
         while (true) {
             clearScreen();
             displayHeader("ORDERS LIST");
-
-            if (mainOrders.isEmpty()) {
-                showSuccessMessage("No orders found.");
-                Pause.pause(1500);
-                return;
-            }
-
-            for (int i = 0; i < mainOrders.size(); i++) {
-                Order order = mainOrders.get(i);
-                if (order instanceof CustomerOrder customerOrder) {
-                    System.out.printf("%2d. Customer email: %-30s | Total Price: %-10.2f | Order Date: %s\n",
-                            i + 1,
-                            customerOrder.getCustomerEmail(),
-                            customerOrder.getTotalPrice(),
-                            customerOrder.getOrderDate());
-                } else {
-                    System.out.printf("%2d. [UNKNOWN ORDER TYPE]\n", i + 1);
-                }
-            }
-
+            printOrders(mainOrders);
             System.out.print(PROMPT + "\nEnter choice (0 to back): " + RESET);
             String choice = scan.nextLine().trim();
-
+            if ("0".equals(choice)) {
+                return;
+            }
             if (!isValidChoice(choice, mainOrders.size())) {
                 showErrorMessage("Please enter a valid choice (1-" + mainOrders.size() + ")");
                 Pause.pause(1000);
                 continue;
             }
-
-            if (choice.equals("0")) {
-                return;
-            }
-
             Order selectedOrder = mainOrders.get(Integer.parseInt(choice) - 1);
             DisplayOrder.getInstance().displayOrderDetails(selectedOrder, null);
-
             System.out.println(PROMPT + "\nPress any key to continue..." + RESET);
             scan.nextLine();
+        }
+    }
+
+    private void printOrders(List<Order> orders) {
+        for (int i = 0; i < orders.size(); i++) {
+            Order order = orders.get(i);
+            if (order instanceof CustomerOrder customerOrder) {
+                System.out.printf("%2d. Customer email: %-30s | Total Price: %-10.2f | Order Date: %s\n",
+                        i + 1, customerOrder.getCustomerEmail(), customerOrder.getTotalPrice(), customerOrder.getOrderDate());
+            } else {
+                System.out.printf("%2d. [UNKNOWN ORDER TYPE]\n", i + 1);
+            }
         }
     }
 
@@ -371,7 +363,7 @@ public class SupportPage implements Serializable {
             System.out.print(PROMPT + "\nSelect a request by index (0 to back): " + RESET);
             String choice = scan.nextLine().trim();
 
-            if (choice.equals("0")) {
+            if ("0".equals(choice)) {
                 return -1;
             }
 
