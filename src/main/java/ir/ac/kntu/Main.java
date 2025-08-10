@@ -19,7 +19,7 @@ public class Main {
         DataBase.getInstance().addPerson(seller);
         DataBase.getInstance().addPerson(support);
 
-        customer.addProduct(book);
+//        customer.addProduct(book);
         customer.addProduct(book2);
         DataBase.getInstance().addProduct(book);
         DataBase.getInstance().addProduct(book2);

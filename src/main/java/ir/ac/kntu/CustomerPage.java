@@ -30,12 +30,29 @@ public class CustomerPage implements Serializable {
     }
 
     public void customerMenu(Customer customer) {
+        pupUpNotificationTab(customer);
         customer.getVendiloPlusAccount().checkPremiumAccountActive();
         displayMenuHeader();
         displayCustomerDashboard();
         customerHandleChoice(customer);
     }
-    //TODO pup up notification addition
+
+    public void pupUpNotificationTab(Customer customer) {
+        List<Notification> unseenNotifications = NotificationManage.getInstance().getUnseenNotificationsList(customer);
+        if (unseenNotifications == null || unseenNotifications.isEmpty()) {
+            return;
+        }
+
+        String formatted = String.format("          %d New Notification%s          ", unseenNotifications.size(), unseenNotifications.size() == 1 ? "" : "s");
+        System.out.println(TITLE + "=========================================");
+        System.out.println("|                                       |");
+        System.out.println(formatted);
+        System.out.println("|                                       |");
+        System.out.println("=========================================" + RESET);
+        System.out.println();
+        Pause.pause(2500);
+    }
+
     public void displayMenuHeader() {
         System.out.println(TITLE + "=========================================");
         System.out.println("|                                       |");

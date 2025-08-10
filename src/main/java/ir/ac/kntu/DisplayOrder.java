@@ -57,14 +57,12 @@ public class DisplayOrder implements Serializable {
         Address addr = order.getDeliveryAddress();
         if (addr != null) {
             System.out.println("📍 \u001B[36mDelivery Address:\u001B[0m");
-            System.out.println("    🏙️  City: " + addr.getCity());
-            System.out.println("    🌆 Province: " + addr.getProvince());
-            System.out.println("    🛣️  Street: " + addr.getStreet());
-            System.out.println("    🏢 Plate Number: " + addr.getPlateNumber());
-            System.out.println("    🔢 Postal Code: " + addr.getPostalCode());
-            System.out.println("    ✏️  Details: " + addr.getDetails());
-        } else {
-            System.out.println("📍 \u001B[33mNo address found for this order.\u001B[0m");
+            System.out.println("  🏙️ City: " + addr.getCity());
+            System.out.println("  🌆 Province: " + addr.getProvince());
+            System.out.println("  🛣️ Street: " + addr.getStreet());
+            System.out.println("  🏢 Plate Number: " + addr.getPlateNumber());
+            System.out.println("  🔢 Postal Code: " + addr.getPostalCode());
+            System.out.println("  ✏️ Details: " + addr.getDetails());
         }
 
         System.out.println("--------------------------------------------------\n");
@@ -88,19 +86,19 @@ public class DisplayOrder implements Serializable {
             System.out.println("   \u001B[33m0. Go back\u001B[0m");
 
             if (!(person instanceof Seller)) {
-                System.out.println("   \u001B[33mR. Rate a product\u001B[0m");
+                SystemMessage.printMessage("F. Send Feedback To A Product", MessageTitle.Info);
             }
 
             System.out.println("\u001B[34m🔍 Select a product to view more details, " +
-                    (person instanceof Seller ? "'0' to go back:" : "'R' to rate a product, or '0' to go back:") + "\u001B[0m");
+                    (person instanceof Seller ? "'0' to go back:" : "'F' to Send FeedBack To A Product, or '0' to go back:") + "\u001B[0m");
 
             String input = scan.nextLine().trim();
 
             if (input.equalsIgnoreCase("0")) {
                 return;
-            } else if (input.equalsIgnoreCase("R")) {
+            } else if (input.equalsIgnoreCase("F")) {
                 if (person instanceof Seller) {
-                    System.out.println("\u001B[31mSellers cannot rate products.\u001B[0m");
+                    System.out.println("\u001B[31mSellers Cannot Send Feedback TO Products.\u001B[0m");
                 } else {
                     rateProduct(productList, person);
                 }
@@ -128,7 +126,7 @@ public class DisplayOrder implements Serializable {
 
         Product productToRate = productList.get(choice - 1);
         if (productToRate.getRatingMap().containsKey(person)) {
-            System.out.println("\u001B[31mYou have already rated this product.\u001B[0m");
+            SystemMessage.printMessage("You have already rated this product.", MessageTitle.Error);
             return;
         }
 
@@ -137,23 +135,25 @@ public class DisplayOrder implements Serializable {
         while (true) {
             String ratingInput = scan.nextLine().trim();
             if (!ratingInput.matches("\\d+(\\.\\d+)?")) {
-                System.out.println("\u001B[31mInvalid rating. Please enter a number between 1 and 5.\u001B[0m");
+                SystemMessage.printMessage("Invalid rating. Please enter a number between 1 and 5.", MessageTitle.Error);
                 continue;
             }
             rating = Double.parseDouble(ratingInput);
 
             if (rating < 1 || rating > 5) {
-                System.out.println("\u001B[31mRating must be between 1 and 5. Try again:\u001B[0m");
+                SystemMessage.printMessage("Rating must be between 1 and 5. Try again :", MessageTitle.Error);
             } else {
                 break;
             }
         }
-
-        boolean added = productToRate.addRating(person, rating);
+        SystemMessage.printMessage("Please Enter Your Feedback : ", MessageTitle.Info);
+        String feedbackInput = scan.nextLine().trim();
+        ProductReview productReview = new ProductReview(rating, feedbackInput);
+        boolean added = productToRate.addRating(person, productReview);
         if (added) {
-            System.out.println("\u001B[32mThank you! Your rating has been recorded.\u001B[0m");
+            SystemMessage.printMessage("Thank you! Your Feedback Has Been Recorded.", MessageTitle.Success);
         } else {
-            System.out.println("\u001B[31mYou have already rated this product.\u001B[0m");
+            SystemMessage.printMessage("You Have already rated this product.", MessageTitle.Error);
         }
     }
 
@@ -167,13 +167,12 @@ public class DisplayOrder implements Serializable {
         while (true) {
             String input = scan.nextLine().trim();
             if (!input.matches("\\d+")) {
-                System.out.println("\u001B[31m Invalid input. Please enter a valid number.\u001B[0m");
+                SystemMessage.printMessage("Invalid input. Please enter a valid number.", MessageTitle.Error);
                 continue;
             }
             int choice = Integer.parseInt(input);
-
             if (choice < 0 || choice > max) {
-                System.out.println("\u001B[31m Invalid index. Please enter a number from 0 to " + max + ".\u001B[0m");
+                SystemMessage.printMessage("Invalid index. Please enter a number from 0 to " + max + ".", MessageTitle.Error);
             } else {
                 return choice;
             }

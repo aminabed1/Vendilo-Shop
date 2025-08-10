@@ -73,7 +73,6 @@ public class LoginPage implements Serializable {
                 showLoginSuccess();
                 if (person instanceof Customer) {
                     CustomerPage.getInstance().mainPage(person);
-
                 } else if (person instanceof Seller) {
                     SellerPage.getInstance().mainPage(person);
 
@@ -81,9 +80,9 @@ public class LoginPage implements Serializable {
                     SupportPage.getInstance().mainPage(person);
                 } else if (person instanceof Manager){
                     ManagerPage.getInstance().mainPage(person);
-                } else {
-                    SystemMessage.printMessage("Invalid credentials. Please try again.", MessageTitle.Error);
                 }
+            } else {
+                SystemMessage.printMessage("Invalid credentials. Please try again.", MessageTitle.Error);
             }
         }
     }

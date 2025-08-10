@@ -20,7 +20,7 @@ public abstract class Product implements Serializable {
     private String category;
     private String sellerAgencyCode;
     private final String serialNumber;
-    private HashMap<Person, Double> ratingMap;
+    private final HashMap<Person, ProductReview> ratingMap;
 
 
     public Product(String category, String sellerAgencyCode) {
@@ -91,11 +91,11 @@ public abstract class Product implements Serializable {
         return serialNumber;
     }
 
-    public HashMap<Person, Double> getRatingMap() {
+    public HashMap<Person, ProductReview> getRatingMap() {
         return ratingMap;
     }
 
-    public boolean addRating(Person person, Double rating) {
+    public boolean addRating(Person person, ProductReview rating) {
         if (ratingMap.containsKey(person)) {
             return false;
         }
@@ -111,19 +111,31 @@ public abstract class Product implements Serializable {
             return ANSI_GREEN + formattedKey + ANSI_RESET + value + "\n";
         }
     }
+    private String productReview() {
+        StringBuilder productReview = new StringBuilder();
+        int counter = 1;
+        for (ProductReview review : ratingMap.values()) {
+            String text = "Review : " + review.getReviewText();
+            String rate = "Rating : " + review.getRating();
+            productReview.append(counter).append(". ").append(rate).append("       ").append(text).append("\n\n");
+        }
+        return productReview.toString();
+    }
 
     private String displayAverageRating() {
+        StringBuilder sb = new StringBuilder("⭐ Average Rating: ");
         if (ratingMap == null || ratingMap.isEmpty()) {
-            return ANSI_YELLOW + "⭐ Average Rating: " + ANSI_RED +  "No ratings yet" + ANSI_RESET;
+            sb.append(ANSI_RED +  "No ratings yet" + ANSI_RESET);
+        } else {
+            double sum = 0;
+            for (ProductReview productReview: ratingMap.values()) {
+                sum += productReview.getRating();
+            }
+            double average = sum / ratingMap.size();
+            String formattedAverage = String.format("%.2f/5 (%d ratings)%s\n", average, ratingMap.size(), average < 2 ? " 😞" : average < 4 ? " 🙂" : " 😃");
+            sb.append(ANSI_GREEN).append(formattedAverage).append(ANSI_RESET);
         }
-
-        double sum = 0;
-        for (double rating : ratingMap.values()) {
-            sum += rating;
-        }
-        double average = sum / ratingMap.size();
-        String formattedAverage = String.format("%.2f/5 (%d ratings)%s\n", average, ratingMap.size(), average < 2 ? " 😞" : average < 4 ? " 🙂" : " 😃");
-        return ANSI_YELLOW + "⭐ Average Rating: " + ANSI_GREEN + formattedAverage + ANSI_RESET;
+        return sb.toString();
     }
 
     @Override
@@ -137,6 +149,7 @@ public abstract class Product implements Serializable {
                 displayField("Description", description) +
                 "\n" +
                 displayAverageRating() +
-                "\n";
+                "\n" +
+                productReview();
     }
 }

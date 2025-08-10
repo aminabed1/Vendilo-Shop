@@ -23,16 +23,40 @@ public class NotificationManage {
     }
 
     public void notificationTabMenu(Customer customer) {
+        while (true) {
+            List<Notification> unseenNotifications = getUnseenNotificationsList(customer);
+            if (unseenNotifications.isEmpty()) {
+                System.out.println("No New Notification");
+            } else {
+                System.out.printf(" %d New Notification%s\n", unseenNotifications.size(), (unseenNotifications.size() == 1 ? "" : "s"));
+
+            }
+            System.out.println("1. Display Notification List");
+            System.out.println("0. Back");
+            String choice = scan.nextLine();
+            switch (choice) {
+                case "1" -> {
+                    notificationTabChoiceHandle(unseenNotifications);
+                }
+                case "0" -> {
+                    return;
+                }
+                default -> {
+                    SystemMessage.printMessage("Enter a valid choice", MessageTitle.Error);
+                }
+            }
+        }
+    }
+
+    public List<Notification> getUnseenNotificationsList(Customer customer) {
         int unseenNotifs = 0;
         List<Notification> notificationListTemp = new ArrayList<>();
         List<Notification> notificationList = customer.getNotifications();
         notificationList.addAll(DataBase.getInstance().getNotificationList());
         for (Notification notification : notificationList) {
             if (notificationList.isEmpty()) {
-                SystemMessage.printMessage("You Don't Have Any Notification", MessageTitle.Warning);
-                return;
+                return null;
             }
-            //TODO
             if (notification.getChargedProduct() != null && notification.getChargedProduct().getStock() > 0 && notification.getUnVisible()) {
                 notification.setIsVisible(true);
             }
@@ -45,14 +69,9 @@ public class NotificationManage {
             }
         }
         if (unseenNotifs == 0) {
-            System.out.println("You Have Not Any Unseen Notification");
-        } else {
-            System.out.printf(" %d New Notification%s\n", unseenNotifs, (unseenNotifs == 1 ? "" : "s"));
+            return null;
         }
-        System.out.println("1. Display Notification List");
-        System.out.println("0. Back");
-
-        notificationTabChoiceHandle(notificationListTemp);
+        return notificationListTemp;
     }
 
     public void notificationTabChoiceHandle(List<Notification> notifications) {
