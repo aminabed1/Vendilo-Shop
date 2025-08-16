@@ -9,6 +9,7 @@ public class NotificationManage {
     private static final String RESET = "\u001B[0m";
     private static final String TITLE = "\u001B[38;5;45m";
     private static boolean continueState = false;
+    private static int unseenNotifications;
 
     public static NotificationManage getInstance() {
         return new NotificationManage();
@@ -24,12 +25,12 @@ public class NotificationManage {
 
     public void notificationTabMenu(Customer customer) {
         while (true) {
-            List<Notification> newNotifications = getUnseenNotificationsList(customer);
-            if (newNotifications.isEmpty()) {
-                System.out.println("No New Notification");
+            List<Notification> newNotifications = getNotificationsList(customer);
+            if (unseenNotifications == 0) {
+                SystemMessage.printMessage("No New Notification", MessageTitle.Info);
             } else {
-                System.out.printf(" %d New Notification%s\n", newNotifications.size(), (newNotifications.size() == 1 ? "" : "s"));
-
+                String formatted = String.format(" %d New Notification%s\n", newNotifications.size(), (newNotifications.size() == 1 ? "" : "s"));
+                SystemMessage.printMessage(formatted, MessageTitle.Info);
             }
             System.out.println("1. Display Notification List");
             System.out.println("0. Back");
@@ -39,6 +40,7 @@ public class NotificationManage {
                     notificationTabChoiceHandle(newNotifications);
                 }
                 case "0" -> {
+                    continueState = false;
                     return;
                 }
                 default -> {
@@ -48,14 +50,14 @@ public class NotificationManage {
         }
     }
 
-    public List<Notification> getUnseenNotificationsList(Customer customer) {
-        int unseenNotifs = 0;
+    public List<Notification> getNotificationsList(Customer customer) {
+        unseenNotifications = 0;
         List<Notification> tempList = new ArrayList<>();
         List<Notification> notificationList = customer.getNotifications();
         notificationList.addAll(DataBase.getInstance().getNotificationList());
         for (Notification notification : notificationList) {
             if (notificationList.isEmpty()) {
-                return null;
+                return tempList;
             }
             if (notification.getChargedProduct() != null && notification.getChargedProduct().getStock() > 0 && notification.getUnVisible()) {
                 notification.setIsVisible(true);
@@ -65,46 +67,17 @@ public class NotificationManage {
             }
             tempList.add(notification);
             if (!notification.isNotificationSeen()) {
-                unseenNotifs++;
+                unseenNotifications++;
             }
-        }
-        if (unseenNotifs == 0) {
-            return null;
         }
         return tempList;
     }
 
     public void notificationTabChoiceHandle(List<Notification> notifications) {
-        if (!handleInitialChoice()) {
-            return;
-        }
-        if (notifications.isEmpty()) {
-            System.out.println("You Don't Have Any Notification Yet");
-            return;
-        }
         displayNotificationList(notifications);
         if (!handleNotificationSelection(notifications)) {
             return;
         }
-    }
-
-    private boolean handleInitialChoice() {
-        System.out.println("Enter Your Choice :");
-        String choice = scan.nextLine();
-        if (!choice.matches("\\d+")) {
-            System.out.println("Please Enter Numeric Choice.");
-            return false;
-        }
-        int choiceValue = Integer.parseInt(choice);
-        if (choiceValue != 0 && choiceValue != 1) {
-            System.out.println("Please Enter Valid Choice, (0\\1).");
-            return false;
-        }
-        if (choiceValue == 0) {
-            continueState = false;
-            return false;
-        }
-        return true;
     }
 
     private boolean handleNotificationSelection(List<Notification> notifications) {
@@ -127,10 +100,9 @@ public class NotificationManage {
         System.out.println(notifications.get(choiceValue - 1));
         changeNotificationStatus(notifications.get(choiceValue - 1));
         System.out.println("Press Any Key To Continue...");
-        scan.next();
+        scan.nextLine();
         return true;
     }
-
 
     public void changeNotificationStatus(Notification notification) {
         notification.setNotificationSeen(true);

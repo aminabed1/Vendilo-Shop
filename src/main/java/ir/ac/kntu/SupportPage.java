@@ -170,7 +170,7 @@ public class SupportPage implements Serializable {
     }
 
     private void handleCustomerRequests() {
-        List<CustomerRequest> customerRequests = getPendingCustomerRequests();
+        List<CustomerRequest> customerRequests = getCustomerRequests();
 
         while (true) {
             clearScreen();
@@ -192,20 +192,20 @@ public class SupportPage implements Serializable {
             CustomerRequest selectedRequest = customerRequests.get(selectedIndex);
             handleCustomerRequestDetails(selectedRequest);
 
-            customerRequests = getPendingCustomerRequests();
+            customerRequests = getCustomerRequests();
         }
     }
 
-    private List<CustomerRequest> getPendingCustomerRequests() {
-        List<CustomerRequest> pendingRequests = new ArrayList<>();
+    private List<CustomerRequest> getCustomerRequests() {
+        List<CustomerRequest> requests = new ArrayList<>();
         for (Request request : DataBase.getInstance().getRequestList()) {
             if (request instanceof CustomerRequest customerRequest) {
-                if ("unchecked".equals(customerRequest.getStatus()) && support.getRequestTitles().contains(customerRequest.getRequestTitle())) {
-                    pendingRequests.add(customerRequest);
+                if (support.getRequestTitles().contains(customerRequest.getRequestTitle())) {
+                    requests.add(customerRequest);
                 }
             }
         }
-        return pendingRequests;
+        return requests;
     }
 
     private void displayCustomerRequestsList(List<CustomerRequest> requests) {
@@ -214,7 +214,7 @@ public class SupportPage implements Serializable {
 
         for (int i = 0; i < requests.size(); i++) {
             CustomerRequest request = requests.get(i);
-            String status = "unchecked".equals(request.getStatus())
+            String status = !request.getIsChecked()
                     ? ERROR + "PENDING" + RESET
                     : SUCCESS + "CHECKED" + RESET;
 
@@ -258,7 +258,7 @@ public class SupportPage implements Serializable {
         System.out.println(DIVIDER);
         System.out.printf("%-15s: %s\n", "Title", request.getRequestTitle());
         System.out.printf("%-15s: %s\n", "Status",
-                "unchecked".equals(request.getStatus()) ? ERROR + "PENDING" + RESET : SUCCESS + "CHECKED" + RESET);
+                !request.getIsChecked() ? ERROR + "PENDING" + RESET : SUCCESS + "CHECKED" + RESET);
         System.out.printf("%-15s: %s\n", "Customer Phone", request.getCustomerPhone());
         System.out.printf("%-15s: %s\n", "Serial Number", request.getSerialNumber());
         System.out.printf("%-15s: %s\n", "Date", request.getTimestamp());
@@ -270,7 +270,10 @@ public class SupportPage implements Serializable {
 
     public Customer findCustomerByPhone(String phone) {
         for (Person person : DataBase.getInstance().getPersonList()) {
-            if (((OrdinaryUsers) person).getPhoneNumber().equals(phone)) {
+            if (!(person instanceof Customer customer)) {
+                continue;
+            }
+            if (customer.getPhoneNumber().equals(phone)) {
                 return (Customer) person;
             }
         }
@@ -285,7 +288,7 @@ public class SupportPage implements Serializable {
                 "\n\n=== SUPPORT RESPONSE ===\n" + response;
 
         request.setDescription(newDescription);
-        request.setStatus("checked");
+        request.setIsChecked(true);
 
         showSuccessMessage("Request updated successfully!");
         Pause.pause(1500);

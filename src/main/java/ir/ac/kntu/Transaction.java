@@ -5,7 +5,7 @@ import java.time.Instant;
 
 public class Transaction implements Serializable {
     private final Instant timestamp;
-    private double amount;
+    private final double amount;
 
     public Transaction(Instant timestamp, double amount) {
         this.timestamp = timestamp;
@@ -18,9 +18,5 @@ public class Transaction implements Serializable {
 
     public double getAmount() {
         return amount;
-    }
-
-    public void setAmount(double amount) {
-        this.amount = amount;
     }
 }

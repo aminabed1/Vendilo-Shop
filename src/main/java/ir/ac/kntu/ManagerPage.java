@@ -211,7 +211,7 @@ public class ManagerPage {
         switch (choice) {
             case "1" -> EditPersonInfo.getInstance().handleEdit(person);
             case "2" -> {
-                if (person instanceof Manager otherManager && manager.getPriorityCode() < otherManager.getPriorityCode()) {
+                if (person instanceof Manager otherManager && manager.getPriorityCode() > otherManager.getPriorityCode()) {
                     SystemMessage.printMessage("You Can Not InActive This Manager", MessageTitle.Error);
                     Pause.pause(1500);
                 } else {
@@ -435,7 +435,8 @@ public class ManagerPage {
             String choice = scan.nextLine().trim();
             switch (choice) {
                 case "1" -> {
-                    DiscountCodeManage.getInstance().generateDiscountCode();
+                    DiscountCodeManage.getInstance().setMainCustomer(customer);
+                    DiscountCodeManage.getInstance().objectReceiver(customer);
                 }
                 case "2" -> {
                     VendiloPlusAccountManage.getInstance().vendiloPlusTab(customer, true);

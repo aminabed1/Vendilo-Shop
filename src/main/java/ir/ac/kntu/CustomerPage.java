@@ -38,7 +38,7 @@ public class CustomerPage implements Serializable {
     }
 
     public void pupUpNotificationTab(Customer customer) {
-        List<Notification> newNotifications = NotificationManage.getInstance().getUnseenNotificationsList(customer);
+        List<Notification> newNotifications = NotificationManage.getInstance().getNotificationsList(customer);
         if (newNotifications == null || newNotifications.isEmpty()) {
             return;
         }
@@ -178,7 +178,7 @@ public class CustomerPage implements Serializable {
 
             switch (choice) {
                 case "1":
-                    AutoAnswerToRequests.getInstance().autoAnswer(customer);//TODO Auto Answer
+                    AutoAnswerToRequests.getInstance().autoAnswer(customer);
                     displayRequest(customer);
                     return;
                 case "2":
@@ -236,7 +236,7 @@ public class CustomerPage implements Serializable {
             return;
         }
 
-        Request request = new CustomerRequest(title, "unchecked", Instant.now(),
+        Request request = new CustomerRequest(title, Instant.now(),
                 "empty", serialNumber, customer.getPhoneNumber());
         DataBase.getInstance().addRequest(request);
         System.out.println(SUCCESS + "Customer Request successfully added!" + RESET);
@@ -244,17 +244,15 @@ public class CustomerPage implements Serializable {
 
     public boolean findProductBySerialNumber(String serialNumber) {
         return DataBase.getInstance().getProductList().stream()
-                .anyMatch(p -> p.getSerialNumber().equals(serialNumber));
+                .anyMatch(product -> product.getSerialNumber().equals(serialNumber));
     }
 
     public void displayRequest(Customer customer) {
         List<CustomerRequest> customerRequests = getCustomerRequests(customer);
-
         if (customerRequests.isEmpty()) {
             showNoRequestsMessage();
             return;
         }
-
         displayRequestsList(customerRequests);
         handleRequestSelection(customerRequests);
     }
@@ -279,12 +277,12 @@ public class CustomerPage implements Serializable {
         System.out.println(TITLE + "════════════ YOUR REQUESTS ════════════" + RESET);
         for (int i = 0; i < requests.size(); i++) {
             CustomerRequest request = requests.get(i);
-            String statusColor = "unchecked".equals(request.getStatus()) ? ERROR : SUCCESS;
+            String statusColor = (request.getIsChecked() ? SUCCESS : ERROR);
             System.out.printf(OPTION + "%2d. " + RESET + "%-20s " + statusColor + "%-10s" + RESET +
                             " %-15s %s\n",
                     i + 1,
                     request.getRequestTitle(),
-                    request.getStatus(),
+                    request.getIsChecked() ? "Checked" : "Unchecked",
                     request.getTimestamp().toString(),
                     request.getSerialNumber());
         }
@@ -297,12 +295,10 @@ public class CustomerPage implements Serializable {
             if ("back".equalsIgnoreCase(input)) {
                 return;
             }
-
             if (!input.matches("\\d+")) {
                 System.out.println(ERROR + "Please enter a valid number or 'BACK'" + RESET);
                 continue;
             }
-
             int selectedIndex = Integer.parseInt(input) - 1;
             if (selectedIndex >= 0 && selectedIndex < requests.size()) {
                 System.out.println(requests.get(selectedIndex));
@@ -328,7 +324,6 @@ public class CustomerPage implements Serializable {
                 System.out.println("No products found in this category.");
                 continue;
             }
-
             browseProducts(products, (Customer)person);
         }
     }
@@ -357,9 +352,24 @@ public class CustomerPage implements Serializable {
 
     private List<Product> filterProductsByCategory(String category) {
         List<Product> products = new ArrayList<>();
-        for (Product p : DataBase.getInstance().getProductList()) {
-            if (p.getCategory().equalsIgnoreCase(category)) {
-                products.add(p);
+        for (Product product : DataBase.getInstance().getProductList()) {
+            switch (category) {
+                case "Book" :
+                    if (product instanceof Book) {
+                        products.add(product);
+                    }
+                    break;
+                case "Phone" :
+                    if (product instanceof Phone) {
+                        products.add(product);
+                    }
+                    break;
+                case "Laptop" :
+                    if (product instanceof LopTop) {
+                        products.add(product);
+                    }
+                    break;
+                default :
             }
         }
         return products;
@@ -368,10 +378,8 @@ public class CustomerPage implements Serializable {
     private void browseProducts(List<Product> products, Customer customer) {
         while (true) {
             printProductsList(products);
-
             System.out.print("Choose product index to see details or 0 to go back: ");
             String input = scan.nextLine().trim();
-
             if ("0".equals(input)) {
                 break;
             }
@@ -381,8 +389,6 @@ public class CustomerPage implements Serializable {
 
     private void printProductsList(List<Product> products) {
         System.out.println("╔══════════════ PRODUCTS LIST ═══════════════╗");
-        System.out.println("║ 0. Back to category selection              ║");
-
         for (int i = 0; i < products.size(); i++) {
             Product product = products.get(i);
             System.out.printf("║ %d. %s | Price: %s | Type: %s%n",
@@ -392,6 +398,7 @@ public class CustomerPage implements Serializable {
                     product.getCategory()
             );
         }
+        System.out.println("║ 0. Back to category selection              ║");
         System.out.println("╚════════════════════════════════════════════╝");
         System.out.println();
     }

@@ -11,7 +11,6 @@ public class Seller extends OrdinaryUsers {
     private Wallet wallet;
     private List<Order> orders = new ArrayList<>();
 
-
     public Seller(String name, String surname, String phoneNumber, String email, String password, String shopName,String sellerID,
                   String province, String agencyCode) {
         super(name, surname, password, phoneNumber, email, true);
@@ -19,8 +18,8 @@ public class Seller extends OrdinaryUsers {
         this.shopName = shopName;
         this.province = province;
         this.sellerID = sellerID;
-        wallet = new Wallet();
         this.setRole(Role.Seller);
+        wallet = new Wallet();
     }
 
     public String getAgencyCode() {

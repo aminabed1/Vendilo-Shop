@@ -31,11 +31,9 @@ public class Search implements Serializable {
                 }
                 default -> {
                     System.out.println("Please enter a valid choice!");
-                    continue;
                 }
             }
         }
-
     }
 
     public void searchByName() {
@@ -118,7 +116,6 @@ public class Search implements Serializable {
         }
     }
 
-
     public void combinedSearch() {
         List<Product> filteredProducts = new ArrayList<>(DataBase.getInstance().getProductList());
         if (askYesNo("Do you want to filter by category? (y/n): ")) {
@@ -127,25 +124,56 @@ public class Search implements Serializable {
         if (askYesNo("Do you want to filter by name? (y/n): ")) {
             filteredProducts = filterByName(filteredProducts);
         }
-        double minPrice = getValidDouble("Enter minimum price: ");
-        double maxPrice = getValidDouble("Enter maximum price: ");
-        List<Product> finalFiltered = new ArrayList<>();
-        for (Product p : filteredProducts) {
-            double price = Double.parseDouble(p.getPrice());
-            if (price >= minPrice && price <= maxPrice) {
-                finalFiltered.add(p);
-            }
+        if (askYesNo("Do you want to filter by price? (y/n): ")) {
+            filteredProducts = filterByPrice(filteredProducts);
         }
-
-        if (finalFiltered.isEmpty()) {
+        if (askYesNo("Do you want to filter by rating range? (y/n): ")) {
+            filteredProducts = filterByRating(filteredProducts);
+        }
+        if (filteredProducts.isEmpty()) {
             System.out.println("No products found in the specified filters.");
         } else {
             System.out.println("Filtered products:");
-            DisplayProduct display = DisplayProduct.getInstance();
-            for (Product product : finalFiltered) {
-                display.display(product, currentCustomer);
+            printProductsList(filteredProducts);
+            System.out.print("Choose product index to see details or 0 to go back: ");
+            String input = scan.nextLine().trim();
+            if ("0".equals(input)) {
+                return;
             }
+            handleProductSelection(input, filteredProducts, currentCustomer);
         }
+    }
+
+    private void handleProductSelection(String input, List<Product> products, Customer customer) {
+        if (input == null || !input.matches("\\d+")) {
+            System.out.println("Please enter a valid number!");
+            return;
+        }
+
+        int index = Integer.parseInt(input);
+        if (index >= 1 && index <= products.size()) {
+            Product selectedProduct = products.get(index - 1);
+            DisplayProduct.getInstance().display(selectedProduct, customer);
+        } else {
+            System.out.println("Invalid index! Try again.");
+        }
+    }
+
+    private void printProductsList(List<Product> products) {
+        System.out.println("╔══════════════ PRODUCTS LIST ═══════════════╗");
+
+        for (int i = 0; i < products.size(); i++) {
+            Product product = products.get(i);
+            System.out.printf("║ %d. %s | Price: %s | Type: %s%n",
+                    i + 1,
+                    product.getFullName(),
+                    product.getPrice(),
+                    product.getCategory()
+            );
+        }
+        System.out.println("║ 0. Back to category selection              ║");
+        System.out.println("╚════════════════════════════════════════════╝");
+        System.out.println();
     }
 
     private boolean askYesNo(String prompt) {
@@ -167,11 +195,11 @@ public class Search implements Serializable {
         System.out.println("2. Books");
         String choice = scan.nextLine();
 
-        String category = null;
+        String category;
         if ("1".equals(choice)) {
-            category = "Digital products";
+            category = "Digital Product";
         } else if ("2".equals(choice)) {
-            category = "Books";
+            category = "Book";
         } else {
             System.out.println("Invalid category, skipping category filter.");
             return products;
@@ -197,6 +225,43 @@ public class Search implements Serializable {
             }
         }
         return filtered;
+    }
+
+    private List<Product> filterByPrice(List<Product> products) {
+        double minPrice = getValidDouble("Enter minimum price: ");
+        double maxPrice = getValidDouble("Enter maximum price: ");
+        List<Product> filtered = new ArrayList<>();
+        for (Product product : products) {
+            double price = Double.parseDouble(product.getPrice());
+            if (price >= minPrice && price <= maxPrice) {
+                filtered.add(product);
+            }
+        }
+        return filtered;
+    }
+
+    private List<Product> filterByRating(List<Product> products) {
+        double minRate = getValidDouble("Enter minimum rating: ");
+        double maxRate = getValidDouble("Enter maximum rating: ");
+        List<Product> filtered = new ArrayList<>();
+        for (Product product : products) {
+            if (product.getRatingMap().isEmpty()) {
+                continue;
+            }
+            double rating = calcAverageRating(product);
+            if (rating >= minRate && rating <= maxRate) {
+                filtered.add(product);
+            }
+        }
+        return filtered;
+    }
+
+    private double calcAverageRating(Product product) {
+        double rating = 0;
+        for (ProductReview review : product.getRatingMap().values()) {
+            rating += review.getRating();
+        }
+        return rating / product.getRatingMap().size();
     }
 
     private double getValidDouble(String prompt) {

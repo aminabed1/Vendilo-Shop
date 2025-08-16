@@ -7,7 +7,7 @@ import java.time.Instant;
 import java.util.List;
 
 public class AutoAnswerToRequests {
-    private static AutoAnswerToRequests autoAnswer;
+    private final static AutoAnswerToRequests autoAnswer = new AutoAnswerToRequests();
 
     public static AutoAnswerToRequests getInstance() {
         return autoAnswer;
@@ -25,7 +25,10 @@ public class AutoAnswerToRequests {
                     continue;
                 }
             }
-            if (request.getIsChecked() && !requestExpired(request)) {
+            if (request.getIsChecked()) {
+                continue;
+            }
+            if (!requestExpired(request)) {
                 continue;
             }
             request.setDescription("Our Colleagues Will Contact You As Soon As Possible. Thank You For Your Patient.");

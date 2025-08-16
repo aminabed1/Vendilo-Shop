@@ -13,26 +13,16 @@ public class CustomerRequest extends Request implements Serializable {
     final private RequestTitle requestTitle;
     final private String serialNumber;
     final private String customerPhone;
-    private String status;
 
-    public CustomerRequest(RequestTitle requestTitle, String status, Instant requestTime, String description, String serialNumber, String customerPhone) {
+    public CustomerRequest(RequestTitle requestTitle, Instant requestTime, String description, String serialNumber, String customerPhone) {
         super(requestTime, description);
         this.requestTitle = requestTitle;
-        this.status = status;
         this.serialNumber = serialNumber;
         this.customerPhone = customerPhone;
     }
 
     public RequestTitle getRequestTitle() {
         return requestTitle;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
     }
 
     public String getSerialNumber() {
@@ -47,7 +37,7 @@ public class CustomerRequest extends Request implements Serializable {
     public String toString() {
         return  TITLE + "════════════ REQUEST DETAILS ════════════" + RESET + "\n" + 
             OPTION + "Title: " + RESET + requestTitle + "\n" + 
-            OPTION + "Status: " + RESET + ("unchecked".equals(getStatus()) ? ERROR : SUCCESS) + status + RESET + "\n" +
+            OPTION + "Status: " + RESET + (getIsChecked() ? SUCCESS : ERROR) + (getIsChecked() ? "Checked" : "Unchecked") + RESET + "\n" +
             OPTION + "Date: " + RESET + getTimestamp().toString() + "\n" +
             OPTION + "Serial Number: " + RESET + serialNumber + "\n" + 
             OPTION + "Your Phone: " + RESET + customerPhone + "\n" +

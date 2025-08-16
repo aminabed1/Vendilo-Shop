@@ -13,7 +13,7 @@ public class HandleOrder implements Serializable {
     private static Address selectedAddress;
     private Map<Product, Integer> productMap;
 
-    public static final String WARNING = "\u001B[33m";
+    private static final String WARNING = "\u001B[33m";
     private static final String RESET = "\u001B[0m";
     private static final String TITLE = "\u001B[38;5;45m";
     private static final String MENU = "\u001B[38;5;39m";
@@ -48,7 +48,7 @@ public class HandleOrder implements Serializable {
 
         boolean codeChanged;
         while (true) {
-            totalPrice = cart.getTotalPrice();
+            totalPrice = cart.getTotalPrice() * (((Customer) person).getVendiloPlus().getIsActive() ? 0.95 : 1);
             finalPrice = calculateFinalPrice();
             displayCartSummary(cart);
             codeChanged = discountCodeHandle(cart, person);

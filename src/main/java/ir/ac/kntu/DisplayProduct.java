@@ -21,12 +21,12 @@ public class DisplayProduct implements Serializable {
     }
 
     private void showActionMenu(Product product, Customer customer) {
-        printMenu(product);
+        printMenu(product, customer);
         handleChoice(product, customer, getUserChoice());
         Pause.pause(1500);
     }
 
-    private void printMenu(Product product) {
+    private void printMenu(Product product, Customer customer) {
         String isAvailable = (product.getStock() == 0)
                 ? "║ " + ANSI_BLUE + "3. Let Me Know If It Is Available" + ANSI_PURPLE + "  ║"
                 : "║                                    ║";
@@ -34,8 +34,10 @@ public class DisplayProduct implements Serializable {
         System.out.println("\n" + ANSI_PURPLE + "╔════════════════════════════════════╗");
         System.out.println("║          ACTIONS MENU              ║");
         System.out.println("╠════════════════════════════════════╣");
-        System.out.println("║ " + ANSI_BLUE + "1. Add to Cart" + ANSI_PURPLE + "                     ║");
-        System.out.println("║ " + ANSI_BLUE + "2. Back to List" + ANSI_PURPLE + "                    ║");
+        if (customer != null) {
+            System.out.println("║ " + ANSI_BLUE + "1. Add to Cart" + ANSI_PURPLE + "                     ║");
+        }
+        System.out.println("║ " + ANSI_BLUE + "0. Back to List" + ANSI_PURPLE + "                    ║");
         System.out.println(isAvailable);
         System.out.println("╚════════════════════════════════════╝" + ANSI_RESET);
     }
@@ -48,11 +50,19 @@ public class DisplayProduct implements Serializable {
     private void handleChoice(Product product, Customer customer, String choice) {
         switch (choice) {
             case "1":
+                if (customer == null) {
+                    System.out.println(ANSI_RED + "Invalid choice!" + ANSI_RESET);
+                    break;
+                }
                 addToCart(product, customer);
                 break;
-            case "2":
+            case "0":
                 break;
             case "3":
+                if (product.getStock() != 0) {
+                    System.out.println(ANSI_RED + "Invalid choice!" + ANSI_RESET);
+                    break;
+                }
                 notifyIfUnavailable(product, customer);
                 break;
             default:
@@ -74,7 +84,6 @@ public class DisplayProduct implements Serializable {
             createProductNotification(product, customer);
         }
     }
-
 
     public void createProductNotification(Product product, Customer customer) {
         Notification notification = new Notification(product);

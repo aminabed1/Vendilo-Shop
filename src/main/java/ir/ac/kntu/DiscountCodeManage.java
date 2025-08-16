@@ -12,6 +12,10 @@ public class DiscountCodeManage {
         return new DiscountCodeManage();
     }
 
+    public void setMainCustomer(Customer customer) {
+        mainCustomer = customer;
+    }
+
     public void handleDiscountCodePanel(Customer customer) {
         List<DiscountCode> discountCodeList = customer.getDiscountCodeList();
         if (discountCodeList.isEmpty()) {
@@ -90,7 +94,7 @@ public class DiscountCodeManage {
         return null;
     }
 
-    private void objectReceiver(Object obj) {
+    public void objectReceiver(Object obj) {
         if (obj instanceof Customer customer) {
             codeCategoryOption(customer.getPhoneNumber());
         } else {
@@ -208,6 +212,7 @@ public class DiscountCodeManage {
             String code = generateRandomDiscountCode();
             DiscountCode discountCode = new PercentDiscount(code, purpose, true, usableTimes, percent);
             registerDiscountCode(discountCode, purpose);
+            break;
         }
     }
 
@@ -229,6 +234,7 @@ public class DiscountCodeManage {
         }
 
         SystemMessage.printMessage("Successfully Generated Discount Code", MessageTitle.Success);
+        mainCustomer = null;
     }
 
     public String generateRandomDiscountCode() {

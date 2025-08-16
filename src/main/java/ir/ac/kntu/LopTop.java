@@ -11,9 +11,9 @@ public class LopTop extends DigitalProduct implements Serializable {
     private final boolean hasWebCam;
     private final String ramGeneration;
 
-    public LopTop(String brand,String price, String internalStorage, String rAM, String operationSystem,
+    public LopTop(String brand,String price, String internalStorage, String ram, String operationSystem,
                   String chipset, String gPUChipset, boolean supportBluetooth, boolean hasWebCam, String ramGeneration, int stock, String sellerAgencyCode) {
-        super(brand, price, internalStorage, rAM, operationSystem, chipset, stock, sellerAgencyCode);
+        super(brand, price, internalStorage, ram, operationSystem, chipset, stock, sellerAgencyCode);
         this.GPUChipset = gPUChipset;
         this.supportBluetooth = supportBluetooth;
         this.hasWebCam = hasWebCam;
@@ -28,7 +28,7 @@ public class LopTop extends DigitalProduct implements Serializable {
     @Override
     public String toString() {
         return super.toString() +
-                "\n" + ANSI_CYAN + "── Laptop Specifications ──" + ANSI_RESET +
+                "\n" + ANSI_CYAN + "── Laptop Specifications ──\n" + ANSI_RESET +
                 displayField("GPU Chipset", GPUChipset) +
                 displayField("Bluetooth", supportBluetooth ? "Yes" : "No") +
                 displayField("Webcam", hasWebCam ? "Yes" : "No") +

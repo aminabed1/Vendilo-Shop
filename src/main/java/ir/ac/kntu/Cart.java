@@ -12,6 +12,7 @@ public class Cart implements Serializable {
     private static final String PROMPT = "\u001B[38;5;228m";
     private static final String HIGHLIGHT = "\u001B[38;5;231m";
     private static final String BOLD = "\u001B[1m";
+    private static final String STRIKETHROUGH = "\u001B[9m";
 
     private final static Scanner scan = new Scanner(System.in);
     private final Map<Product, Integer> productMap;
@@ -76,7 +77,7 @@ public class Cart implements Serializable {
         double totalPrice = calculateTotalPrice();
         printCartHeader();
         printProductList(person.getVendiloPlus().getIsActive());
-        printCartFooter(totalPrice);
+        printCartFooter(totalPrice * (person.getVendiloPlus().getIsActive() ? 0.95 : 1) , totalPrice);
     }
 
     private double calculateTotalPrice() {
@@ -110,10 +111,15 @@ public class Cart implements Serializable {
         System.out.println(MENU   + "╚══════════════════════════════════════════════╝" + RESET);
     }
 
-    private void printCartFooter(double totalPrice) {
+    private void printCartFooter(double premiumTotalPrice, double simpleTotalPrice) {
+        String formattedTotal = "  TOTAL PRICE: " + STRIKETHROUGH + String.format("%.2f", simpleTotalPrice) + RESET;
+        String formattedPremium = String.format("  TOTAL PRICE %s : ", simpleTotalPrice != premiumTotalPrice ? "FOR PREMIUM ACCOUNT" : "")  + String.format("%.2f", premiumTotalPrice) + RESET;
         System.out.println();
         System.out.println(MENU   + "════════════════════════════════════════════════");
-        System.out.println(MENU   + "  TOTAL PRICE: " + HIGHLIGHT + totalPrice);
+        if (simpleTotalPrice != premiumTotalPrice) {
+            System.out.println(MENU   + formattedTotal);
+        }
+        System.out.println(MENU   + formattedPremium);
         System.out.println(MENU   + "════════════════════════════════════════════════");
         System.out.println(OPTION + "  Select product by number or :");
         System.out.println(OPTION + "  Type DONE to checkout");
