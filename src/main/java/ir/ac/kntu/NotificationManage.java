@@ -9,7 +9,7 @@ public class NotificationManage {
     private static final String RESET = "\u001B[0m";
     private static final String TITLE = "\u001B[38;5;45m";
     private static boolean continueState = false;
-    private static int unseenNotifications;
+    private static int unseenNotif;
 
     public static NotificationManage getInstance() {
         return new NotificationManage();
@@ -26,7 +26,7 @@ public class NotificationManage {
     public void notificationTabMenu(Customer customer) {
         while (true) {
             List<Notification> newNotifications = getNotificationsList(customer);
-            if (unseenNotifications == 0) {
+            if (unseenNotif == 0) {
                 SystemMessage.printMessage("No New Notification", MessageTitle.Info);
             } else {
                 String formatted = String.format(" %d New Notification%s\n", newNotifications.size(), (newNotifications.size() == 1 ? "" : "s"));
@@ -51,7 +51,7 @@ public class NotificationManage {
     }
 
     public List<Notification> getNotificationsList(Customer customer) {
-        unseenNotifications = 0;
+        unseenNotif = 0;
         List<Notification> tempList = new ArrayList<>();
         List<Notification> notificationList = customer.getNotifications();
         notificationList.addAll(DataBase.getInstance().getNotificationList());
@@ -67,7 +67,7 @@ public class NotificationManage {
             }
             tempList.add(notification);
             if (!notification.isNotificationSeen()) {
-                unseenNotifications++;
+                unseenNotif++;
             }
         }
         return tempList;

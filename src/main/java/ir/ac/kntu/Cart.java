@@ -77,7 +77,7 @@ public class Cart implements Serializable {
         double totalPrice = calculateTotalPrice();
         printCartHeader();
         printProductList(person.getVendiloPlus().getIsActive());
-        printCartFooter(totalPrice * (person.getVendiloPlus().getIsActive() ? 0.95 : 1) , totalPrice);
+        printCartFooter(totalPrice * (person.getVendiloPlus().getIsActive() ? 0.95 : 1), totalPrice);
     }
 
     private double calculateTotalPrice() {

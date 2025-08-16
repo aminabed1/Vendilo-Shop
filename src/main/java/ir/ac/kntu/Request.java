@@ -5,7 +5,7 @@ import java.time.Instant;
 
 public abstract class Request implements Serializable {
     private String description;
-    private final Instant timestamp;
+    private Instant timestamp;
     private boolean isChecked = false;
 
     public Request(Instant timestamp, String description) {
@@ -23,6 +23,10 @@ public abstract class Request implements Serializable {
 
     public Instant getTimestamp() {
         return timestamp;
+    }
+
+    public void setTimestamp(Instant timestamp) {
+        this.timestamp = timestamp;
     }
 
     public boolean getIsChecked() {

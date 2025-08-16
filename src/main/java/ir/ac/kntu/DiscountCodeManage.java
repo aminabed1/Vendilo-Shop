@@ -181,38 +181,44 @@ public class DiscountCodeManage {
     public void generatePercentCode(String purpose) {
         while (true) {
             System.out.println("\n--- Create Percent Discount Code ---");
-
-            String percentInput = readInput("Enter Percent Of Discount Code (or 0 to Back): ");
-            if ("0".equals(percentInput)) {
+            double percent = readValidPercent();
+            if (percent == 0) {
                 return;
             }
-            if (!percentInput.matches("\\d+")) {
-                SystemMessage.printMessage("Please Enter A Valid Percent.", MessageTitle.Error);
-                continue;
-            }
-
-            double percent = Double.parseDouble(percentInput);
-            if (percent <= 0 || percent > 100) {
-                SystemMessage.printMessage("Percent Must Be Between 1 And 100.", MessageTitle.Error);
-                continue;
-            }
-
-            String usableTimesInput = readInput("Enter Usable Times: ");
-            if (!usableTimesInput.matches("\\d+")) {
-                SystemMessage.printMessage("Please Enter A Valid Number.", MessageTitle.Error);
-                continue;
-            }
-
-            int usableTimes = Integer.parseInt(usableTimesInput);
-            if (usableTimes <= 0) {
-                SystemMessage.printMessage("Usable Times Must Be Greater Than 0.", MessageTitle.Error);
-                continue;
-            }
-
+            int usableTimes = readValidPositiveInt("Enter Usable Times: ");
             String code = generateRandomDiscountCode();
             DiscountCode discountCode = new PercentDiscount(code, purpose, true, usableTimes, percent);
             registerDiscountCode(discountCode, purpose);
             break;
+        }
+    }
+
+    private double readValidPercent() {
+        while (true) {
+            String input = readInput("Enter Percent Of Discount Code (or 0 to Back): ");
+            if ("0".equals(input)) {
+                return 0;
+            }
+            if (input.matches("\\d+")) {
+                double percent = Double.parseDouble(input);
+                if (percent > 0 && percent <= 100) {
+                    return percent;
+                }
+            }
+            SystemMessage.printMessage("Percent Must Be Between 1 And 100.", MessageTitle.Error);
+        }
+    }
+
+    private int readValidPositiveInt(String message) {
+        while (true) {
+            String input = readInput(message);
+            if (input.matches("\\d+")) {
+                int value = Integer.parseInt(input);
+                if (value > 0) {
+                    return value;
+                }
+            }
+            SystemMessage.printMessage("Please Enter A Valid Number Greater Than 0.", MessageTitle.Error);
         }
     }
 
